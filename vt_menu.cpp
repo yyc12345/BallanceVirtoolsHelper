@@ -4,6 +4,7 @@
 //=============func import
 
 #include "func_namespace/script_CKDataArray.h"
+#include "func_namespace/misc_SpecialNMO.h"
 
 //=============func import
 
@@ -54,7 +55,7 @@ void RemoveMenu() {
 	s_Plugininterface->RemovePluginMenu(s_MiscMenu);
 }
 
-void UpdateMenu() {
+void UpdateMenu() { //current max id: 32
 	// mapping
 	s_Plugininterface->ClearPluginMenu(s_MappingMenu);
 
@@ -108,6 +109,8 @@ void UpdateMenu() {
 	// misc
 	s_Plugininterface->ClearPluginMenu(s_MiscMenu);
 
+	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 32, "Export as special NMO");
+	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, -1, NULL, TRUE);
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 30, "Report bug");
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 31, "About BallanceVirtoolsHelper");
 
@@ -129,6 +132,9 @@ void MenuCallback(int commandID) {
 			runResult = func_namespace::script::CKDataArray::Clean(s_Plugininterface);
 			break;
 
+		case 32:
+			runResult = func_namespace::misc::SpecialNMO::SaveSpecialNMO(s_Plugininterface);
+			break;
 		case 30:
 			ShellExecute(NULL, "open", "https://github.com/yyc12345/BallanceVirtoolsHelper/issues", NULL, NULL, SW_SHOWNORMAL);
 			break;

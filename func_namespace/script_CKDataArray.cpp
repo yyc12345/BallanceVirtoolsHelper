@@ -89,7 +89,8 @@ namespace func_namespace {
 				ofn.lpstrFile = func_namespace::ExecutionCache;
 				ofn.lpstrFile[0] = '\0';
 				ofn.nMaxFile = CACHE_SIZE;
-				ofn.lpstrFilter = "Csv file(*.csv)\0*.csv\0All files(*.*)\0*.*\0";
+				ofn.lpstrFilter = "Csv file(*.csv)\0*.csv\0";
+				ofn.lpstrDefExt = "csv";
 				ofn.lpstrFileTitle = NULL;
 				ofn.nMaxFileTitle = 0;
 				ofn.lpstrInitialDir = NULL;

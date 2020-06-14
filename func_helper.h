@@ -7,6 +7,7 @@
 namespace func_namespace {
 	extern char* ExecutionResult;
 	extern char* ExecutionCache;
+	extern char* ExecutionCache2;
 
 	BOOL InitHelper();
 	void DisposeHelper();

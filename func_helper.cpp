@@ -4,13 +4,15 @@ namespace func_namespace {
 
 	char* ExecutionResult;
 	char* ExecutionCache;
+	char* ExecutionCache2;
 
 	BOOL InitHelper() {
 		ExecutionResult = (char*)malloc(sizeof(char) * 65526);
 		if (ExecutionResult == NULL) return FALSE;
 
 		ExecutionCache = (char*)malloc(sizeof(char) * CACHE_SIZE);
-		if (ExecutionCache == NULL) return FALSE;
+		ExecutionCache2 = (char*)malloc(sizeof(char) * CACHE_SIZE);
+		if (ExecutionCache == NULL || ExecutionCache2 == NULL) return FALSE;
 
 		return TRUE;
 	}
@@ -19,6 +21,8 @@ namespace func_namespace {
 			free(ExecutionResult);
 		if (ExecutionCache != NULL)
 			free(ExecutionCache);
+		if (ExecutionCache2 != NULL)
+			free(ExecutionCache2);
 	}
 	void DisplayLastMessage(BOOL status, CKContext* ctx) {
 		if (status) {

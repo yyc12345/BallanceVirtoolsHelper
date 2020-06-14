@@ -36,6 +36,9 @@
     <ClInclude Include="resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="func_namespace\misc_SpecialNMO.h">
+      <Filter>头文件\func_namespace</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -49,6 +52,9 @@
     </ClCompile>
     <ClCompile Include="func_helper.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="func_namespace\misc_SpecialNMO.cpp">
+      <Filter>源文件\func_namespace</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
