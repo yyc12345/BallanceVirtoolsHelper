@@ -5,7 +5,7 @@ namespace func_namespace {
 	namespace misc {
 		namespace SpecialNMO {
 			BOOL SaveSpecialNMO(PluginInterface* plgif) {
-				std::filesystem::path file;
+				std::filesystem::path file, tempfile;
 				getNmoFile(&file);
 				if (file.empty()) {
 					strcpy(func_namespace::ExecutionResult, "No selected NMO file.");
@@ -31,25 +31,31 @@ namespace func_namespace {
 					finalArray->Remove(ctx->GetCurrentScene());
 				}
 
-				//clean useless file
-				strcpy(func_namespace::ExecutionCache, file.string().c_str());
+				//get temp file
+				GetTempPath(CACHE_SIZE, func_namespace::ExecutionCache);
+				tempfile = func_namespace::ExecutionCache;
+				sprintf(func_namespace::ExecutionCache, "7c20254bdc9a4409b490e46efaf5e128_%d.cmo", GetCurrentProcessId()); //7c20254bdc9a4409b490e46efaf5e128 is guid
+				tempfile /= func_namespace::ExecutionCache;
+				strcpy(func_namespace::ExecutionCache, tempfile.string().c_str());
 				DeleteFile(func_namespace::ExecutionCache);
-				file.replace_extension("cmo");
+				//get real file
 				strcpy(func_namespace::ExecutionCache2, file.string().c_str());
 				DeleteFile(func_namespace::ExecutionCache2);
+				
 				//save it
 				CKDependencies dep;
 				dep.m_Flags = CK_DEPENDENCIES_FULL;
-				CKERROR code = ctx->Save(func_namespace::ExecutionCache2, finalArray, 0xFFFFFFFF, &dep);
+				CKERROR code = ctx->Save(func_namespace::ExecutionCache, finalArray, 0xFFFFFFFF, &dep);
 				DeleteCKObjectArray(finalArray);
 				if (code != CK_OK) {
 					sprintf(func_namespace::ExecutionResult, "Error when saving file. Error code: %d", code);
 					return FALSE;
 				}
-				//rename
-				auto code2 = MoveFile(func_namespace::ExecutionCache2, func_namespace::ExecutionCache);
+
+				//move temp file
+				auto code2 = MoveFile(func_namespace::ExecutionCache, func_namespace::ExecutionCache2);
 				if (code != CK_OK) {
-					strcpy(func_namespace::ExecutionResult, "Error when changing extension.");
+					strcpy(func_namespace::ExecutionResult, "Error when moving extension.");
 					return FALSE;
 				}
 
