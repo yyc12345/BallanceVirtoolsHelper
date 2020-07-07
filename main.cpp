@@ -2,7 +2,9 @@
 #include "vt_menu.h"
 #include "func_helper.h"
 #include <exception>
+#include "config_manager.h"
 
+config_manager* cfg_manager = NULL;
 PluginInterface* s_Plugininterface = NULL;
 PluginInfo g_PluginInfo0;
 
@@ -31,6 +33,8 @@ BOOL SuperScriptMaterializer::InitInstance() {
 
 	if (!func_namespace::InitHelper())
 		throw new std::bad_alloc();
+	cfg_manager = new config_manager();
+	cfg_manager->LoadConfig();
 
 	strcpy(g_PluginInfo0.m_Name, "BallanceVirtoolsHelper");
 	g_PluginInfo0.m_PluginType = PluginInfo::PT_EDITOR;
@@ -43,6 +47,7 @@ BOOL SuperScriptMaterializer::InitInstance() {
 int SuperScriptMaterializer::ExitInstance() {
 	// TODO: Add your specialized code here and/or call the base class
 
+	delete cfg_manager;
 	func_namespace::DisposeHelper();
 
 	return CWinApp::ExitInstance();

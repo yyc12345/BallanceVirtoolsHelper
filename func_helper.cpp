@@ -5,25 +5,27 @@ namespace func_namespace {
 	char* ExecutionResult;
 	char* ExecutionCache;
 	char* ExecutionCache2;
+	char* ConfigCache;
 
+#define safeAlloc(target,type,size) target=(type)malloc(size);if(target==NULL)return FALSE;
+#define safeFree(target) if(target!=NULL)free(target);
 	BOOL InitHelper() {
-		ExecutionResult = (char*)malloc(sizeof(char) * 65526);
-		if (ExecutionResult == NULL) return FALSE;
-
-		ExecutionCache = (char*)malloc(sizeof(char) * CACHE_SIZE);
-		ExecutionCache2 = (char*)malloc(sizeof(char) * CACHE_SIZE);
-		if (ExecutionCache == NULL || ExecutionCache2 == NULL) return FALSE;
+		safeAlloc(ExecutionResult, char*, sizeof(char) * CACHE_SIZE);
+		safeAlloc(ExecutionCache, char*, sizeof(char) * CACHE_SIZE);
+		safeAlloc(ExecutionCache2, char*, sizeof(char) * CACHE_SIZE);
+		safeAlloc(ConfigCache, char*, sizeof(char) * CACHE_SIZE);
 
 		return TRUE;
 	}
 	void DisposeHelper() {
-		if (ExecutionResult != NULL)
-			free(ExecutionResult);
-		if (ExecutionCache != NULL)
-			free(ExecutionCache);
-		if (ExecutionCache2 != NULL)
-			free(ExecutionCache2);
+		safeFree(ExecutionResult);
+		safeFree(ExecutionCache);
+		safeFree(ExecutionCache2);
+		safeFree(ConfigCache);
 	}
+#undef safeAlloc
+#undef safeFree
+
 	void DisplayLastMessage(BOOL status, CKContext* ctx) {
 		if (status) {
 			ctx->OutputToConsole("Execution OK", FALSE);

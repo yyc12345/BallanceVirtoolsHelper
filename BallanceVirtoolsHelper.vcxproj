@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="config_manager.h" />
     <ClInclude Include="func_helper.h" />
     <ClInclude Include="func_namespace\misc_SpecialNMO.h" />
     <ClInclude Include="func_namespace\script_CKDataArray.h" />
@@ -151,6 +152,7 @@
     <ClInclude Include="vt_menu.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="config_manager.cpp" />
     <ClCompile Include="func_helper.cpp" />
     <ClCompile Include="func_namespace\misc_SpecialNMO.cpp" />
     <ClCompile Include="func_namespace\script_CKDataArray.cpp" />

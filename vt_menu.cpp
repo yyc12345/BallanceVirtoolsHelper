@@ -59,38 +59,40 @@ void UpdateMenu() { //current max id: 32
 	// mapping
 	s_Plugininterface->ClearPluginMenu(s_MappingMenu);
 
-	CMenu* sub_bm = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 25, "BM", FALSE, TRUE);
-	CMenu* sub_3dentity = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 0, "3DEntity", FALSE, TRUE);
+	CMenu* sub_bm = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 0, "BM", FALSE, TRUE);
+	//CMenu* sub_3dentity = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 0, "3DEntity", FALSE, TRUE);
 	CMenu* sub_group = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 1, "Group", FALSE, TRUE);
-	CMenu* sub_light = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 2, "Light", FALSE, TRUE);
-	CMenu* sub_mesh = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 3, "Mesh", FALSE, TRUE);
-	CMenu* sub_name = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 4, "Name", FALSE, TRUE);
+	//CMenu* sub_light = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 2, "Light", FALSE, TRUE);
+	//CMenu* sub_mesh = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 3, "Mesh", FALSE, TRUE);
+	//CMenu* sub_name = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 4, "Name", FALSE, TRUE);
 
-	s_Plugininterface->AddPluginMenuItem(sub_bm, 23, "Import BM file");
-	s_Plugininterface->AddPluginMenuItem(sub_bm, 24, "Export BM file");
+	s_Plugininterface->AddPluginMenuItem(sub_bm, 2, "Import BM file");
+	s_Plugininterface->AddPluginMenuItem(sub_bm, 3, "Export BM file");
+	s_Plugininterface->AddPluginMenuItem(sub_bm, -1, NULL, TRUE);
+	s_Plugininterface->AddPluginMenuItem(sub_bm, 4, "BM settings");
 
-	s_Plugininterface->AddPluginMenuItem(sub_3dentity, 5, "Align");
-	s_Plugininterface->AddPluginMenuItem(sub_3dentity, 6, "Center distribute");
-	s_Plugininterface->AddPluginMenuItem(sub_3dentity, 7, "Exchange position");
-	s_Plugininterface->AddPluginMenuItem(sub_3dentity, 8, "Fast splice");
-	s_Plugininterface->AddPluginMenuItem(sub_3dentity, 9, "Gather");
-	s_Plugininterface->AddPluginMenuItem(sub_3dentity, 10, "Splice");
-	s_Plugininterface->AddPluginMenuItem(sub_3dentity, 11, "Accurately move");
+	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 5, "Align");
+	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 6, "Center distribute");
+	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 7, "Exchange position");
+	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 8, "Fast splice");
+	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 9, "Gather");
+	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 10, "Splice");
+	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 11, "Accurately move");
 
-	s_Plugininterface->AddPluginMenuItem(sub_group, 12, "Auto group special object");
-	s_Plugininterface->AddPluginMenuItem(sub_group, 13, "Group in floor");
-	s_Plugininterface->AddPluginMenuItem(sub_group, 14, "Group in rail");
-	s_Plugininterface->AddPluginMenuItem(sub_group, 15, "Group in wooden");
+	s_Plugininterface->AddPluginMenuItem(sub_group, 5, "Auto grouping");
+	s_Plugininterface->AddPluginMenuItem(sub_group, 6, "Grouping checker");
+	s_Plugininterface->AddPluginMenuItem(sub_group, -1, NULL, TRUE);
+	s_Plugininterface->AddPluginMenuItem(sub_group, 7, "Grouping settings");
 
-	s_Plugininterface->AddPluginMenuItem(sub_light, 16, "Add test light");
-	s_Plugininterface->AddPluginMenuItem(sub_light, 17, "Remove test light");
+	//s_Plugininterface->AddPluginMenuItem(sub_light, 16, "Add test light");
+	//s_Plugininterface->AddPluginMenuItem(sub_light, 17, "Remove test light");
 
-	s_Plugininterface->AddPluginMenuItem(sub_mesh, 18, "Mesh clone");
-	s_Plugininterface->AddPluginMenuItem(sub_mesh, 19, "Mesh exchange");
-	s_Plugininterface->AddPluginMenuItem(sub_mesh, 20, "Shadow reset");
-	s_Plugininterface->AddPluginMenuItem(sub_mesh, 21, "Clean shared mesh");
+	//s_Plugininterface->AddPluginMenuItem(sub_mesh, 18, "Mesh clone");
+	//s_Plugininterface->AddPluginMenuItem(sub_mesh, 19, "Mesh exchange");
+	//s_Plugininterface->AddPluginMenuItem(sub_mesh, 20, "Shadow reset");
+	//s_Plugininterface->AddPluginMenuItem(sub_mesh, 21, "Clean shared mesh");
 
-	s_Plugininterface->AddPluginMenuItem(sub_name, 22, "Auto rename");
+	//s_Plugininterface->AddPluginMenuItem(sub_name, 22, "Auto rename");
 
 	s_Plugininterface->UpdatePluginMenu(s_MappingMenu);
 
