@@ -5,6 +5,7 @@
 
 #include "func_namespace/script_CKDataArray.h"
 #include "func_namespace/misc_SpecialNMO.h"
+#include "func_namespace/mapping_BM.h"
 
 //=============func import
 
@@ -124,6 +125,9 @@ void MenuCallback(int commandID) {
 	BOOL runResult = TRUE;
 
 	switch (commandID) {
+		case 2:
+			runResult = func_namespace::mapping::BM::ImportBM();
+			break;
 		case 27:
 			runResult = func_namespace::script::CKDataArray::ExportCsv(s_Plugininterface);
 			break;

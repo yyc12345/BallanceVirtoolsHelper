@@ -6,6 +6,8 @@ namespace func_namespace {
 	char* ExecutionCache;
 	char* ExecutionCache2;
 	char* ConfigCache;
+	char* SelfCache;
+
 
 #define safeAlloc(target,type,size) target=(type)malloc(size);if(target==NULL)return FALSE;
 #define safeFree(target) if(target!=NULL)free(target);
@@ -14,6 +16,7 @@ namespace func_namespace {
 		safeAlloc(ExecutionCache, char*, sizeof(char) * CACHE_SIZE);
 		safeAlloc(ExecutionCache2, char*, sizeof(char) * CACHE_SIZE);
 		safeAlloc(ConfigCache, char*, sizeof(char) * CACHE_SIZE);
+		safeAlloc(SelfCache, char*, sizeof(char) * CACHE_SIZE);
 
 		return TRUE;
 	}
@@ -22,6 +25,7 @@ namespace func_namespace {
 		safeFree(ExecutionCache);
 		safeFree(ExecutionCache2);
 		safeFree(ConfigCache);
+		safeFree(SelfCache);
 	}
 #undef safeAlloc
 #undef safeFree
@@ -34,5 +38,34 @@ namespace func_namespace {
 			ctx->OutputToConsoleExBeep("Execution failed, reason: %s", ExecutionResult);
 			ctx->OutputToInfo("Execution failed, reason: %s", ExecutionResult);
 		}
+	}
+
+	void OpenFileDialog(std::string* returned_file, const char* file_filter, const char* file_extension, BOOL isOpen) {
+		returned_file->clear();
+
+		OPENFILENAME OpenFileStruct;
+		ZeroMemory(&OpenFileStruct, sizeof(OPENFILENAME));
+		OpenFileStruct.lStructSize = sizeof(OPENFILENAME);
+		OpenFileStruct.lpstrFile = func_namespace::SelfCache;
+		OpenFileStruct.lpstrFile[0] = '\0';
+		OpenFileStruct.nMaxFile = CACHE_SIZE;
+		OpenFileStruct.lpstrFilter = file_filter;
+		OpenFileStruct.lpstrDefExt = file_extension;
+		OpenFileStruct.lpstrFileTitle = NULL;
+		OpenFileStruct.nMaxFileTitle = 0;
+		OpenFileStruct.lpstrInitialDir = NULL;
+		OpenFileStruct.Flags = OFN_EXPLORER;
+		if (isOpen) {
+			if (GetOpenFileName(&OpenFileStruct))
+				*returned_file = SelfCache;
+		} else {
+			if (GetSaveFileName(&OpenFileStruct))
+				*returned_file = SelfCache;
+		}
+	}
+
+	void GetTempFolder(std::filesystem::path* temp_folder) {
+		GetTempPath(CACHE_SIZE, SelfCache);
+		*temp_folder = SelfCache;
 	}
 }

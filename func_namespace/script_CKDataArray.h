@@ -13,7 +13,6 @@ namespace func_namespace {
 			BOOL Clean(PluginInterface* plgif);
 
 			::CKDataArray* getEditingDataArray(PluginInterface* plgif);
-			void getCsvFile(std::string* str, BOOL isOpen);
 		}
 	}
 }

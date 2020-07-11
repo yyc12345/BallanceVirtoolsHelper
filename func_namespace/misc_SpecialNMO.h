@@ -8,8 +8,6 @@ namespace func_namespace {
 	namespace misc {
 		namespace SpecialNMO {
 			BOOL SaveSpecialNMO(PluginInterface* plgif);
-
-			void getNmoFile(std::filesystem::path* str);
 		}
 	}
 }

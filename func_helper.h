@@ -2,6 +2,8 @@
 #define _YYCDLL_FUNC_HELPER_H__IMPORTED_
 
 #include "stdafx.h"
+#include <string>
+#include <filesystem>
 #define CACHE_SIZE 65526
 
 namespace func_namespace {
@@ -9,10 +11,17 @@ namespace func_namespace {
 	extern char* ExecutionCache;
 	extern char* ExecutionCache2;
 	extern char* ConfigCache;
+	extern char* SelfCache;
+
+	
 
 	BOOL InitHelper();
 	void DisposeHelper();
 	void DisplayLastMessage(BOOL status, CKContext* ctx);
+
+	void OpenFileDialog(std::string* returned_file, const char* file_filter, const char* file_extension, BOOL isOpen);
+	void GetTempFolder(std::filesystem::path* temp_folder);
+	
 }
 
 #endif

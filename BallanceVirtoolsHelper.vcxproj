@@ -82,7 +82,7 @@
       <SDLCheck>
       </SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\Virtools\Virtools Dev 3.5\Sdk\Includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\CppLib\zlib\contrib\minizip;D:\CppLib\zlib;E:\Virtools\Virtools Dev 3.5\Sdk\Includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;VX_MEM_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -91,8 +91,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>E:\Virtools\Virtools Dev 3.5\InterfacePlugins\$(ProjectName).dll</OutputFile>
-      <AdditionalLibraryDirectories>E:\Virtools\Virtools Dev 3.5\Sdk\Lib\Win32\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vxmath.lib;DllEditor.lib;ck2.lib;InterfaceControls.lib;CKControls.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\CppLib\zlibLinkDll\dll32;E:\Virtools\Virtools Dev 3.5\Sdk\Lib\Win32\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vxmath.lib;DllEditor.lib;ck2.lib;InterfaceControls.lib;CKControls.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>BallanceVirtoolsHelper.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>E:\Virtools\Virtools Dev 5.0\InterfacePlugins\$(ProjectName).pdb</ProgramDatabaseFile>
@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="config_manager.h" />
     <ClInclude Include="func_helper.h" />
+    <ClInclude Include="func_namespace\mapping_BM.h" />
     <ClInclude Include="func_namespace\misc_SpecialNMO.h" />
     <ClInclude Include="func_namespace\script_CKDataArray.h" />
     <ClInclude Include="resource.h" />
@@ -154,6 +155,7 @@
   <ItemGroup>
     <ClCompile Include="config_manager.cpp" />
     <ClCompile Include="func_helper.cpp" />
+    <ClCompile Include="func_namespace\mapping_BM.cpp" />
     <ClCompile Include="func_namespace\misc_SpecialNMO.cpp" />
     <ClCompile Include="func_namespace\script_CKDataArray.cpp" />
     <ClCompile Include="main.cpp" />

@@ -12,7 +12,7 @@ namespace func_namespace {
 					return FALSE;
 				}
 				std::string file;
-				getCsvFile(&file, TRUE);
+				func_namespace::OpenFileDialog(&file, "Csv file(*.csv)\0*.csv\0", "csv", TRUE);
 				if (file.empty()) {
 					strcpy(func_namespace::ExecutionResult, "No selected CSV file.");
 					return FALSE;
@@ -34,7 +34,7 @@ namespace func_namespace {
 					return FALSE;
 				}
 				std::string file;
-				getCsvFile(&file, FALSE);
+				func_namespace::OpenFileDialog(&file, "Csv file(*.csv)\0*.csv\0", "csv", FALSE);
 				if (file.empty()) {
 					strcpy(func_namespace::ExecutionResult, "No selected CSV file.");
 					return FALSE;
@@ -79,31 +79,6 @@ namespace func_namespace {
 			destroyCKDataArrayWindow:
 				plgif->FreeInterfaceParameter(ifparam->GetID());
 				return res;
-			}
-			void getCsvFile(std::string* str, BOOL isOpen) {
-				str->clear();
-
-				OPENFILENAME ofn;
-				ZeroMemory(&ofn, sizeof(OPENFILENAME));
-				ofn.lStructSize = sizeof(OPENFILENAME);
-				ofn.lpstrFile = func_namespace::ExecutionCache;
-				ofn.lpstrFile[0] = '\0';
-				ofn.nMaxFile = CACHE_SIZE;
-				ofn.lpstrFilter = "Csv file(*.csv)\0*.csv\0";
-				ofn.lpstrDefExt = "csv";
-				ofn.lpstrFileTitle = NULL;
-				ofn.nMaxFileTitle = 0;
-				ofn.lpstrInitialDir = NULL;
-				ofn.Flags = OFN_EXPLORER;
-				if (isOpen) {
-					if (GetOpenFileName(&ofn))
-						*str = func_namespace::ExecutionCache;
-				} else {
-					if (GetSaveFileName(&ofn))
-						*str = func_namespace::ExecutionCache;
-				}
-
-
 			}
 
 		}

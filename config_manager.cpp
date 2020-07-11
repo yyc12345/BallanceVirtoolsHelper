@@ -3,7 +3,7 @@
 
 config_manager::config_manager() :
 	CurrentConfig(),
-	config_version(10) {
+	config_version(11) {
 	;
 }
 config_manager::~config_manager() {
@@ -33,6 +33,7 @@ void config_manager::SaveConfig() {
 	WriteInt(f, &config_version);
 
 	//write data
+	WriteString(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
 	WriteString(f, &CurrentConfig.func_mapping_bm_NoCoponentGroupName);
 	WriteString(f, &CurrentConfig.func_mapping_bm_PHReplacePair_Regex);
 	WriteInt(f, &CurrentConfig.func_mapping_bm_PHReplacePair_Target);
@@ -56,6 +57,7 @@ void config_manager::LoadConfig() {
 	}
 
 	//read data
+	ReadString(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
 	ReadString(f, &CurrentConfig.func_mapping_bm_NoCoponentGroupName);
 	ReadString(f, &CurrentConfig.func_mapping_bm_PHReplacePair_Regex);
 	ReadInt(f, &CurrentConfig.func_mapping_bm_PHReplacePair_Target);

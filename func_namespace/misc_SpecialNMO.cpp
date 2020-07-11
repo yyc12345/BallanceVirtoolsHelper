@@ -6,7 +6,9 @@ namespace func_namespace {
 		namespace SpecialNMO {
 			BOOL SaveSpecialNMO(PluginInterface* plgif) {
 				std::filesystem::path file, tempfile;
-				getNmoFile(&file);
+				std::string filepath;
+				func_namespace::OpenFileDialog(&filepath, "NMO file(*.nmo)\0*.nmo\0", "nmo", FALSE);
+				file = filepath;
 				if (file.empty()) {
 					strcpy(func_namespace::ExecutionResult, "No selected NMO file.");
 					return FALSE;
@@ -32,8 +34,7 @@ namespace func_namespace {
 				}
 
 				//get temp file
-				GetTempPath(CACHE_SIZE, func_namespace::ExecutionCache);
-				tempfile = func_namespace::ExecutionCache;
+				func_namespace::GetTempFolder(&tempfile);
 				sprintf(func_namespace::ExecutionCache, "7c20254bdc9a4409b490e46efaf5e128_%d.cmo", GetCurrentProcessId()); //7c20254bdc9a4409b490e46efaf5e128 is guid
 				tempfile /= func_namespace::ExecutionCache;
 				strcpy(func_namespace::ExecutionCache, tempfile.string().c_str());
@@ -60,26 +61,6 @@ namespace func_namespace {
 				}
 
 				return TRUE;
-			}
-
-			void getNmoFile(std::filesystem::path* str) {
-				str->clear();
-
-				OPENFILENAME ofn;
-				ZeroMemory(&ofn, sizeof(OPENFILENAME));
-				ofn.lStructSize = sizeof(OPENFILENAME);
-				ofn.lpstrFile = func_namespace::ExecutionCache;
-				ofn.lpstrFile[0] = '\0';
-				ofn.nMaxFile = CACHE_SIZE;
-				ofn.lpstrFilter = "NMO file(*.nmo)\0*.nmo\0";
-				ofn.lpstrDefExt = "nmo";
-				ofn.lpstrFileTitle = NULL;
-				ofn.nMaxFileTitle = 0;
-				ofn.lpstrInitialDir = NULL;
-				ofn.Flags = OFN_EXPLORER;
-				if (GetSaveFileName(&ofn))
-					*str = func_namespace::ExecutionCache;
-
 			}
 
 		}

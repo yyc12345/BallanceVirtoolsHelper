@@ -42,6 +42,9 @@
     <ClInclude Include="config_manager.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="func_namespace\mapping_BM.h">
+      <Filter>头文件\func_namespace</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -61,6 +64,9 @@
     </ClCompile>
     <ClCompile Include="config_manager.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="func_namespace\mapping_BM.cpp">
+      <Filter>源文件\func_namespace</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
