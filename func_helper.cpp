@@ -7,7 +7,8 @@ namespace func_namespace {
 	char* ExecutionCache2;
 	char* ConfigCache;
 	char* SelfCache;
-
+	char32_t* BMNameCache;
+	wchar_t* WideCharCache;
 
 #define safeAlloc(target,type,size) target=(type)malloc(size);if(target==NULL)return FALSE;
 #define safeFree(target) if(target!=NULL)free(target);
@@ -17,6 +18,8 @@ namespace func_namespace {
 		safeAlloc(ExecutionCache2, char*, sizeof(char) * CACHE_SIZE);
 		safeAlloc(ConfigCache, char*, sizeof(char) * CACHE_SIZE);
 		safeAlloc(SelfCache, char*, sizeof(char) * CACHE_SIZE);
+		safeAlloc(BMNameCache, char32_t*, sizeof(char32_t) * CACHE_SIZE);
+		safeAlloc(WideCharCache, wchar_t*, sizeof(wchar_t) * CACHE_SIZE);
 
 		return TRUE;
 	}
@@ -26,6 +29,8 @@ namespace func_namespace {
 		safeFree(ExecutionCache2);
 		safeFree(ConfigCache);
 		safeFree(SelfCache);
+		safeFree(BMNameCache);
+		safeFree(WideCharCache);
 	}
 #undef safeAlloc
 #undef safeFree

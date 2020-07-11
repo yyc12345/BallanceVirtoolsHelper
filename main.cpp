@@ -29,7 +29,8 @@ class SuperScriptMaterializer : CWinApp {
 SuperScriptMaterializer theApp;
 
 BOOL SuperScriptMaterializer::InitInstance() {
-	// TODO: Add your specialized code here and/or call the base class
+	// set locale
+	//setlocale(LC_ALL, "");
 
 	if (!func_namespace::InitHelper())
 		throw new std::bad_alloc();

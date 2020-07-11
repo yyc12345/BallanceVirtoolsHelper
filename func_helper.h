@@ -12,7 +12,8 @@ namespace func_namespace {
 	extern char* ExecutionCache2;
 	extern char* ConfigCache;
 	extern char* SelfCache;
-
+	extern char32_t* BMNameCache;
+	extern wchar_t* WideCharCache;
 	
 
 	BOOL InitHelper();
