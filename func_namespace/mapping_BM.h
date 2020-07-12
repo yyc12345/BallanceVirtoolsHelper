@@ -37,6 +37,8 @@ namespace func_namespace {
 			void ReadInt(std::ifstream* fs, uint64_t* num);
 			void ReadFloat(std::ifstream* fs, float* num);
 			void ReadString(std::ifstream* fs, std::string* str);
+			void LoadExternalTexture(std::string* name, CKTexture* texture);
+			void LoadComponenetMesh(CK3dEntity* obj, uint32_t index);
 
 			BOOL ExportBM();
 

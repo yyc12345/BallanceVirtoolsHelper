@@ -42,10 +42,46 @@ namespace func_namespace {
 				// ====================================== read
 				std::ifstream findex, fobject, fmesh, fmaterial, ftexture;
 				std::vector<FILE_INDEX_HELPER*> objectList, meshList, materialList, textureList;
+				// ckcontext ensurance
+				CKContext* ctx = s_Plugininterface->GetCKContext();
+				CKScene* curScene = NULL;
+				XObjectPointerArray tmpArray = ctx->GetObjectListByType(CKCID_OBJECT, TRUE);
+				int count = tmpArray.Size();
+				if (ctx->GetCurrentLevel() == NULL) {
+					//no level, add it and add all object into it.
+					CKLevel* levels = (CKLevel*)ctx->CreateObject(CKCID_LEVEL);
+					for (unsigned int i = 0; i < count; i++)
+						levels->AddObject(tmpArray.GetObjectA(i));
+					ctx->SetCurrentLevel(levels);
+				}
+				curScene = ctx->GetCurrentLevel()->GetLevelScene();
 
-				// read info.bm and check version first
+				//used in index
 				FILE_INDEX_HELPER* helper_struct = NULL;
 				FILE_INDEX_TYPE index_type;
+				//used in texture
+				std::string texture_filename;
+				CKTexture* currenrTexture = NULL;
+				uint32_t is_external;
+				std::filesystem::path texture_file;
+				//used in material
+				CKMaterial* currentMaterial = NULL;
+				VxColor color;
+				uint32_t is_texture, texture_index;
+				//used in mesh
+				CKMesh* currentMesh = NULL;
+				VxVector vector;
+				uint32_t vecCount;
+				std::vector<VxVector> vnList, vtList; // vt only use xy to store uv
+				uint32_t face_data[9];
+				uint32_t is_material, material_index;
+				//used in object
+				CK3dEntity* currentObject = NULL;
+				VxMatrix world_matrix;
+				uint32_t is_component, mesh_index;
+
+
+				// read info.bm and check version first
 				findex.open(temp / "index.bm", std::ios_base::out | std::ios_base::binary);
 
 				uint32_t vercmp;
@@ -58,7 +94,7 @@ namespace func_namespace {
 
 				while (TRUE) {
 					if (findex.peek(), findex.eof()) break;
-					
+
 					helper_struct = new FILE_INDEX_HELPER();
 					ReadString(&findex, &(helper_struct->name));
 					ReadInt(&findex, (uint32_t*)&index_type);
@@ -83,12 +119,141 @@ namespace func_namespace {
 
 				findex.close();
 
+				// read texture
+				ftexture.open(temp / "texture.bm", std::ios_base::out | std::ios_base::binary);
+				for (auto iter = textureList.begin(); iter != textureList.end(); iter++) {
+					ftexture.seekg((*iter)->offset);
 
+					ReadString(&ftexture, &texture_filename);
+					currenrTexture = (CKTexture*)ctx->CreateObject(CKCID_TEXTURE, (char*)(*iter)->name.c_str());
+					(*iter)->id = currenrTexture->GetID();
+					ReadInt(&ftexture, &is_external);
+					if (is_external) {
+						LoadExternalTexture(&texture_filename, currenrTexture);
+						currenrTexture->SetSaveOptions(CKTEXTURE_EXTERNAL);
+					} else {
+						texture_file = tempTexture / texture_filename;
+						currenrTexture->LoadImageA((char*)texture_file.string().c_str());
+						currenrTexture->SetSaveOptions(CKTEXTURE_RAWDATA);
+					}
+				}
+				ftexture.close();
+
+				// read material
+				fmaterial.open(temp / "material.bm", std::ios_base::out | std::ios_base::binary);
+				for (auto iter = materialList.begin(); iter != materialList.end(); iter++) {
+					fmaterial.seekg((*iter)->offset);
+
+					color.a = 1;
+					currentMaterial = (CKMaterial*)ctx->CreateObject(CKCID_MATERIAL, (char*)(*iter)->name.c_str());
+					(*iter)->id = currentMaterial->GetID();
+					ReadFloat(&fmaterial, &(color.r)); ReadFloat(&fmaterial, &(color.g)); ReadFloat(&fmaterial, &(color.b));
+					currentMaterial->SetAmbient(color);
+					ReadFloat(&fmaterial, &(color.r)); ReadFloat(&fmaterial, &(color.g)); ReadFloat(&fmaterial, &(color.b));
+					currentMaterial->SetDiffuse(color);
+					ReadFloat(&fmaterial, &(color.r)); ReadFloat(&fmaterial, &(color.g)); ReadFloat(&fmaterial, &(color.b));
+					currentMaterial->SetEmissive(color);
+
+					ReadInt(&fmaterial, &is_texture);
+					if (is_texture) {
+						ReadInt(&fmaterial, &texture_index);
+						currentMaterial->SetTexture((CKTexture*)ctx->GetObjectA(textureList[texture_index]->id));
+					}
+				}
+				fmaterial.close();
+
+				// read mesh
+				fmesh.open(temp / "mesh.bm", std::ios_base::out | std::ios_base::binary);
+				for (auto iter = meshList.begin(); iter != meshList.end(); iter++) {
+					fmesh.seekg((*iter)->offset);
+
+					currentMesh = (CKMesh*)ctx->CreateObject(CKCID_MESH, (char*)(*iter)->name.c_str());
+					(*iter)->id = currentMesh->GetID();
+					vnList.clear(); vtList.clear();
+					ReadInt(&fmesh, &vecCount);
+					// init vector count
+					currentMesh->SetVertexCount(vecCount);
+					// load v
+					for (int i = 0; i < vecCount; i++) {
+						ReadFloat(&fmesh, &(vector.x));
+						ReadFloat(&fmesh, &(vector.y));
+						ReadFloat(&fmesh, &(vector.z));
+						currentMesh->SetVertexPosition(i, &vector);
+					}
+					// vn and vt need stored in vector
+					ReadInt(&fmesh, &vecCount);
+					vector.z = 0;
+					for (int i = 0; i < vecCount; i++) {
+						ReadFloat(&fmesh, &(vector.x));
+						ReadFloat(&fmesh, &(vector.y));
+						vtList.push_back(vector);
+					}
+					ReadInt(&fmesh, &vecCount);
+					for (int i = 0; i < vecCount; i++) {
+						ReadFloat(&fmesh, &(vector.x));
+						ReadFloat(&fmesh, &(vector.y));
+						ReadFloat(&fmesh, &(vector.z));
+						vnList.push_back(vector);
+					}
+					// read face
+					ReadInt(&fmesh, &vecCount);
+					currentMesh->SetFaceCount(vecCount);
+					for (int i = 0; i < vecCount; i++) {
+						for (int j = 0; j < 9; j++)
+							ReadInt(&fmesh, &(face_data[j]));
+
+						for (int j = 0; j < 9; j += 3) {
+							vector = vtList[face_data[j + 1]];
+							currentMesh->SetVertexTextureCoordinates(face_data[j], vector.x, vector.y);
+							vector = vnList[face_data[j + 2]];
+							currentMesh->SetVertexNormal(face_data[j], &vector);
+						}
+
+						currentMesh->SetFaceVertexIndex(i, face_data[0], face_data[3], face_data[6]);
+						ReadInt(&fmesh, &is_material);
+						if (is_material) {
+							ReadInt(&fmesh, &material_index);
+							currentMesh->SetFaceMaterial(i, (CKMaterial*)ctx->GetObjectA(materialList[material_index]->id));
+						}
+					}
+				}
+				fmesh.close();
+
+				// read object
+				fobject.open(temp / "object.bm", std::ios_base::out | std::ios_base::binary);
+				for (auto iter = objectList.begin(); iter != objectList.end(); iter++) {
+					fobject.seekg((*iter)->offset);
+
+					currentObject = (CK3dEntity*)ctx->CreateObject(CKCID_3DENTITY, (char*)(*iter)->name.c_str());
+					(*iter)->id = currentObject->GetID();
+					ReadInt(&fobject, &is_component);
+					for (int i = 0; i < 4; i++)
+						for (int j = 0; j < 4; j++)
+							ReadFloat(&fobject, &(world_matrix[i][j]));
+					currentObject->SetWorldMatrix(world_matrix);
+					ReadInt(&fobject, &mesh_index);
+					if (is_component) LoadComponenetMesh(currentObject, mesh_index);
+					else currentObject->SetCurrentMesh((CKMesh*)ctx->GetObjectA(meshList[mesh_index]->id));
+
+					// all object should add into current scene with dependency
+					curScene->AddObjectToScene(currentObject);
+				}
+				fobject.close();
+
+				// release all list data
+				for (auto iter = textureList.begin(); iter != textureList.end(); iter++)
+					delete (*iter);
+				for (auto iter = materialList.begin(); iter != materialList.end(); iter++)
+					delete (*iter);
+				for (auto iter = meshList.begin(); iter != meshList.end(); iter++)
+					delete (*iter);
+				for (auto iter = objectList.begin(); iter != objectList.end(); iter++)
+					delete (*iter);
 
 				return TRUE;
 			}
 
-			// WARNING: all following read func are based on current OS is little-endian.
+			// WARNING: all following `Read` func are based on current OS is little-endian.
 			void ReadInt(std::ifstream* fs, uint32_t* num) {
 				fs->read((char*)num, sizeof(uint32_t));
 			}
@@ -125,7 +290,12 @@ namespace func_namespace {
 				//copy result
 				*str = func_namespace::ExecutionCache;
 			}
-
+			void LoadExternalTexture(std::string* name, CKTexture* texture) {
+				;
+			}
+			void LoadComponenetMesh(CK3dEntity* obj, uint32_t index) {
+				;
+			}
 #pragma endregion
 
 
