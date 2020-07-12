@@ -72,7 +72,7 @@ namespace func_namespace {
 				CKMesh* currentMesh = NULL;
 				VxVector vector;
 				uint32_t vecCount;
-				std::vector<VxVector> vnList, vtList; // vt only use xy to store uv
+				std::vector<VxVector> vList, vnList, vtList; // vt only use xy to store uv
 				uint32_t face_data[9];
 				uint32_t is_material, material_index;
 				//used in object
@@ -169,16 +169,14 @@ namespace func_namespace {
 
 					currentMesh = (CKMesh*)ctx->CreateObject(CKCID_MESH, (char*)(*iter)->name.c_str());
 					(*iter)->id = currentMesh->GetID();
-					vnList.clear(); vtList.clear();
+					vList.clear(); vnList.clear(); vtList.clear();
 					ReadInt(&fmesh, &vecCount);
-					// init vector count
-					currentMesh->SetVertexCount(vecCount);
-					// load v
+					// lazy load v
 					for (int i = 0; i < vecCount; i++) {
 						ReadFloat(&fmesh, &(vector.x));
 						ReadFloat(&fmesh, &(vector.y));
 						ReadFloat(&fmesh, &(vector.z));
-						currentMesh->SetVertexPosition(i, &vector);
+						vList.push_back(vector);
 					}
 					// vn and vt need stored in vector
 					ReadInt(&fmesh, &vecCount);
@@ -197,19 +195,23 @@ namespace func_namespace {
 					}
 					// read face
 					ReadInt(&fmesh, &vecCount);
+					// init vector and face count
+					currentMesh->SetVertexCount(vecCount * 3);
 					currentMesh->SetFaceCount(vecCount);
 					for (int i = 0; i < vecCount; i++) {
 						for (int j = 0; j < 9; j++)
 							ReadInt(&fmesh, &(face_data[j]));
 
 						for (int j = 0; j < 9; j += 3) {
+							vector = vList[face_data[j]];
+							currentMesh->SetVertexPosition(i * 3 + j / 3, &vector);
 							vector = vtList[face_data[j + 1]];
-							currentMesh->SetVertexTextureCoordinates(face_data[j], vector.x, vector.y);
+							currentMesh->SetVertexTextureCoordinates(i * 3 + j / 3, vector.x, vector.y);
 							vector = vnList[face_data[j + 2]];
-							currentMesh->SetVertexNormal(face_data[j], &vector);
+							currentMesh->SetVertexNormal(i * 3 + j / 3, &vector);
 						}
 
-						currentMesh->SetFaceVertexIndex(i, face_data[0], face_data[3], face_data[6]);
+						currentMesh->SetFaceVertexIndex(i, i * 3, i * 3 + 1, i * 3 + 2);
 						ReadInt(&fmesh, &is_material);
 						if (is_material) {
 							ReadInt(&fmesh, &material_index);
