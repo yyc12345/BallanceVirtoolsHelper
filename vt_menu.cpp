@@ -6,6 +6,9 @@
 #include "func_namespace/script_CKDataArray.h"
 #include "func_namespace/misc_SpecialNMO.h"
 #include "func_namespace/mapping_BM.h"
+#include "func_namespace/mapping_Group.h"
+
+#include "func_window/misc_config.h"
 
 //=============func import
 
@@ -70,7 +73,7 @@ void UpdateMenu() { //current max id: 32
 	s_Plugininterface->AddPluginMenuItem(sub_bm, 2, "Import BM file");
 	s_Plugininterface->AddPluginMenuItem(sub_bm, 3, "Export BM file");
 	s_Plugininterface->AddPluginMenuItem(sub_bm, -1, NULL, TRUE);
-	s_Plugininterface->AddPluginMenuItem(sub_bm, 4, "BM settings");
+	s_Plugininterface->AddPluginMenuItem(sub_bm, 7, "Fix Blender texture");
 
 	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 5, "Align");
 	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 6, "Center distribute");
@@ -82,8 +85,6 @@ void UpdateMenu() { //current max id: 32
 
 	s_Plugininterface->AddPluginMenuItem(sub_group, 5, "Auto grouping");
 	s_Plugininterface->AddPluginMenuItem(sub_group, 6, "Grouping checker");
-	s_Plugininterface->AddPluginMenuItem(sub_group, -1, NULL, TRUE);
-	s_Plugininterface->AddPluginMenuItem(sub_group, 7, "Grouping settings");
 
 	//s_Plugininterface->AddPluginMenuItem(sub_light, 16, "Add test light");
 	//s_Plugininterface->AddPluginMenuItem(sub_light, 17, "Remove test light");
@@ -114,6 +115,8 @@ void UpdateMenu() { //current max id: 32
 
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 32, "Export as special NMO");
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, -1, NULL, TRUE);
+	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 4, "Plugin settings");
+	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, -1, NULL, TRUE);
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 30, "Report bug");
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 31, "About BallanceVirtoolsHelper");
 
@@ -124,10 +127,17 @@ void MenuCallback(int commandID) {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	BOOL runResult = TRUE;
 
+	// window define
+	func_window::misc_config* window_misc_config = NULL;
+
 	switch (commandID) {
 		case 2:
 			runResult = func_namespace::mapping::BM::ImportBM();
 			break;
+		case 5:
+			runResult = func_namespace::mapping::Group::AutoGrouping();
+			break;
+
 		case 27:
 			runResult = func_namespace::script::CKDataArray::ExportCsv(s_Plugininterface);
 			break;
@@ -138,6 +148,12 @@ void MenuCallback(int commandID) {
 			runResult = func_namespace::script::CKDataArray::Clean(s_Plugininterface);
 			break;
 
+		case 4:
+			runResult = TRUE;
+			window_misc_config = new func_window::misc_config();
+			window_misc_config->DoModal();
+			delete window_misc_config;
+			break;
 		case 32:
 			runResult = func_namespace::misc::SpecialNMO::SaveSpecialNMO(s_Plugininterface);
 			break;

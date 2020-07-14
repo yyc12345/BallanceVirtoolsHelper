@@ -3,13 +3,12 @@
 
 config_manager::config_manager() :
 	CurrentConfig(),
-	config_version(11) {
+	config_version(10) {
 	;
 }
 config_manager::~config_manager() {
 	//destroy config vector's string
-	for (auto iter = CurrentConfig.func_mapping_bm_PHReplacePair_Regex.begin(); iter != CurrentConfig.func_mapping_bm_PHReplacePair_Regex.end(); iter++)
-		delete(*iter);
+	// todo: add vector in there
 
 }
 
@@ -19,7 +18,8 @@ void config_manager::GetConfigFilePath(std::filesystem::path* path) {
 	path->replace_filename("BallanceVirtoolsHelper.cfg");
 }
 void config_manager::InitConfig() {
-	CurrentConfig.func_mapping_bm_NoCoponentGroupName = "";
+	CurrentConfig.func_mapping_bm_ExternalTextureFolder = "";
+	CurrentConfig.func_mapping_bm_NoComponentGroupName = "";
 
 	//todo: add standard regex for func_mapping_bm_PHReplacePair_Regex and Target
 }
@@ -34,9 +34,7 @@ void config_manager::SaveConfig() {
 
 	//write data
 	WriteString(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
-	WriteString(f, &CurrentConfig.func_mapping_bm_NoCoponentGroupName);
-	WriteString(f, &CurrentConfig.func_mapping_bm_PHReplacePair_Regex);
-	WriteInt(f, &CurrentConfig.func_mapping_bm_PHReplacePair_Target);
+	WriteString(f, &CurrentConfig.func_mapping_bm_NoComponentGroupName);
 
 	fclose(f);
 }
@@ -58,9 +56,7 @@ void config_manager::LoadConfig() {
 
 	//read data
 	ReadString(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
-	ReadString(f, &CurrentConfig.func_mapping_bm_NoCoponentGroupName);
-	ReadString(f, &CurrentConfig.func_mapping_bm_PHReplacePair_Regex);
-	ReadInt(f, &CurrentConfig.func_mapping_bm_PHReplacePair_Target);
+	ReadString(f, &CurrentConfig.func_mapping_bm_NoComponentGroupName);
 
 	fclose(f);
 	return;
@@ -99,6 +95,7 @@ void config_manager::ReadString(FILE* fs, std::string* str) {
 	int count = 0;
 	ReadInt(fs, &count);
 	fread(func_namespace::ConfigCache, sizeof(char), count, fs);
+	func_namespace::ConfigCache[count] = '\0';
 	*str = func_namespace::ConfigCache;
 }
 void config_manager::ReadString(FILE* fs, std::vector<std::string*>* str) {

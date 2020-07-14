@@ -43,6 +43,8 @@ namespace func_namespace {
 			BOOL ExportBM();
 
 
+			BOOL FixBlenderTexture();
+
 			namespace zip_handle {
 				void Compress(std::filesystem::path* filepath, std::filesystem::path* folder);
 

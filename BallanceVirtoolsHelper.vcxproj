@@ -86,7 +86,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;VX_MEM_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,9 +147,12 @@
     <ClInclude Include="config_manager.h" />
     <ClInclude Include="func_helper.h" />
     <ClInclude Include="func_namespace\mapping_BM.h" />
+    <ClInclude Include="func_namespace\mapping_Group.h" />
     <ClInclude Include="func_namespace\misc_SpecialNMO.h" />
     <ClInclude Include="func_namespace\script_CKDataArray.h" />
+    <ClInclude Include="func_window\misc_config.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="resource1.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="vt_menu.h" />
   </ItemGroup>
@@ -157,13 +160,18 @@
     <ClCompile Include="config_manager.cpp" />
     <ClCompile Include="func_helper.cpp" />
     <ClCompile Include="func_namespace\mapping_BM.cpp" />
+    <ClCompile Include="func_namespace\mapping_Group.cpp" />
     <ClCompile Include="func_namespace\misc_SpecialNMO.cpp" />
     <ClCompile Include="func_namespace\script_CKDataArray.cpp" />
+    <ClCompile Include="func_window\misc_config.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vt_menu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BallanceVirtoolsHelper.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="BallanceVirtoolsHelper.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

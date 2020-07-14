@@ -11,13 +11,103 @@
 #include <vector>
 #include <cuchar>
 #include <sstream>
+#include "../config_manager.h"
 #include "../func_helper.h"
 
 extern PluginInterface* s_Plugininterface;
+extern config_manager* cfg_manager;
 
 namespace func_namespace {
 	namespace mapping {
 		namespace BM {
+
+#pragma region const value
+
+			const uint32_t CONST_External_Texture_Length = 79;	//following list's length. not to change this when the list is changed
+			const char* CONST_External_Texture_Value[] = {
+				"Ball_LightningSphere1.bmp",
+				"Ball_LightningSphere2.bmp",
+				"Ball_LightningSphere3.bmp",
+				"Ball_Paper.bmp",
+				"Ball_Stone.bmp",
+				"Ball_Wood.bmp",
+				"Brick.bmp",
+				"Button01_deselect.tga",
+				"Button01_select.tga",
+				"Button01_special.tga",
+				"Column_beige.bmp",
+				"Column_beige_fade.tga",
+				"Column_blue.bmp",
+				"Cursor.tga",
+				"Dome.bmp",
+				"DomeEnvironment.bmp",
+				"DomeShadow.tga",
+				"ExtraBall.bmp",
+				"ExtraParticle.bmp",
+				"E_Holzbeschlag.bmp",
+				"FloorGlow.bmp",
+				"Floor_Side.bmp",
+				"Floor_Top_Border.bmp",
+				"Floor_Top_Borderless.bmp",
+				"Floor_Top_Checkpoint.bmp",
+				"Floor_Top_Flat.bmp",
+				"Floor_Top_Profil.bmp",
+				"Floor_Top_ProfilFlat.bmp",
+				"Font_1.tga",
+				"Gravitylogo_intro.bmp",
+				"HardShadow.bmp",
+				"Laterne_Glas.bmp",
+				"Laterne_Schatten.tga",
+				"Laterne_Verlauf.tga",
+				"Logo.bmp",
+				"Metal_stained.bmp",
+				"Misc_Ufo.bmp",
+				"Misc_UFO_Flash.bmp",
+				"Modul03_Floor.bmp",
+				"Modul03_Wall.bmp",
+				"Modul11_13_Wood.bmp",
+				"Modul11_Wood.bmp",
+				"Modul15.bmp",
+				"Modul16.bmp",
+				"Modul18.bmp",
+				"Modul18_Gitter.tga",
+				"Modul30_d_Seiten.bmp",
+				"Particle_Flames.bmp",
+				"Particle_Smoke.bmp",
+				"PE_Bal_balloons.bmp",
+				"PE_Bal_platform.bmp",
+				"PE_Ufo_env.bmp",
+				"Pfeil.tga",
+				"P_Extra_Life_Oil.bmp",
+				"P_Extra_Life_Particle.bmp",
+				"P_Extra_Life_Shadow.bmp",
+				"Rail_Environment.bmp",
+				"sandsack.bmp",
+				"SkyLayer.bmp",
+				"Sky_Vortex.bmp",
+				"Stick_Bottom.tga",
+				"Stick_Stripes.bmp",
+				"Target.bmp",
+				"Tower_Roof.bmp",
+				"Trafo_Environment.bmp",
+				"Trafo_FlashField.bmp",
+				"Trafo_Shadow_Big.tga",
+				"Tut_Pfeil01.tga",
+				"Tut_Pfeil_Hoch.tga",
+				"Wolken_intro.tga",
+				"Wood_Metal.bmp",
+				"Wood_MetalStripes.bmp",
+				"Wood_Misc.bmp",
+				"Wood_Nailed.bmp",
+				"Wood_Old.bmp",
+				"Wood_Panel.bmp",
+				"Wood_Plain.bmp",
+				"Wood_Plain2.bmp",
+				"Wood_Raft.bmp"
+			};
+
+
+#pragma endregion
 
 #pragma region import
 
@@ -76,7 +166,7 @@ namespace func_namespace {
 				uint32_t face_data[9];
 				uint32_t is_material, material_index;
 				//used in object
-				CK3dEntity* currentObject = NULL;
+				CK3dObject* currentObject = NULL;
 				VxMatrix world_matrix;
 				uint32_t is_component, mesh_index;
 
@@ -226,7 +316,7 @@ namespace func_namespace {
 				for (auto iter = objectList.begin(); iter != objectList.end(); iter++) {
 					fobject.seekg((*iter)->offset);
 
-					currentObject = (CK3dEntity*)ctx->CreateObject(CKCID_3DENTITY, (char*)(*iter)->name.c_str());
+					currentObject = (CK3dObject*)ctx->CreateObject(CKCID_3DOBJECT, (char*)(*iter)->name.c_str());
 					(*iter)->id = currentObject->GetID();
 					ReadInt(&fobject, &is_component);
 					for (int i = 0; i < 4; i++)
@@ -293,7 +383,14 @@ namespace func_namespace {
 				*str = func_namespace::ExecutionCache;
 			}
 			void LoadExternalTexture(std::string* name, CKTexture* texture) {
-				;
+				std::filesystem::path external_folder;
+				if (cfg_manager->CurrentConfig.func_mapping_bm_ExternalTextureFolder.empty())
+					return;	//empty folder, don't load it.
+				external_folder = cfg_manager->CurrentConfig.func_mapping_bm_ExternalTextureFolder;
+				external_folder /= *name;
+				
+				texture->LoadImageA((char*)external_folder.string().c_str());
+				texture->SetSaveOptions(CKTEXTURE_EXTERNAL);
 			}
 			void LoadComponenetMesh(CK3dEntity* obj, uint32_t index) {
 				;
@@ -308,6 +405,15 @@ namespace func_namespace {
 			}
 
 #pragma endregion
+
+#pragma region misc feature
+
+			BOOL FixBlenderTexture() {
+				return TRUE;
+			}
+
+#pragma endregion
+
 
 			namespace zip_handle {
 

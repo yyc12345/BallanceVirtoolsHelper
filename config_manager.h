@@ -8,9 +8,7 @@
 struct config_body {
 	//func_mapping_bm
 	std::string func_mapping_bm_ExternalTextureFolder;
-	std::string func_mapping_bm_NoCoponentGroupName;
-	std::vector<std::string*> func_mapping_bm_PHReplacePair_Regex;
-	std::vector<int> func_mapping_bm_PHReplacePair_Target;
+	std::string func_mapping_bm_NoComponentGroupName;
 };
 
 class config_manager {

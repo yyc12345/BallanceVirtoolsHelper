@@ -19,6 +19,12 @@
     <Filter Include="源文件\func_namespace">
       <UniqueIdentifier>{1c21900c-8045-4863-bb0c-499f62223166}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\func_window">
+      <UniqueIdentifier>{621de344-8d01-4caa-a2da-400ee41aa66d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\func_window">
+      <UniqueIdentifier>{6cbd239d-10f4-49d5-854e-1138ec7db805}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -45,6 +51,15 @@
     <ClInclude Include="func_namespace\mapping_BM.h">
       <Filter>头文件\func_namespace</Filter>
     </ClInclude>
+    <ClInclude Include="resource1.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="func_window\misc_config.h">
+      <Filter>头文件\func_window</Filter>
+    </ClInclude>
+    <ClInclude Include="func_namespace\mapping_Group.h">
+      <Filter>头文件\func_namespace</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -68,10 +83,21 @@
     <ClCompile Include="func_namespace\mapping_BM.cpp">
       <Filter>源文件\func_namespace</Filter>
     </ClCompile>
+    <ClCompile Include="func_window\misc_config.cpp">
+      <Filter>源文件\func_window</Filter>
+    </ClCompile>
+    <ClCompile Include="func_namespace\mapping_Group.cpp">
+      <Filter>源文件\func_namespace</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="BallanceVirtoolsHelper.def">
       <Filter>源文件</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="BallanceVirtoolsHelper.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

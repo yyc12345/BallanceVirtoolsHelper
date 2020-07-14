@@ -69,8 +69,26 @@ namespace func_namespace {
 		}
 	}
 
+	void OpenFolderDialog(std::string* returned_folder, HWND owner) {
+		returned_folder->clear();
+
+		BROWSEINFOA folderViewer = { 0 };
+		folderViewer.hwndOwner = owner;
+		folderViewer.pidlRoot = NULL;
+		folderViewer.pszDisplayName = func_namespace::SelfCache;
+		folderViewer.lpszTitle = "Pick a folder";
+		folderViewer.lpfn = NULL;
+		folderViewer.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
+		PIDLIST_ABSOLUTE data = SHBrowseForFolder(&folderViewer);
+		if (data == NULL) return;
+		if (SHGetPathFromIDList(data, func_namespace::SelfCache))
+			*returned_folder = func_namespace::SelfCache;
+		CoTaskMemFree(data);
+	}
+
 	void GetTempFolder(std::filesystem::path* temp_folder) {
 		GetTempPath(CACHE_SIZE, SelfCache);
 		*temp_folder = SelfCache;
 	}
+
 }
