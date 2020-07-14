@@ -134,6 +134,9 @@ void MenuCallback(int commandID) {
 		case 2:
 			runResult = func_namespace::mapping::BM::ImportBM();
 			break;
+		case 7:
+			runResult = func_namespace::mapping::BM::FixBlenderTexture();
+			break;
 		case 5:
 			runResult = func_namespace::mapping::Group::AutoGrouping();
 			break;

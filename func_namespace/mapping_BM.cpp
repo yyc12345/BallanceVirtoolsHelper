@@ -409,6 +409,52 @@ namespace func_namespace {
 #pragma region misc feature
 
 			BOOL FixBlenderTexture() {
+				// filter texture
+				std::vector<CK_ID> textureList;
+				CKTexture* texture = NULL; CKMaterial* material = NULL;
+				std::filesystem::path filepath;
+				VxColor color;
+				color.a = 1;
+
+				// iterate texture
+				CKContext* ctx = s_Plugininterface->GetCKContext();
+				XObjectPointerArray objArray = ctx->GetObjectListByType(CKCID_TEXTURE, FALSE);
+				int count = objArray.Size();
+				for (int i = 0; i < count; i++) {
+					texture = (CKTexture*)objArray[i];
+					if (texture->GetSlotFileName(0) == NULL) continue;
+
+					filepath = texture->GetSlotFileName(0);
+					if (filepath.filename() == "Rail_Environment.bmp") {
+						// this texture is need to be changed
+						textureList.push_back(texture->GetID());
+					}
+				}
+
+				//iterate material
+				XObjectPointerArray objArray2 = ctx->GetObjectListByType(CKCID_MATERIAL, FALSE);
+				count = objArray2.Size();
+				for (int i = 0; i < count; i++) {
+					material = (CKMaterial*)objArray2[i];
+					texture = material->GetTexture(0);
+
+					if (texture == NULL) continue;
+					if (std::find(textureList.begin(), textureList.end(), texture->GetID()) == textureList.end()) {
+						// no match
+					} else {
+						// got, change this material's data
+						color.r = 0; color.g = 0; color.b = 0;
+						material->SetAmbient(color);
+						color.r = 100 / 255.0; color.g = 118 / 255.0; color.b = 133 / 255.0;
+						material->SetDiffuse(color);
+						color.r = 210 / 255.0; color.g = 210 / 255.0; color.b = 210 / 255.0;
+						material->SetSpecular(color);
+						color.r = 124 / 255.0; color.g = 134 / 255.0; color.b = 150 / 255.0;
+						material->SetEmissive(color);
+						material->SetPower(10);
+					}
+				}
+
 				return TRUE;
 			}
 
