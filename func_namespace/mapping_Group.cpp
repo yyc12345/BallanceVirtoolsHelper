@@ -83,14 +83,14 @@ namespace func_namespace {
 					}
 					if (objName.starts_with("A_Rail")) {
 						GroupIntoWithCreation(ctx, obj, "Phys_FloorRails");
-						GroupIntoWithCreation(ctx, obj, "Sound_HitID_02");
-						GroupIntoWithCreation(ctx, obj, "Sound_RollID_02");
+						GroupIntoWithCreation(ctx, obj, "Sound_HitID_03");
+						GroupIntoWithCreation(ctx, obj, "Sound_RollID_03");
 						continue;
 					}
 					if (objName.starts_with("A_Floor")) {
 						GroupIntoWithCreation(ctx, obj, "Phys_Floors");
-						GroupIntoWithCreation(ctx, obj, "Sound_HitID_03");
-						GroupIntoWithCreation(ctx, obj, "Sound_RollID_03");
+						GroupIntoWithCreation(ctx, obj, "Sound_HitID_02");
+						GroupIntoWithCreation(ctx, obj, "Sound_RollID_02");
 						continue;
 					}
 
@@ -102,7 +102,7 @@ namespace func_namespace {
 
 					// ====================== stopper
 					if (objName.starts_with("A_Stopper")) {
-						GroupIntoWithCreation(ctx, obj, "Phys_Floorstopper");
+						GroupIntoWithCreation(ctx, obj, "Phys_FloorStopper");
 						continue;
 					}
 
