@@ -15,6 +15,8 @@
 #include "../config_manager.h"
 #include "../func_helper.h"
 
+#pragma warning(disable:4305)
+
 extern PluginInterface* s_Plugininterface;
 extern config_manager* cfg_manager;
 
@@ -221,6 +223,7 @@ namespace func_namespace {
 						currenrTexture->LoadImageA((char*)texture_file.string().c_str());
 						currenrTexture->SetSaveOptions(CKTEXTURE_RAWDATA);
 					}
+					currenrTexture->FreeVideoMemory();
 				}
 				ftexture.close();
 
@@ -463,9 +466,20 @@ namespace func_namespace {
 							break;
 						case 4:    // Ball_Stone.bmp
 						case 5:    // Ball_Wood.bmp
-							color.r = 0; color.g = 0; color.b = 0;
+							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
 							material->SetAmbient(color);
-							color.r = 190 / 255.0; color.g = 190 / 255.0; color.b = 190 / 255.0;
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+							material->SetSpecular(color);
+							color.r = 60 / 255.0; color.g = 60 / 255.0; color.b = 60 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(0);
+							break;
+						case 6:    // Brick.bmp
+							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
 							material->SetDiffuse(color);
 							color.r = 0; color.g = 0; color.b = 0;
 							material->SetSpecular(color);
@@ -473,7 +487,6 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(0);
 							break;
-						//case 6:    // Brick.bmp
 						//case 7:    // Button01_deselect.tga
 						//case 8:    // Button01_select.tga
 						//case 9:    // Button01_special.tga
