@@ -11,6 +11,7 @@
 #include <vector>
 #include <cuchar>
 #include <sstream>
+#include <unordered_map>
 #include "../config_manager.h"
 #include "../func_helper.h"
 
@@ -23,8 +24,8 @@ namespace func_namespace {
 
 #pragma region const value
 
-			const uint32_t CONST_External_Texture_Length = 79;	//following list's length. not to change this when the list is changed
-			const char* CONST_External_Texture_Value[] = {
+			const uint32_t CONST_ExternalTextureList_Length = 73;	//following list's length. not to change this when the list is changed
+			const char* CONST_ExternalTextureList[] = {
 				"Ball_LightningSphere1.bmp",
 				"Ball_LightningSphere2.bmp",
 				"Ball_LightningSphere3.bmp",
@@ -38,7 +39,6 @@ namespace func_namespace {
 				"Column_beige.bmp",
 				"Column_beige_fade.tga",
 				"Column_blue.bmp",
-				"Cursor.tga",
 				"Dome.bmp",
 				"DomeEnvironment.bmp",
 				"DomeShadow.tga",
@@ -59,7 +59,6 @@ namespace func_namespace {
 				"Laterne_Glas.bmp",
 				"Laterne_Schatten.tga",
 				"Laterne_Verlauf.tga",
-				"Logo.bmp",
 				"Metal_stained.bmp",
 				"Misc_Ufo.bmp",
 				"Misc_UFO_Flash.bmp",
@@ -77,7 +76,6 @@ namespace func_namespace {
 				"PE_Bal_balloons.bmp",
 				"PE_Bal_platform.bmp",
 				"PE_Ufo_env.bmp",
-				"Pfeil.tga",
 				"P_Extra_Life_Oil.bmp",
 				"P_Extra_Life_Particle.bmp",
 				"P_Extra_Life_Shadow.bmp",
@@ -92,9 +90,6 @@ namespace func_namespace {
 				"Trafo_Environment.bmp",
 				"Trafo_FlashField.bmp",
 				"Trafo_Shadow_Big.tga",
-				"Tut_Pfeil01.tga",
-				"Tut_Pfeil_Hoch.tga",
-				"Wolken_intro.tga",
 				"Wood_Metal.bmp",
 				"Wood_MetalStripes.bmp",
 				"Wood_Misc.bmp",
@@ -388,7 +383,7 @@ namespace func_namespace {
 					return;	//empty folder, don't load it.
 				external_folder = cfg_manager->CurrentConfig.func_mapping_bm_ExternalTextureFolder;
 				external_folder /= *name;
-				
+
 				texture->LoadImageA((char*)external_folder.string().c_str());
 				texture->SetSaveOptions(CKTEXTURE_EXTERNAL);
 			}
@@ -396,7 +391,6 @@ namespace func_namespace {
 				;
 			}
 #pragma endregion
-
 
 #pragma region export
 
@@ -410,9 +404,10 @@ namespace func_namespace {
 
 			BOOL FixBlenderTexture() {
 				// filter texture
-				std::vector<CK_ID> textureList;
+				std::unordered_map<CK_ID, uint8_t> textureList;
 				CKTexture* texture = NULL; CKMaterial* material = NULL;
 				std::filesystem::path filepath;
+				std::string filename;
 				VxColor color;
 				color.a = 1;
 
@@ -425,10 +420,17 @@ namespace func_namespace {
 					if (texture->GetSlotFileName(0) == NULL) continue;
 
 					filepath = texture->GetSlotFileName(0);
-					if (filepath.filename() == "Rail_Environment.bmp") {
-						// this texture is need to be changed
-						textureList.push_back(texture->GetID());
+					filename = filepath.filename().string();
+					for (uint8_t j = 0; j < CONST_ExternalTextureList_Length; j++) {
+						if (filename == CONST_ExternalTextureList[j]) {
+							textureList.try_emplace(texture->GetID(), j);
+							goto nextTexture; //have get a valid texture. next texture
+						}
+						// no match. next one
 					}
+
+				nextTexture:
+					;
 				}
 
 				//iterate material
@@ -439,19 +441,274 @@ namespace func_namespace {
 					texture = material->GetTexture(0);
 
 					if (texture == NULL) continue;
-					if (std::find(textureList.begin(), textureList.end(), texture->GetID()) == textureList.end()) {
-						// no match
-					} else {
-						// got, change this material's data
-						color.r = 0; color.g = 0; color.b = 0;
-						material->SetAmbient(color);
-						color.r = 100 / 255.0; color.g = 118 / 255.0; color.b = 133 / 255.0;
-						material->SetDiffuse(color);
-						color.r = 210 / 255.0; color.g = 210 / 255.0; color.b = 210 / 255.0;
-						material->SetSpecular(color);
-						color.r = 124 / 255.0; color.g = 134 / 255.0; color.b = 150 / 255.0;
-						material->SetEmissive(color);
-						material->SetPower(10);
+					auto target = textureList.find(texture->GetID());
+					if (target == textureList.end())
+						continue;	// no found
+
+					// judge its type
+					switch (target->second) {
+						//case 0:    // Ball_LightningSphere1.bmp
+						//case 1:    // Ball_LightningSphere2.bmp
+						//case 2:    // Ball_LightningSphere3.bmp
+						case 3:    // Ball_Paper.bmp
+							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r =0; color.g = 0; color.b = 0;
+							material->SetSpecular(color);
+							color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(0);
+							break;
+						case 4:    // Ball_Stone.bmp
+						case 5:    // Ball_Wood.bmp
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetAmbient(color);
+							color.r = 190 / 255.0; color.g = 190 / 255.0; color.b = 190 / 255.0;
+							material->SetDiffuse(color);
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetSpecular(color);
+							color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(0);
+							break;
+						//case 6:    // Brick.bmp
+						//case 7:    // Button01_deselect.tga
+						//case 8:    // Button01_select.tga
+						//case 9:    // Button01_special.tga
+						case 10:    // Column_beige.bmp
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetAmbient(color);
+							color.r = 233 / 255.0; color.g = 233 / 255.0; color.b = 233 / 255.0;
+							material->SetDiffuse(color);
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetSpecular(color);
+							color.r = 80 / 255.0; color.g = 80 / 255.0; color.b = 80 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(0);
+							break;
+						case 11:    // Column_beige_fade.tga
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetAmbient(color);
+							color.r = 233 / 255.0; color.g = 233 / 255.0; color.b = 233 / 255.0;
+							material->SetDiffuse(color);
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetSpecular(color);
+							color.r = 80 / 255.0; color.g = 80 / 255.0; color.b = 80 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(0);
+
+							material->EnableAlphaTest(FALSE);
+							material->SetAlphaFunc(VXCMP_GREATER);
+							material->SetAlphaRef(1);
+							material->EnableAlphaBlend();
+							material->SetSourceBlend(VXBLEND_SRCALPHA);
+							material->SetDestBlend(VXBLEND_INVSRCCOLOR);
+							material->EnableZWrite();
+							material->SetZFunc(VXCMP_LESSEQUAL);
+							break;
+						case 12:    // Column_blue.bmp
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetAmbient(color);
+							color.r = 209 / 255.0; color.g = 209 / 255.0; color.b = 209 / 255.0;
+							material->SetDiffuse(color);
+							color.r = 150 / 255.0; color.g = 150 / 255.0; color.b = 150 / 255.0;
+							material->SetSpecular(color);
+							color.r = 80 / 255.0; color.g = 80 / 255.0; color.b = 80 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(31);
+							break;
+						//case 13:    // Dome.bmp
+						//case 14:    // DomeEnvironment.bmp
+						//case 15:    // DomeShadow.tga
+						//case 16:    // ExtraBall.bmp
+						//case 17:    // ExtraParticle.bmp
+						case 18:    // E_Holzbeschlag.bmp
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetAmbient(color);
+							color.r = 186 / 255.0; color.g = 186 / 255.0; color.b = 186 / 255.0;
+							material->SetDiffuse(color);
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetSpecular(color);
+							color.r = 65 / 255.0; color.g = 65 / 255.0; color.b = 65 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(0);
+							break;
+						//case 19:    // FloorGlow.bmp
+						case 20:    // Floor_Side.bmp
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetAmbient(color);
+							color.r = 122 / 255.0; color.g = 122 / 255.0; color.b = 122 / 255.0;
+							material->SetDiffuse(color);
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetSpecular(color);
+							color.r = 104 / 255.0; color.g = 104 / 255.0; color.b = 104 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(0);
+							break;
+						case 21:    // Floor_Top_Border.bmp
+						case 22:    // Floor_Top_Borderless.bmp
+						case 23:    // Floor_Top_Checkpoint.bmp
+						case 24:    // Floor_Top_Flat.bmp
+						case 25:    // Floor_Top_Profil.bmp
+						case 26:    // Floor_Top_ProfilFlat.bmp
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 80 / 255.0; color.g = 80 / 255.0; color.b = 80 / 255.0;
+							material->SetSpecular(color);
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetEmissive(color);
+							material->SetPower(100);
+							break;
+
+						//case 27:    // Font_1.tga    // forget to delete this. if change this. all following number need to be changed. so, just omit this...
+						//case 28:    // Gravitylogo_intro.bmp
+						//case 29:    // HardShadow.bmp
+						case 30:    // Laterne_Glas.bmp
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+							material->SetSpecular(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetEmissive(color);
+							material->SetPower(0);
+							break;
+						case 31:    // Laterne_Schatten.tga
+						case 32:    // Laterne_Verlauf.tga
+							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+							material->SetAmbient(color);
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetDiffuse(color);
+							color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+							material->SetSpecular(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetEmissive(color);
+							material->SetPower(0);
+
+							material->EnableAlphaTest();
+							material->SetAlphaFunc(VXCMP_GREATER);
+							material->SetAlphaRef(1);
+							material->EnableAlphaBlend();
+							material->SetSourceBlend(VXBLEND_SRCALPHA);
+							material->SetDestBlend(VXBLEND_INVSRCCOLOR);
+							material->EnableZWrite();
+							material->SetZFunc(VXCMP_LESSEQUAL);
+							material->SetTwoSided(TRUE);
+							break;
+						//case 33:    // Metal_stained.bmp
+						//case 34:    // Misc_Ufo.bmp
+						//case 35:    // Misc_UFO_Flash.bmp
+						//case 36:    // Modul03_Floor.bmp
+						//case 37:    // Modul03_Wall.bmp
+						//case 38:    // Modul11_13_Wood.bmp
+						//case 39:    // Modul11_Wood.bmp
+						//case 40:    // Modul15.bmp
+						//case 41:    // Modul16.bmp
+						//case 42:    // Modul18.bmp
+						//case 43:    // Modul18_Gitter.tga
+						//case 44:    // Modul30_d_Seiten.bmp
+						//case 45:    // Particle_Flames.bmp
+						//case 46:    // Particle_Smoke.bmp
+						//case 47:    // PE_Bal_balloons.bmp
+						//case 48:    // PE_Bal_platform.bmp
+						//case 49:    // PE_Ufo_env.bmp
+						//case 50:    // P_Extra_Life_Oil.bmp
+						//case 51:    // P_Extra_Life_Particle.bmp
+						//case 52:    // P_Extra_Life_Shadow.bmp
+						case 53:    // Rail_Environment.bmp
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetAmbient(color);
+							color.r = 100 / 255.0; color.g = 118 / 255.0; color.b = 133 / 255.0;
+							material->SetDiffuse(color);
+							color.r = 210 / 255.0; color.g = 210 / 255.0; color.b = 210 / 255.0;
+							material->SetSpecular(color);
+							color.r = 124 / 255.0; color.g = 134 / 255.0; color.b = 150 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(10);
+							break;
+						//case 54:    // sandsack.bmp
+						//case 55:    // SkyLayer.bmp
+						//case 56:    // Sky_Vortex.bmp
+						case 57:    // Stick_Bottom.tga
+							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+							material->SetAmbient(color);
+							color.r = 100 / 255.0; color.g = 118 / 255.0; color.b = 133 / 255.0;
+							material->SetDiffuse(color);
+							color.r = 210 / 255.0; color.g = 210 / 255.0; color.b = 210 / 255.0;
+							material->SetSpecular(color);
+							color.r = 124 / 255.0; color.g = 134 / 255.0; color.b = 150 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(13);
+
+							material->EnableAlphaTest(FALSE);
+							material->SetAlphaFunc(VXCMP_GREATER);
+							material->SetAlphaRef(1);
+							material->EnableAlphaBlend();
+							material->SetSourceBlend(VXBLEND_SRCALPHA);
+							material->SetDestBlend(VXBLEND_INVSRCCOLOR);
+							material->EnableZWrite();
+							material->SetZFunc(VXCMP_LESSEQUAL);
+							break;
+						case 58:    // Stick_Stripes.bmp
+							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+							material->SetSpecular(color);
+							color.r = 106 / 255.0; color.g = 106 / 255.0; color.b = 106 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(13);
+							break;
+						//case 59:    // Target.bmp
+						case 60:    // Tower_Roof.bmp
+							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+							material->SetAmbient(color);
+							color.r = 218 / 255.0; color.g = 218 / 255.0; color.b = 218 / 255.0;
+							material->SetDiffuse(color);
+							color.r = 64 / 255.0; color.g = 64 / 255.0; color.b = 64 / 255.0;
+							material->SetSpecular(color);
+							color.r = 103 / 255.0; color.g = 103 / 255.0; color.b = 103 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(100);
+							break;
+						//case 61:    // Trafo_Environment.bmp
+						//case 62:    // Trafo_FlashField.bmp
+						//case 63:    // Trafo_Shadow_Big.tga
+						//case 64:    // Wood_Metal.bmp
+						//case 65:    // Wood_MetalStripes.bmp
+						//case 66:    // Wood_Misc.bmp
+						//case 67:    // Wood_Nailed.bmp
+						//case 68:    // Wood_Old.bmp
+						case 69:    // Wood_Panel.bmp
+							color.r = 2 / 255.0; color.g = 2 / 255.0; color.b = 2 / 255.0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 59 / 255.0; color.g = 59 / 255.0; color.b = 59 / 255.0;
+							material->SetSpecular(color);
+							color.r = 30 / 255.0; color.g = 30 / 255.0; color.b = 30 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(25);
+							break;
+						//case 70:    // Wood_Plain.bmp
+						case 71:    // Wood_Plain2.bmp
+							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+							material->SetSpecular(color);
+							color.r = 50 / 255.0; color.g = 50 / 255.0; color.b = 50 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(50);
+						//case 72:    // Wood_Raft.bmp
+
 					}
 				}
 
