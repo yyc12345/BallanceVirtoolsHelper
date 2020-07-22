@@ -117,6 +117,7 @@ void UpdateMenu() { //current max id: 32
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, -1, NULL, TRUE);
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 4, "Plugin settings");
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, -1, NULL, TRUE);
+	//s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 99, "Test function");
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 30, "Report bug");
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 31, "About BallanceVirtoolsHelper");
 
@@ -131,6 +132,21 @@ void MenuCallback(int commandID) {
 	func_window::misc_config* window_misc_config = NULL;
 
 	switch (commandID) {
+		// todo: move this shadow func to normal function menu
+		//case 99:
+		//{
+		//	CKContext* ctx = s_Plugininterface->GetCKContext();
+		//	CKGroup* group = (CKGroup*)ctx->GetObjectByName("Phys_Floors");
+		//	CK3dEntity* obj = NULL;
+		//	int count = group->GetObjectCount();
+		//	DWORD objFlag;
+		//	for (int i = 0; i < count; i++) {
+		//		obj = (CK3dEntity*)group->GetObjectA(i);
+		//		objFlag = obj->GetMoveableFlags();
+		//		objFlag |=8;
+		//		obj->SetMoveableFlags(objFlag);
+		//	}
+		//} break;
 		case 2:
 			runResult = func_namespace::mapping::BM::ImportBM();
 			break;
