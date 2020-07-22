@@ -6,6 +6,7 @@
 
 #include <zlib.h>
 #include <unzip.h>
+#include <zip.h>
 #include <iowin32.h>
 #include <fstream>
 #include <vector>
@@ -113,18 +114,21 @@ namespace func_namespace {
 				// get file
 				std::string filepath;
 				std::filesystem::path file, temp, tempTexture;
-				func_namespace::OpenFileDialog(&filepath, "BM file(*.bm)\0*.bm\0", "bm", TRUE);
+				if (!func_namespace::OpenFileDialog(&filepath, "BM file(*.bm)\0*.bm\0", "bm", TRUE)) {
+					strcpy(func_namespace::ExecutionResult, "No selected BM file.");
+					return FALSE;
+				}
 				file = filepath;
 				// get temp folder
 				func_namespace::GetTempFolder(&temp);
 				temp /= "9d2aa26133b94afaa2edcaf580c71e86";	// 9d2aa26133b94afaa2edcaf580c71e86 is guid
+				tempTexture = temp / "Texture";
 				//clean temp folder
 				std::filesystem::remove_all(temp);
 				std::filesystem::create_directory(temp);
 				// decompress it
 				zip_handle::Decompress(&file, &temp);
 
-				tempTexture = temp / "Texture";
 
 				// ====================================== read
 				std::ifstream findex, fobject, fmesh, fmaterial, ftexture;
@@ -169,7 +173,7 @@ namespace func_namespace {
 
 
 				// read info.bm and check version first
-				findex.open(temp / "index.bm", std::ios_base::out | std::ios_base::binary);
+				findex.open(temp / "index.bm", std::ios_base::in | std::ios_base::binary);
 
 				uint32_t vercmp;
 				ReadInt(&findex, &vercmp);
@@ -207,7 +211,7 @@ namespace func_namespace {
 				findex.close();
 
 				// read texture
-				ftexture.open(temp / "texture.bm", std::ios_base::out | std::ios_base::binary);
+				ftexture.open(temp / "texture.bm", std::ios_base::in | std::ios_base::binary);
 				for (auto iter = textureList.begin(); iter != textureList.end(); iter++) {
 					ftexture.seekg((*iter)->offset);
 
@@ -228,7 +232,7 @@ namespace func_namespace {
 				ftexture.close();
 
 				// read material
-				fmaterial.open(temp / "material.bm", std::ios_base::out | std::ios_base::binary);
+				fmaterial.open(temp / "material.bm", std::ios_base::in | std::ios_base::binary);
 				for (auto iter = materialList.begin(); iter != materialList.end(); iter++) {
 					fmaterial.seekg((*iter)->offset);
 
@@ -251,7 +255,7 @@ namespace func_namespace {
 				fmaterial.close();
 
 				// read mesh
-				fmesh.open(temp / "mesh.bm", std::ios_base::out | std::ios_base::binary);
+				fmesh.open(temp / "mesh.bm", std::ios_base::in | std::ios_base::binary);
 				for (auto iter = meshList.begin(); iter != meshList.end(); iter++) {
 					fmesh.seekg((*iter)->offset);
 
@@ -310,7 +314,7 @@ namespace func_namespace {
 				fmesh.close();
 
 				// read object
-				fobject.open(temp / "object.bm", std::ios_base::out | std::ios_base::binary);
+				fobject.open(temp / "object.bm", std::ios_base::in | std::ios_base::binary);
 				for (auto iter = objectList.begin(); iter != objectList.end(); iter++) {
 					fobject.seekg((*iter)->offset);
 
@@ -398,6 +402,25 @@ namespace func_namespace {
 #pragma region export
 
 			BOOL ExportBM() {
+				// get file
+				std::string filepath;
+				std::filesystem::path file, temp, tempTexture;
+				if (!func_namespace::OpenFileDialog(&filepath, "BM file(*.bm)\0*.bm\0", "bm", FALSE)) {
+					strcpy(func_namespace::ExecutionResult, "No selected BM file.");
+					return FALSE;
+				}
+				file = filepath;
+				// get temp folder
+				func_namespace::GetTempFolder(&temp);
+				temp /= "a6694fa9ca1c46588cf4b6e6d376c3bd";	// a6694fa9ca1c46588cf4b6e6d376c3bd is guid
+				tempTexture = temp / "Texture";
+				//clean temp folder
+				std::filesystem::remove_all(temp);
+				std::filesystem::create_directory(temp);
+				temp = "G:\\ziptest";	//debug!!!!!
+				//DeleteFile(file.string().c_str());
+				zip_handle::Compress(&file, &temp);
+
 				return TRUE;
 			}
 
@@ -458,7 +481,7 @@ namespace func_namespace {
 							material->SetAmbient(color);
 							color.r = 1; color.g = 1; color.b = 1;
 							material->SetDiffuse(color);
-							color.r =0; color.g = 0; color.b = 0;
+							color.r = 0; color.g = 0; color.b = 0;
 							material->SetSpecular(color);
 							color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
 							material->SetEmissive(color);
@@ -487,9 +510,9 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(0);
 							break;
-						//case 7:    // Button01_deselect.tga
-						//case 8:    // Button01_select.tga
-						//case 9:    // Button01_special.tga
+							//case 7:    // Button01_deselect.tga
+							//case 8:    // Button01_select.tga
+							//case 9:    // Button01_special.tga
 						case 10:    // Column_beige.bmp
 							color.r = 0; color.g = 0; color.b = 0;
 							material->SetAmbient(color);
@@ -532,11 +555,11 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(31);
 							break;
-						//case 13:    // Dome.bmp
-						//case 14:    // DomeEnvironment.bmp
-						//case 15:    // DomeShadow.tga
-						//case 16:    // ExtraBall.bmp
-						//case 17:    // ExtraParticle.bmp
+							//case 13:    // Dome.bmp
+							//case 14:    // DomeEnvironment.bmp
+							//case 15:    // DomeShadow.tga
+							//case 16:    // ExtraBall.bmp
+							//case 17:    // ExtraParticle.bmp
 						case 18:    // E_Holzbeschlag.bmp
 							color.r = 0; color.g = 0; color.b = 0;
 							material->SetAmbient(color);
@@ -548,7 +571,7 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(0);
 							break;
-						//case 19:    // FloorGlow.bmp
+							//case 19:    // FloorGlow.bmp
 						case 20:    // Floor_Side.bmp
 							color.r = 0; color.g = 0; color.b = 0;
 							material->SetAmbient(color);
@@ -577,9 +600,9 @@ namespace func_namespace {
 							material->SetPower(100);
 							break;
 
-						//case 27:    // Font_1.tga    // forget to delete this. if change this. all following number need to be changed. so, just omit this...
-						//case 28:    // Gravitylogo_intro.bmp
-						//case 29:    // HardShadow.bmp
+							//case 27:    // Font_1.tga    // forget to delete this. if change this. all following number need to be changed. so, just omit this...
+							//case 28:    // Gravitylogo_intro.bmp
+							//case 29:    // HardShadow.bmp
 						case 30:    // Laterne_Glas.bmp
 							color.r = 0; color.g = 0; color.b = 0;
 							material->SetAmbient(color);
@@ -613,26 +636,26 @@ namespace func_namespace {
 							material->SetZFunc(VXCMP_LESSEQUAL);
 							material->SetTwoSided(TRUE);
 							break;
-						//case 33:    // Metal_stained.bmp
-						//case 34:    // Misc_Ufo.bmp
-						//case 35:    // Misc_UFO_Flash.bmp
-						//case 36:    // Modul03_Floor.bmp
-						//case 37:    // Modul03_Wall.bmp
-						//case 38:    // Modul11_13_Wood.bmp
-						//case 39:    // Modul11_Wood.bmp
-						//case 40:    // Modul15.bmp
-						//case 41:    // Modul16.bmp
-						//case 42:    // Modul18.bmp
-						//case 43:    // Modul18_Gitter.tga
-						//case 44:    // Modul30_d_Seiten.bmp
-						//case 45:    // Particle_Flames.bmp
-						//case 46:    // Particle_Smoke.bmp
-						//case 47:    // PE_Bal_balloons.bmp
-						//case 48:    // PE_Bal_platform.bmp
-						//case 49:    // PE_Ufo_env.bmp
-						//case 50:    // P_Extra_Life_Oil.bmp
-						//case 51:    // P_Extra_Life_Particle.bmp
-						//case 52:    // P_Extra_Life_Shadow.bmp
+							//case 33:    // Metal_stained.bmp
+							//case 34:    // Misc_Ufo.bmp
+							//case 35:    // Misc_UFO_Flash.bmp
+							//case 36:    // Modul03_Floor.bmp
+							//case 37:    // Modul03_Wall.bmp
+							//case 38:    // Modul11_13_Wood.bmp
+							//case 39:    // Modul11_Wood.bmp
+							//case 40:    // Modul15.bmp
+							//case 41:    // Modul16.bmp
+							//case 42:    // Modul18.bmp
+							//case 43:    // Modul18_Gitter.tga
+							//case 44:    // Modul30_d_Seiten.bmp
+							//case 45:    // Particle_Flames.bmp
+							//case 46:    // Particle_Smoke.bmp
+							//case 47:    // PE_Bal_balloons.bmp
+							//case 48:    // PE_Bal_platform.bmp
+							//case 49:    // PE_Ufo_env.bmp
+							//case 50:    // P_Extra_Life_Oil.bmp
+							//case 51:    // P_Extra_Life_Particle.bmp
+							//case 52:    // P_Extra_Life_Shadow.bmp
 						case 53:    // Rail_Environment.bmp
 							color.r = 0; color.g = 0; color.b = 0;
 							material->SetAmbient(color);
@@ -644,9 +667,9 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(10);
 							break;
-						//case 54:    // sandsack.bmp
-						//case 55:    // SkyLayer.bmp
-						//case 56:    // Sky_Vortex.bmp
+							//case 54:    // sandsack.bmp
+							//case 55:    // SkyLayer.bmp
+							//case 56:    // Sky_Vortex.bmp
 						case 57:    // Stick_Bottom.tga
 							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
 							material->SetAmbient(color);
@@ -678,7 +701,7 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(13);
 							break;
-						//case 59:    // Target.bmp
+							//case 59:    // Target.bmp
 						case 60:    // Tower_Roof.bmp
 							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
 							material->SetAmbient(color);
@@ -690,14 +713,14 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(100);
 							break;
-						//case 61:    // Trafo_Environment.bmp
-						//case 62:    // Trafo_FlashField.bmp
-						//case 63:    // Trafo_Shadow_Big.tga
-						//case 64:    // Wood_Metal.bmp
-						//case 65:    // Wood_MetalStripes.bmp
-						//case 66:    // Wood_Misc.bmp
-						//case 67:    // Wood_Nailed.bmp
-						//case 68:    // Wood_Old.bmp
+							//case 61:    // Trafo_Environment.bmp
+							//case 62:    // Trafo_FlashField.bmp
+							//case 63:    // Trafo_Shadow_Big.tga
+							//case 64:    // Wood_Metal.bmp
+							//case 65:    // Wood_MetalStripes.bmp
+							//case 66:    // Wood_Misc.bmp
+							//case 67:    // Wood_Nailed.bmp
+							//case 68:    // Wood_Old.bmp
 						case 69:    // Wood_Panel.bmp
 							color.r = 2 / 255.0; color.g = 2 / 255.0; color.b = 2 / 255.0;
 							material->SetAmbient(color);
@@ -709,7 +732,7 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(25);
 							break;
-						//case 70:    // Wood_Plain.bmp
+							//case 70:    // Wood_Plain.bmp
 						case 71:    // Wood_Plain2.bmp
 							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
 							material->SetAmbient(color);
@@ -720,7 +743,7 @@ namespace func_namespace {
 							color.r = 50 / 255.0; color.g = 50 / 255.0; color.b = 50 / 255.0;
 							material->SetEmissive(color);
 							material->SetPower(50);
-						//case 72:    // Wood_Raft.bmp
+							//case 72:    // Wood_Raft.bmp
 
 					}
 				}
@@ -734,10 +757,86 @@ namespace func_namespace {
 			namespace zip_handle {
 
 				void Compress(std::filesystem::path* filepath, std::filesystem::path* folder) {
+					zlib_filefunc_def ffunc;
+					fill_win32_filefunc(&ffunc);
+					zipFile zip_file = NULL;
+					zip_file = zipOpen2(filepath->string().c_str(), APPEND_STATUS_CREATE, NULL, &ffunc);
+					if (zip_file == NULL) throw std::bad_alloc();
 
+					if (!do_compress_currentFolder(&zip_file, folder, folder))
+						throw std::bad_alloc();
+
+					zipClose(zip_file, NULL);
 				}
 
+				BOOL do_compress_currentFolder(zipFile* zip_file, std::filesystem::path* basefolder, std::filesystem::path* nowFolder) {
+					WIN32_FIND_DATA filedata;
+					zip_fileinfo zi;
+					std::filesystem::path newFolder, relativeFolder;
+					std::ifstream file_get;
+					std::streamsize file_get_count;
+					memset(&filedata, 0, sizeof(WIN32_FIND_DATA)); ZeroMemory(&zi, sizeof(zip_fileinfo));
+					sprintf(func_namespace::ExecutionCache, "%s\\*", nowFolder->string().c_str());
+					HANDLE fhandle = FindFirstFile(func_namespace::ExecutionCache, &filedata);
+					if (fhandle == INVALID_HANDLE_VALUE)
+						//error throw it
+						return FALSE;
 
+
+					while (TRUE) {
+						if (filedata.cFileName[0] != '.') {	//filter for .. and .
+							newFolder = *nowFolder;
+							newFolder /= filedata.cFileName;
+							relativeFolder = std::filesystem::relative(newFolder, *basefolder);
+
+							// process folder
+							if (filedata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+								// create blank folder first
+								sprintf(func_namespace::ExecutionCache, "%s/", relativeFolder.string().c_str());
+								if (zipOpenNewFileInZip3(*zip_file, func_namespace::ExecutionCache, &zi,
+									NULL, 0, NULL, 0, NULL,
+									Z_DEFLATED, 9, 0,
+									-MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY,
+									NULL, 0) != ZIP_OK)
+									return FALSE;
+								zipCloseFileInZip(*zip_file);
+
+								// iterate sub folder file
+								if (!do_compress_currentFolder(zip_file, basefolder, &newFolder))
+									return FALSE;
+							} else {
+								// process file
+								if (zipOpenNewFileInZip3(*zip_file, relativeFolder.string().c_str(), &zi,
+									NULL, 0, NULL, 0, NULL,
+									Z_DEFLATED, 9, 0,
+									-MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY,
+									NULL, 0) != ZIP_OK)
+									return FALSE;
+								file_get.open(newFolder.string().c_str(), std::ios_base::in | std::ios_base::binary);
+
+								while (TRUE) {
+									if (file_get.peek(), file_get.eof()) break;
+
+									file_get.read(func_namespace::ExecutionCache, CACHE_SIZE);
+									file_get_count = file_get.gcount();
+									zipWriteInFileInZip(*zip_file, func_namespace::ExecutionCache, file_get_count);
+								}
+
+								file_get.close();
+								zipCloseFileInZip(*zip_file);
+							}
+						}
+
+						// do next get
+						if (!FindNextFile(fhandle, &filedata))
+							// no more data
+							break;
+
+					}
+
+					FindClose(fhandle);
+					return TRUE;
+				}
 
 
 				void Decompress(std::filesystem::path* filepath, std::filesystem::path* _folder) {
@@ -750,34 +849,34 @@ namespace func_namespace {
 					folder = *_folder;
 
 					fill_win32_filefunc(&ffunc);
-					unzFile zipfile = NULL;
-					zipfile = unzOpen2(filepath->string().c_str(), &ffunc);
-					if (zipfile == NULL) throw std::bad_alloc();
+					unzFile zip_file = NULL;
+					zip_file = unzOpen2(filepath->string().c_str(), &ffunc);
+					if (zip_file == NULL) throw std::bad_alloc();
 
 					// read global information
-					if (unzGetGlobalInfo(zipfile, &gi) != UNZ_OK)
+					if (unzGetGlobalInfo(zip_file, &gi) != UNZ_OK)
 						throw std::bad_alloc();
 
 					// iterate file
 					for (uLong i = 0; i < gi.number_entry; i++) {
-						if (unzGetCurrentFileInfo(zipfile, &file_info, func_namespace::ExecutionCache, CACHE_SIZE, NULL, 0, NULL, 0) != UNZ_OK)
+						if (unzGetCurrentFileInfo(zip_file, &file_info, func_namespace::ExecutionCache, CACHE_SIZE, NULL, 0, NULL, 0) != UNZ_OK)
 							throw std::bad_alloc();
 						inner_filename = func_namespace::ExecutionCache;
 
-						if (!do_extract_currentfile(&zipfile, &inner_filename, &folder))
+						if (!do_extract_currentfile(&zip_file, &inner_filename, &folder))
 							throw std::bad_alloc();
 
 						// to next file and check it.
 						if ((i + 1) < gi.number_entry) {
-							if (unzGoToNextFile(zipfile) != UNZ_OK)
+							if (unzGoToNextFile(zip_file) != UNZ_OK)
 								throw std::bad_alloc();
 						}
 					}
 
-					unzClose(zipfile);
+					unzClose(zip_file);
 				}
 
-				BOOL do_extract_currentfile(unzFile* zipfile, std::string* inner_name, std::filesystem::path* folder) {
+				BOOL do_extract_currentfile(unzFile* zip_file, std::string* inner_name, std::filesystem::path* folder) {
 					std::filesystem::path real_path;
 					std::ofstream fs;
 					int read_result;
@@ -795,19 +894,19 @@ namespace func_namespace {
 						std::filesystem::create_directories(real_path.parent_path());
 
 						//then process file
-						if (unzOpenCurrentFile(*zipfile) != UNZ_OK)
+						if (unzOpenCurrentFile(*zip_file) != UNZ_OK)
 							return FALSE;
 
 						fs.open(real_path, std::ios_base::out | std::ios_base::binary);
 						while (TRUE) {
-							read_result = unzReadCurrentFile(*zipfile, func_namespace::ExecutionCache, CACHE_SIZE);
+							read_result = unzReadCurrentFile(*zip_file, func_namespace::ExecutionCache, CACHE_SIZE);
 							if (read_result < 0)
 								return FALSE;
 							else if (read_result > 0) {
 								fs.write(func_namespace::ExecutionCache, read_result);
 							} else break; // no any more data
 						}
-						unzCloseCurrentFile(*zipfile);
+						unzCloseCurrentFile(*zip_file);
 
 						fs.close();
 					}

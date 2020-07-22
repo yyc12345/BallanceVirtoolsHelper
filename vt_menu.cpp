@@ -134,6 +134,9 @@ void MenuCallback(int commandID) {
 		case 2:
 			runResult = func_namespace::mapping::BM::ImportBM();
 			break;
+		case 3:
+			runResult = func_namespace::mapping::BM::ExportBM();
+			break;
 		case 7:
 			runResult = func_namespace::mapping::BM::FixBlenderTexture();
 			break;

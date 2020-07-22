@@ -6,6 +6,7 @@
 #include <string>
 #include <fstream>
 #include <unzip.h>
+#include <zip.h>
 
 #define BM_FILE_VERSION 10
 
@@ -47,10 +48,10 @@ namespace func_namespace {
 
 			namespace zip_handle {
 				void Compress(std::filesystem::path* filepath, std::filesystem::path* folder);
-
+				BOOL do_compress_currentFolder(zipFile* zip_file, std::filesystem::path* basefolder, std::filesystem::path* nowFolder);
 
 				void Decompress(std::filesystem::path* filepath, std::filesystem::path* folder);
-				BOOL do_extract_currentfile(unzFile* zipfile, std::string* inner_name, std::filesystem::path* folder);
+				BOOL do_extract_currentfile(unzFile* zip_file, std::string* inner_name, std::filesystem::path* folder);
 			}
 		}
 	}

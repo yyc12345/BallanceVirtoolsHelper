@@ -12,8 +12,7 @@ namespace func_namespace {
 					return FALSE;
 				}
 				std::string file;
-				func_namespace::OpenFileDialog(&file, "Csv file(*.csv)\0*.csv\0", "csv", TRUE);
-				if (file.empty()) {
+				if (!func_namespace::OpenFileDialog(&file, "Csv file(*.csv)\0*.csv\0", "csv", TRUE)) {
 					strcpy(func_namespace::ExecutionResult, "No selected CSV file.");
 					return FALSE;
 				}
@@ -34,8 +33,7 @@ namespace func_namespace {
 					return FALSE;
 				}
 				std::string file;
-				func_namespace::OpenFileDialog(&file, "Csv file(*.csv)\0*.csv\0", "csv", FALSE);
-				if (file.empty()) {
+				if(!func_namespace::OpenFileDialog(&file, "Csv file(*.csv)\0*.csv\0", "csv", FALSE)) {
 					strcpy(func_namespace::ExecutionResult, "No selected CSV file.");
 					return FALSE;
 				}

@@ -45,9 +45,10 @@ namespace func_namespace {
 		}
 	}
 
-	void OpenFileDialog(std::string* returned_file, const char* file_filter, const char* file_extension, BOOL isOpen) {
+	BOOL OpenFileDialog(std::string* returned_file, const char* file_filter, const char* file_extension, BOOL isOpen) {
 		returned_file->clear();
 
+		BOOL status;
 		OPENFILENAME OpenFileStruct;
 		ZeroMemory(&OpenFileStruct, sizeof(OPENFILENAME));
 		OpenFileStruct.lStructSize = sizeof(OPENFILENAME);
@@ -61,15 +62,17 @@ namespace func_namespace {
 		OpenFileStruct.lpstrInitialDir = NULL;
 		OpenFileStruct.Flags = OFN_EXPLORER;
 		if (isOpen) {
-			if (GetOpenFileName(&OpenFileStruct))
+			if (status = GetOpenFileName(&OpenFileStruct))
 				*returned_file = SelfCache;
 		} else {
-			if (GetSaveFileName(&OpenFileStruct))
+			if (status = GetSaveFileName(&OpenFileStruct))
 				*returned_file = SelfCache;
 		}
+
+		return status;
 	}
 
-	void OpenFolderDialog(std::string* returned_folder, HWND owner) {
+	BOOL OpenFolderDialog(std::string* returned_folder, HWND owner) {
 		returned_folder->clear();
 
 		BROWSEINFOA folderViewer = { 0 };
@@ -80,10 +83,11 @@ namespace func_namespace {
 		folderViewer.lpfn = NULL;
 		folderViewer.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
 		PIDLIST_ABSOLUTE data = SHBrowseForFolder(&folderViewer);
-		if (data == NULL) return;
+		if (data == NULL) return FALSE;
 		if (SHGetPathFromIDList(data, func_namespace::SelfCache))
 			*returned_folder = func_namespace::SelfCache;
 		CoTaskMemFree(data);
+		return TRUE;
 	}
 
 	void GetTempFolder(std::filesystem::path* temp_folder) {

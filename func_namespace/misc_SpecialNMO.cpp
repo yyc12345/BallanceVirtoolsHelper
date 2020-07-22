@@ -7,13 +7,12 @@ namespace func_namespace {
 			BOOL SaveSpecialNMO(PluginInterface* plgif) {
 				std::filesystem::path file, tempfile;
 				std::string filepath;
-				func_namespace::OpenFileDialog(&filepath, "NMO file(*.nmo)\0*.nmo\0", "nmo", FALSE);
-				file = filepath;
-				if (file.empty()) {
+				if (!func_namespace::OpenFileDialog(&filepath, "NMO file(*.nmo)\0*.nmo\0", "nmo", FALSE)) {
 					strcpy(func_namespace::ExecutionResult, "No selected NMO file.");
 					return FALSE;
 				}
-
+				file = filepath;
+				
 				// try re-construct a usable CKObjectArray
 				auto ctx = plgif->GetCKContext();
 				CKObjectArray* finalArray = CreateCKObjectArray();
