@@ -38,5 +38,6 @@
 #include "VEP_ScriptActionMenu.h"
 #include "VEP_KeyboardShortcutManager.h"
 #include "VEP_All.h"
+#include <afxcontrolbars.h>
 
 #endif

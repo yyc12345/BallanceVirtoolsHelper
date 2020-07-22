@@ -3,7 +3,7 @@
 
 config_manager::config_manager() :
 	CurrentConfig(),
-	config_version(10) {
+	config_version(11) {
 	;
 }
 config_manager::~config_manager() {
@@ -20,8 +20,10 @@ void config_manager::GetConfigFilePath(std::filesystem::path* path) {
 void config_manager::InitConfig() {
 	CurrentConfig.func_mapping_bm_ExternalTextureFolder = "";
 	CurrentConfig.func_mapping_bm_NoComponentGroupName = "";
+	CurrentConfig.window_mapping_bmExport_mode = 2;
+	CurrentConfig.window_mapping_bmExport_filename = "";
 
-	//todo: add standard regex for func_mapping_bm_PHReplacePair_Regex and Target
+	//todo: add setting default value in there
 }
 void config_manager::SaveConfig() {
 	std::filesystem::path filepath;
@@ -35,6 +37,10 @@ void config_manager::SaveConfig() {
 	//write data
 	WriteString(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
 	WriteString(f, &CurrentConfig.func_mapping_bm_NoComponentGroupName);
+	WriteInt(f, &CurrentConfig.window_mapping_bmExport_mode);
+	WriteString(f, &CurrentConfig.window_mapping_bmExport_filename);
+
+	//todo: add setting write in there
 
 	fclose(f);
 }
@@ -57,6 +63,10 @@ void config_manager::LoadConfig() {
 	//read data
 	ReadString(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
 	ReadString(f, &CurrentConfig.func_mapping_bm_NoComponentGroupName);
+	ReadInt(f, &CurrentConfig.window_mapping_bmExport_mode);
+	ReadString(f, &CurrentConfig.window_mapping_bmExport_filename);
+
+	//todo: add setting read in there
 
 	fclose(f);
 	return;

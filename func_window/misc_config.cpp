@@ -1,5 +1,5 @@
 ﻿#include "misc_config.h"
-#include "../resource1.h"
+#include "../resource.h"
 #include "../config_manager.h"
 #include "../func_helper.h"
 #include <string>

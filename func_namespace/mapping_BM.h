@@ -8,7 +8,7 @@
 #include <unzip.h>
 #include <zip.h>
 
-#define BM_FILE_VERSION 10
+#define BM_FILE_VERSION 11
 
 namespace func_namespace {
 	namespace mapping {
@@ -42,7 +42,10 @@ namespace func_namespace {
 			void LoadComponenetMesh(CK3dEntity* obj, uint32_t index);
 
 			BOOL ExportBM();
-
+			void WriteInt(std::ofstream* fs, uint32_t* num);
+			void WriteInt(std::ofstream* fs, uint64_t* num);
+			void WriteFloat(std::ofstream* fs, float* num);
+			void WriteString(std::ofstream* fs, std::string* str);
 
 			BOOL FixBlenderTexture();
 

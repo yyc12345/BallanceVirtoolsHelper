@@ -46,7 +46,6 @@ BOOL SuperScriptMaterializer::InitInstance() {
 }
 
 int SuperScriptMaterializer::ExitInstance() {
-	// TODO: Add your specialized code here and/or call the base class
 
 	delete cfg_manager;
 	func_namespace::DisposeHelper();

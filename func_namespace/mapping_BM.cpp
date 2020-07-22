@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include "../config_manager.h"
 #include "../func_helper.h"
+#include "../func_window/mapping_BMExport.h"
 
 #pragma warning(disable:4305)
 
@@ -402,14 +403,16 @@ namespace func_namespace {
 #pragma region export
 
 			BOOL ExportBM() {
-				// get file
+				// ============================================get file
 				std::string filepath;
 				std::filesystem::path file, temp, tempTexture;
-				if (!func_namespace::OpenFileDialog(&filepath, "BM file(*.bm)\0*.bm\0", "bm", FALSE)) {
-					strcpy(func_namespace::ExecutionResult, "No selected BM file.");
+				func_window::mapping_BMExport* bm_export_window = new func_window::mapping_BMExport();
+				if (bm_export_window->DoModal() != IDOK) {
+					strcpy(func_namespace::ExecutionResult, "You cancel this process.");
+					delete bm_export_window;
 					return FALSE;
 				}
-				file = filepath;
+				file = bm_export_window->OUT_File;
 				// get temp folder
 				func_namespace::GetTempFolder(&temp);
 				temp /= "a6694fa9ca1c46588cf4b6e6d376c3bd";	// a6694fa9ca1c46588cf4b6e6d376c3bd is guid
@@ -417,11 +420,46 @@ namespace func_namespace {
 				//clean temp folder
 				std::filesystem::remove_all(temp);
 				std::filesystem::create_directory(temp);
-				temp = "G:\\ziptest";	//debug!!!!!
-				//DeleteFile(file.string().c_str());
-				zip_handle::Compress(&file, &temp);
 
+				
+
+				// ============================================write zip
+				zip_handle::Compress(&file, &temp);
+				delete bm_export_window;
 				return TRUE;
+			}
+
+			// WARNING: all following `Write` func are based on current OS is little-endian.
+			void WriteInt(std::ofstream* fs, uint32_t* num) {
+				fs->write((char*)num, sizeof(uint32_t));
+			}
+			void WriteInt(std::ofstream* fs, uint64_t* num) {
+				fs->write((char*)num, sizeof(uint64_t));
+			}
+			void WriteFloat(std::ofstream* fs, float* num) {
+				fs->write((char*)num, sizeof(float));
+			}
+			void WriteString(std::ofstream* fs, std::string* str) {
+				// for microsoft shit implementation. i need convert utf8 output into current locale output
+				MultiByteToWideChar(CP_ACP, 0, str->c_str(), -1, func_namespace::WideCharCache, CACHE_SIZE);
+				WideCharToMultiByte(CP_UTF8, 0, func_namespace::WideCharCache, -1, func_namespace::ExecutionCache, CACHE_SIZE, NULL, NULL);
+
+				// start convert
+				std::mbstate_t state{};
+				size_t convCount = 0, convPos = 0, convAll = strlen(func_namespace::ExecutionCache);
+				uint32_t length = 0;
+
+				while ((convCount = mbrtoc32(&(func_namespace::BMNameCache[length]), &(func_namespace::ExecutionCache[convPos]), convAll - convPos, &state)) > 0) {
+					convPos += convCount;
+					length++;
+				}
+
+				// write length
+				WriteInt(fs, &length);
+
+				// write data
+				fs->write((char*)func_namespace::BMNameCache, length * sizeof(char32_t));
+
 			}
 
 #pragma endregion
