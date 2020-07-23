@@ -60,6 +60,9 @@
     <ClInclude Include="func_window\mapping_BMExport.h">
       <Filter>头文件\func_window</Filter>
     </ClInclude>
+    <ClInclude Include="func_namespace\mapping_Shadow.h">
+      <Filter>头文件\func_namespace</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -91,6 +94,9 @@
     </ClCompile>
     <ClCompile Include="func_window\mapping_BMExport.cpp">
       <Filter>源文件\func_window</Filter>
+    </ClCompile>
+    <ClCompile Include="func_namespace\mapping_Shadow.cpp">
+      <Filter>源文件\func_namespace</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

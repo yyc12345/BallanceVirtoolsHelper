@@ -7,6 +7,7 @@
 #include "func_namespace/misc_SpecialNMO.h"
 #include "func_namespace/mapping_BM.h"
 #include "func_namespace/mapping_Group.h"
+#include "func_namespace/mapping_Shadow.h"
 
 #include "func_window/misc_config.h"
 
@@ -66,6 +67,7 @@ void UpdateMenu() { //current max id: 32
 	CMenu* sub_bm = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 0, "BM", FALSE, TRUE);
 	//CMenu* sub_3dentity = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 0, "3DEntity", FALSE, TRUE);
 	CMenu* sub_group = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 1, "Group", FALSE, TRUE);
+	s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 8, "Add Shadow");
 	//CMenu* sub_light = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 2, "Light", FALSE, TRUE);
 	//CMenu* sub_mesh = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 3, "Mesh", FALSE, TRUE);
 	//CMenu* sub_name = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 4, "Name", FALSE, TRUE);
@@ -132,21 +134,6 @@ void MenuCallback(int commandID) {
 	func_window::misc_config* window_misc_config = NULL;
 
 	switch (commandID) {
-		// todo: move this shadow func to normal function menu
-		//case 99:
-		//{
-		//	CKContext* ctx = s_Plugininterface->GetCKContext();
-		//	CKGroup* group = (CKGroup*)ctx->GetObjectByName("Phys_Floors");
-		//	CK3dEntity* obj = NULL;
-		//	int count = group->GetObjectCount();
-		//	DWORD objFlag;
-		//	for (int i = 0; i < count; i++) {
-		//		obj = (CK3dEntity*)group->GetObjectA(i);
-		//		objFlag = obj->GetMoveableFlags();
-		//		objFlag |=8;
-		//		obj->SetMoveableFlags(objFlag);
-		//	}
-		//} break;
 		case 2:
 			runResult = func_namespace::mapping::BM::ImportBM();
 			break;
@@ -158,6 +145,9 @@ void MenuCallback(int commandID) {
 			break;
 		case 5:
 			runResult = func_namespace::mapping::Group::AutoGrouping();
+			break;
+		case 8:
+			runResult = func_namespace::mapping::Shadow::AddShadow();
 			break;
 
 		case 27:
@@ -183,7 +173,7 @@ void MenuCallback(int commandID) {
 			ShellExecute(NULL, "open", "https://github.com/yyc12345/BallanceVirtoolsHelper/issues", NULL, NULL, SW_SHOWNORMAL);
 			break;
 		case 31:
-			AfxMessageBox("BallanceVirtoolsHelper - The plugin which can help Ballance mapping and script.\nBM file spec version: 1.1(11)\nConfig file version: 1.1(11)Under GPL v3 License.\nProject homepage: https://github.com/yyc12345/BallanceVirtoolsHelper", MB_ICONINFORMATION + MB_OK);
+			AfxMessageBox("BallanceVirtoolsHelper - The plugin which can help Ballance mapping and script.\nBM file spec version: 1.1(11)\nConfig file version: 1.1(11)\nUnder GPL v3 License.\nProject homepage: https://github.com/yyc12345/BallanceVirtoolsHelper", MB_ICONINFORMATION + MB_OK);
 			break;
 	}
 

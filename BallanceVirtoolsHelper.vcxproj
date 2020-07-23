@@ -148,6 +148,7 @@
     <ClInclude Include="func_helper.h" />
     <ClInclude Include="func_namespace\mapping_BM.h" />
     <ClInclude Include="func_namespace\mapping_Group.h" />
+    <ClInclude Include="func_namespace\mapping_Shadow.h" />
     <ClInclude Include="func_namespace\misc_SpecialNMO.h" />
     <ClInclude Include="func_namespace\script_CKDataArray.h" />
     <ClInclude Include="func_window\mapping_BMExport.h" />
@@ -161,6 +162,7 @@
     <ClCompile Include="func_helper.cpp" />
     <ClCompile Include="func_namespace\mapping_BM.cpp" />
     <ClCompile Include="func_namespace\mapping_Group.cpp" />
+    <ClCompile Include="func_namespace\mapping_Shadow.cpp" />
     <ClCompile Include="func_namespace\misc_SpecialNMO.cpp" />
     <ClCompile Include="func_namespace\script_CKDataArray.cpp" />
     <ClCompile Include="func_window\mapping_BMExport.cpp" />
