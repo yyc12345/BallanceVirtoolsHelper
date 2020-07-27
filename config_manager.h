@@ -12,6 +12,12 @@ struct config_body {
 	//window_mapping_bm_export
 	int window_mapping_bmExport_mode;	//0 is object, 1 is group, 2 is all
 	std::string window_mapping_bmExport_filename;
+	//window_convertEncoding
+	int window_ConvertEncoding_Method;
+	int window_ConvertEncoding_OldCP;
+	std::string window_ConvertEncoding_ManualOldCP;
+	int window_ConvertEncoding_NewCP;
+	std::string window_ConvertEncoding_ManualNewCP;
 
 	//todo: add setting in there
 };

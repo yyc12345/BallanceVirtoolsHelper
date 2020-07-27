@@ -113,7 +113,7 @@ namespace func_namespace {
 				"Wood_Raft.bmp"
 			};
 
-			const uint32_t CONST_ExternalTextureList_Length = 27;	//following list's length. not to change this when the list is changed
+			const uint32_t CONST_ExternalComponent_Length = 27;	//following list's length. not to change this when the list is changed
 			const char* CONST_ExternalComponent[] = {
 				"P_Extra_Life",
 				"P_Extra_Point",

@@ -149,10 +149,12 @@
     <ClInclude Include="func_namespace\mapping_BM.h" />
     <ClInclude Include="func_namespace\mapping_Group.h" />
     <ClInclude Include="func_namespace\mapping_Shadow.h" />
+    <ClInclude Include="func_namespace\misc_ConvertEncoding.h" />
     <ClInclude Include="func_namespace\misc_SpecialNMO.h" />
     <ClInclude Include="func_namespace\script_CKDataArray.h" />
     <ClInclude Include="func_window\mapping_BMExport.h" />
     <ClInclude Include="func_window\misc_config.h" />
+    <ClInclude Include="func_window\window_ConvertEncoding.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="vt_menu.h" />
@@ -163,10 +165,12 @@
     <ClCompile Include="func_namespace\mapping_BM.cpp" />
     <ClCompile Include="func_namespace\mapping_Group.cpp" />
     <ClCompile Include="func_namespace\mapping_Shadow.cpp" />
+    <ClCompile Include="func_namespace\misc_ConvertEncoding.cpp" />
     <ClCompile Include="func_namespace\misc_SpecialNMO.cpp" />
     <ClCompile Include="func_namespace\script_CKDataArray.cpp" />
     <ClCompile Include="func_window\mapping_BMExport.cpp" />
     <ClCompile Include="func_window\misc_config.cpp" />
+    <ClCompile Include="func_window\window_ConvertEncoding.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vt_menu.cpp" />
   </ItemGroup>

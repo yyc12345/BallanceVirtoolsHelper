@@ -8,6 +8,7 @@
 #include "func_namespace/mapping_BM.h"
 #include "func_namespace/mapping_Group.h"
 #include "func_namespace/mapping_Shadow.h"
+#include "func_namespace/misc_ConvertEncoding.h"
 
 #include "func_window/misc_config.h"
 
@@ -116,6 +117,7 @@ void UpdateMenu() { //current max id: 32
 	s_Plugininterface->ClearPluginMenu(s_MiscMenu);
 
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 32, "Export as special NMO");
+	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 33, "Convert encoding");
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, -1, NULL, TRUE);
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, 4, "Plugin settings");
 	s_Plugininterface->AddPluginMenuItem(s_MiscMenu, -1, NULL, TRUE);
@@ -169,11 +171,14 @@ void MenuCallback(int commandID) {
 		case 32:
 			runResult = func_namespace::misc::SpecialNMO::SaveSpecialNMO(s_Plugininterface);
 			break;
+		case 33:
+			runResult = func_namespace::misc::ConvertEncoding::DoConvertEncoding();
+			break;
 		case 30:
 			ShellExecute(NULL, "open", "https://github.com/yyc12345/BallanceVirtoolsHelper/issues", NULL, NULL, SW_SHOWNORMAL);
 			break;
 		case 31:
-			AfxMessageBox("BallanceVirtoolsHelper - The plugin which can help Ballance mapping and script.\nBM file spec version: 1.1(11)\nConfig file version: 1.1(11)\nUnder GPL v3 License.\nProject homepage: https://github.com/yyc12345/BallanceVirtoolsHelper", MB_ICONINFORMATION + MB_OK);
+			AfxMessageBox("BallanceVirtoolsHelper - The plugin which can help Ballance mapping and script.\nBM file spec version: 1.1(11)\nConfig file version: 12\nUnder GPL v3 License.\nProject homepage: https://github.com/yyc12345/BallanceVirtoolsHelper", MB_ICONINFORMATION + MB_OK);
 			break;
 	}
 

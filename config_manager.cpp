@@ -3,7 +3,7 @@
 
 config_manager::config_manager() :
 	CurrentConfig(),
-	config_version(11) {
+	config_version(12) {
 	;
 }
 config_manager::~config_manager() {
@@ -20,8 +20,15 @@ void config_manager::GetConfigFilePath(std::filesystem::path* path) {
 void config_manager::InitConfig() {
 	CurrentConfig.func_mapping_bm_ExternalTextureFolder = "";
 	CurrentConfig.func_mapping_bm_NoComponentGroupName = "";
+
 	CurrentConfig.window_mapping_bmExport_mode = 2;
 	CurrentConfig.window_mapping_bmExport_filename = "";
+
+	CurrentConfig.window_ConvertEncoding_Method = 0;
+	CurrentConfig.window_ConvertEncoding_OldCP = 0;
+	CurrentConfig.window_ConvertEncoding_ManualOldCP = "";
+	CurrentConfig.window_ConvertEncoding_NewCP = 0;
+	CurrentConfig.window_ConvertEncoding_ManualNewCP = "";
 
 	//todo: add setting default value in there
 }
@@ -37,8 +44,15 @@ void config_manager::SaveConfig() {
 	//write data
 	WriteString(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
 	WriteString(f, &CurrentConfig.func_mapping_bm_NoComponentGroupName);
+
 	WriteInt(f, &CurrentConfig.window_mapping_bmExport_mode);
 	WriteString(f, &CurrentConfig.window_mapping_bmExport_filename);
+
+	WriteInt(f, &CurrentConfig.window_ConvertEncoding_Method);
+	WriteInt(f, &CurrentConfig.window_ConvertEncoding_OldCP);
+	WriteString(f, &CurrentConfig.window_ConvertEncoding_ManualOldCP);
+	WriteInt(f, &CurrentConfig.window_ConvertEncoding_NewCP);
+	WriteString(f, &CurrentConfig.window_ConvertEncoding_ManualNewCP);
 
 	//todo: add setting write in there
 
@@ -63,8 +77,15 @@ void config_manager::LoadConfig() {
 	//read data
 	ReadString(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
 	ReadString(f, &CurrentConfig.func_mapping_bm_NoComponentGroupName);
+
 	ReadInt(f, &CurrentConfig.window_mapping_bmExport_mode);
 	ReadString(f, &CurrentConfig.window_mapping_bmExport_filename);
+
+	ReadInt(f, &CurrentConfig.window_ConvertEncoding_Method);
+	ReadInt(f, &CurrentConfig.window_ConvertEncoding_OldCP);
+	ReadString(f, &CurrentConfig.window_ConvertEncoding_ManualOldCP);
+	ReadInt(f, &CurrentConfig.window_ConvertEncoding_NewCP);
+	ReadString(f, &CurrentConfig.window_ConvertEncoding_ManualNewCP);
 
 	//todo: add setting read in there
 
