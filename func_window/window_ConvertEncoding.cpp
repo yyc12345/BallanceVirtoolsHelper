@@ -118,6 +118,8 @@ namespace func_window {
 		m_ManualNewCP.GetWindowTextA(func_namespace::ExecutionCache, CACHE_SIZE);
 		cfg_manager->CurrentConfig.window_ConvertEncoding_ManualNewCP = func_namespace::ExecutionCache;
 
+		cfg_manager->SaveConfig();
+
 		CDialogEx::OnOK();
 	}
 	afx_msg void window_ConvertEncoding::On_Dialog_Cancel() {
