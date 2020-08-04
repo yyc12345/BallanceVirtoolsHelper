@@ -643,7 +643,7 @@ namespace func_namespace {
 					//write index first
 					SafeGetName(exportMaterial, &index_name);
 					WriteString(&findex, &index_name);
-					index_type = FILE_INDEX_TYPE__MESH;
+					index_type = FILE_INDEX_TYPE__MATERIAL;
 					WriteInt(&findex, (uint8_t*)&index_type);
 					index_offset = fmaterial.tellp();
 					WriteInt(&findex, &index_offset);
@@ -678,7 +678,7 @@ namespace func_namespace {
 					//write index first
 					SafeGetName(exportTexture, &index_name);
 					WriteString(&findex, &index_name);
-					index_type = FILE_INDEX_TYPE__MESH;
+					index_type = FILE_INDEX_TYPE__TEXTURE;
 					WriteInt(&findex, (uint8_t*)&index_type);
 					index_offset = ftexture.tellp();
 					WriteInt(&findex, &index_offset);

@@ -52,7 +52,8 @@ namespace func_window {
 				m_Mode_All.SetCheck(1);
 				break;
 		}
-		nowMode = cfg_manager->CurrentConfig.window_mapping_bmExport_mode;
+		//following function will change nowMode
+		// nowMode = cfg_manager->CurrentConfig.window_mapping_bmExport_mode;
 		On_Mode_Change();
 
 		m_BM_File.SetWindowTextA(cfg_manager->CurrentConfig.window_mapping_bmExport_filename.c_str());
