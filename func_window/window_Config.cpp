@@ -1,4 +1,4 @@
-﻿#include "misc_config.h"
+﻿#include "window_Config.h"
 #include "../resource.h"
 #include "../config_manager.h"
 #include "../func_helper.h"
@@ -8,29 +8,29 @@ extern config_manager* cfg_manager;
 
 namespace func_window {
 
-	IMPLEMENT_DYNAMIC(misc_config, CDialogEx)
+	IMPLEMENT_DYNAMIC(window_Config, CDialogEx)
 
-	misc_config::misc_config(CWnd* pParent /*=nullptr*/)
+	window_Config::window_Config(CWnd* pParent /*=nullptr*/)
 		: CDialogEx(IDD_DIALOG1, pParent) {
 
 	}
 
-	misc_config::~misc_config() {
+	window_Config::~window_Config() {
 	}
 
-	void misc_config::DoDataExchange(CDataExchange* pDX) {
+	void window_Config::DoDataExchange(CDataExchange* pDX) {
 		DDX_Control(pDX, IDC_EDIT1, m_BM_ExternalTextureFolder);
 		DDX_Control(pDX, IDC_EDIT2, m_BM_NoComponentGroup);
 	}
 
 
-	BEGIN_MESSAGE_MAP(misc_config, CDialogEx)
-		ON_BN_CLICKED(IDC_BUTTON1, &misc_config::On_BM_ExternalTextureFolderBrowse)
-		ON_BN_CLICKED(IDOK, &misc_config::On_Dialog_OK)
-		ON_BN_CLICKED(IDCANCEL, &misc_config::On_Dialog_Cancel)
+	BEGIN_MESSAGE_MAP(window_Config, CDialogEx)
+		ON_BN_CLICKED(IDC_BUTTON1, &window_Config::On_BM_ExternalTextureFolderBrowse)
+		ON_BN_CLICKED(IDOK, &window_Config::On_Dialog_OK)
+		ON_BN_CLICKED(IDCANCEL, &window_Config::On_Dialog_Cancel)
 	END_MESSAGE_MAP()
 
-	BOOL misc_config::OnInitDialog() {
+	BOOL window_Config::OnInitDialog() {
 		CDialogEx::OnInitDialog();
 		
 		// load config
@@ -40,15 +40,15 @@ namespace func_window {
 					  // 异常: OCX 属性页应返回 FALSE
 	}
 
-#pragma region misc_config message processor
+#pragma region window_Config message processor
 
-	void misc_config::On_BM_ExternalTextureFolderBrowse() {
+	void window_Config::On_BM_ExternalTextureFolderBrowse() {
 		std::string cache;
 		func_namespace::OpenFolderDialog(&cache, m_hWnd);
 		m_BM_ExternalTextureFolder.SetWindowTextA(cache.c_str());
 	}
 
-	void misc_config::On_Dialog_OK() {
+	void window_Config::On_Dialog_OK() {
 		//save config
 		m_BM_ExternalTextureFolder.GetWindowTextA(func_namespace::ExecutionCache, CACHE_SIZE);
 		cfg_manager->CurrentConfig.func_mapping_bm_ExternalTextureFolder = func_namespace::ExecutionCache;
@@ -60,7 +60,7 @@ namespace func_window {
 		CDialogEx::OnOK();
 	}
 
-	void misc_config::On_Dialog_Cancel() {
+	void window_Config::On_Dialog_Cancel() {
 		CDialogEx::OnCancel();
 	}
 

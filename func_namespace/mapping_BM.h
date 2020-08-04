@@ -28,8 +28,6 @@ namespace func_namespace {
 				CK_ID id;
 				uint64_t offset;
 			};
-
-			
 			
 #pragma endregion
 
@@ -42,10 +40,16 @@ namespace func_namespace {
 			void LoadComponenetMesh(CK3dEntity* obj, uint32_t index);
 
 			BOOL ExportBM();
+			void WriteInt(std::ofstream* fs, uint8_t* num);
 			void WriteInt(std::ofstream* fs, uint32_t* num);
 			void WriteInt(std::ofstream* fs, uint64_t* num);
 			void WriteFloat(std::ofstream* fs, float* num);
 			void WriteString(std::ofstream* fs, std::string* str);
+			BOOL IsValidObject(CK3dEntity* obj);
+			void GetComponent(std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id);
+			BOOL IsExternalTexture(std::string* name);
+			void SafeGetName(CKObject* obj, std::string* name);
+			uint32_t TryAddWithIndex(std::vector<CK_ID>::iterator begin, std::vector<CK_ID>::iterator end, CK_ID newValue);
 
 			BOOL FixBlenderTexture();
 

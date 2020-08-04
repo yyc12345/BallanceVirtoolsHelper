@@ -51,14 +51,8 @@
     <ClInclude Include="func_namespace\mapping_BM.h">
       <Filter>头文件\func_namespace</Filter>
     </ClInclude>
-    <ClInclude Include="func_window\misc_config.h">
-      <Filter>头文件\func_window</Filter>
-    </ClInclude>
     <ClInclude Include="func_namespace\mapping_Group.h">
       <Filter>头文件\func_namespace</Filter>
-    </ClInclude>
-    <ClInclude Include="func_window\mapping_BMExport.h">
-      <Filter>头文件\func_window</Filter>
     </ClInclude>
     <ClInclude Include="func_namespace\mapping_Shadow.h">
       <Filter>头文件\func_namespace</Filter>
@@ -68,6 +62,12 @@
     </ClInclude>
     <ClInclude Include="func_namespace\misc_ConvertEncoding.h">
       <Filter>头文件\func_namespace</Filter>
+    </ClInclude>
+    <ClInclude Include="func_window\window_BMExport.h">
+      <Filter>头文件\func_window</Filter>
+    </ClInclude>
+    <ClInclude Include="func_window\window_Config.h">
+      <Filter>头文件\func_window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -92,14 +92,8 @@
     <ClCompile Include="func_namespace\mapping_BM.cpp">
       <Filter>源文件\func_namespace</Filter>
     </ClCompile>
-    <ClCompile Include="func_window\misc_config.cpp">
-      <Filter>源文件\func_window</Filter>
-    </ClCompile>
     <ClCompile Include="func_namespace\mapping_Group.cpp">
       <Filter>源文件\func_namespace</Filter>
-    </ClCompile>
-    <ClCompile Include="func_window\mapping_BMExport.cpp">
-      <Filter>源文件\func_window</Filter>
     </ClCompile>
     <ClCompile Include="func_namespace\mapping_Shadow.cpp">
       <Filter>源文件\func_namespace</Filter>
@@ -109,6 +103,12 @@
     </ClCompile>
     <ClCompile Include="func_namespace\misc_ConvertEncoding.cpp">
       <Filter>源文件\func_namespace</Filter>
+    </ClCompile>
+    <ClCompile Include="func_window\window_BMExport.cpp">
+      <Filter>源文件\func_window</Filter>
+    </ClCompile>
+    <ClCompile Include="func_window\window_Config.cpp">
+      <Filter>源文件\func_window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

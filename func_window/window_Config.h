@@ -6,12 +6,12 @@
 
 namespace func_window {
 
-	class misc_config : public CDialogEx {
-		DECLARE_DYNAMIC(misc_config)
+	class window_Config : public CDialogEx {
+		DECLARE_DYNAMIC(window_Config)
 
 		public:
-		misc_config(CWnd* pParent = nullptr);   // 标准构造函数
-		virtual ~misc_config();
+		window_Config(CWnd* pParent = nullptr);   // 标准构造函数
+		virtual ~window_Config();
 
 		// 对话框数据
 #ifdef AFX_DESIGN_TIME

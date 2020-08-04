@@ -87,6 +87,7 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;VX_MEM_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <DisableSpecificWarnings>4819;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -152,8 +153,8 @@
     <ClInclude Include="func_namespace\misc_ConvertEncoding.h" />
     <ClInclude Include="func_namespace\misc_SpecialNMO.h" />
     <ClInclude Include="func_namespace\script_CKDataArray.h" />
-    <ClInclude Include="func_window\mapping_BMExport.h" />
-    <ClInclude Include="func_window\misc_config.h" />
+    <ClInclude Include="func_window\window_BMExport.h" />
+    <ClInclude Include="func_window\window_Config.h" />
     <ClInclude Include="func_window\window_ConvertEncoding.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -168,8 +169,8 @@
     <ClCompile Include="func_namespace\misc_ConvertEncoding.cpp" />
     <ClCompile Include="func_namespace\misc_SpecialNMO.cpp" />
     <ClCompile Include="func_namespace\script_CKDataArray.cpp" />
-    <ClCompile Include="func_window\mapping_BMExport.cpp" />
-    <ClCompile Include="func_window\misc_config.cpp" />
+    <ClCompile Include="func_window\window_BMExport.cpp" />
+    <ClCompile Include="func_window\window_Config.cpp" />
     <ClCompile Include="func_window\window_ConvertEncoding.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vt_menu.cpp" />

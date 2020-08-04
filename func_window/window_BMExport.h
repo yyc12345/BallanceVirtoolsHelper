@@ -8,12 +8,12 @@
 
 namespace func_window {
 
-	class mapping_BMExport : public CDialogEx {
-		DECLARE_DYNAMIC(mapping_BMExport)
+	class window_BMExport : public CDialogEx {
+		DECLARE_DYNAMIC(window_BMExport)
 
 		public:
-		mapping_BMExport(CWnd* pParent = nullptr);   // 标准构造函数
-		virtual ~mapping_BMExport();
+		window_BMExport(CWnd* pParent = nullptr);   // 标准构造函数
+		virtual ~window_BMExport();
 
 		// 对话框数据
 #ifdef AFX_DESIGN_TIME

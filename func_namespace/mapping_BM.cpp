@@ -15,7 +15,7 @@
 #include <unordered_map>
 #include "../config_manager.h"
 #include "../func_helper.h"
-#include "../func_window/mapping_BMExport.h"
+#include "../func_window/window_BMExport.h"
 
 #pragma warning(disable:4305)
 
@@ -444,7 +444,7 @@ namespace func_namespace {
 				// ============================================get file
 				std::string filepath;
 				std::filesystem::path file, temp, tempTexture;
-				func_window::mapping_BMExport* bm_export_window = new func_window::mapping_BMExport();
+				func_window::window_BMExport* bm_export_window = new func_window::window_BMExport();
 				if (bm_export_window->DoModal() != IDOK) {
 					strcpy(func_namespace::ExecutionResult, "You cancel this process.");
 					delete bm_export_window;
@@ -459,7 +459,246 @@ namespace func_namespace {
 				std::filesystem::remove_all(temp);
 				std::filesystem::create_directory(temp);
 
+				// ============================================write file
+				CKContext* ctx = s_Plugininterface->GetCKContext();
+				std::vector<CK_ID> objectList, meshList, materialList, textureList;
+				std::ofstream findex, fobject, fmesh, fmaterial, ftexture;
 
+				//used by filter
+				std::string filter_name;
+				CKGroup* filter_group;
+				CKBeObject* filter_groupItem;
+				CK3dEntity* filter_3dentity;
+				//used by index
+				uint32_t bm_version;
+				uint64_t index_offset;
+				FILE_INDEX_TYPE index_type;
+				std::string index_name;
+				//used by object
+				CK3dEntity* exportObject;
+				BOOL object_isComponent, object_isForcedNoComponent, object_isHidden;
+				uint32_t object_meshIndex;
+				VxMatrix object_worldMatrix;
+				//used by mesh
+				CKMesh* exportMesh;
+				VxVector mesh_vector;
+				uint32_t mesh_count;
+				uint32_t mesh_indexValue;
+				float mesh_uvU, mesh_uvV;
+				WORD* mesh_faceIndices;
+				BOOL mesh_useMaterial;
+				CKMaterial* mesh_faceMaterial;
+				//used by material
+				CKMaterial* exportMaterial;
+				VxColor material_color;
+				float material_value;
+				CKTexture* material_tryTexture;
+				BOOL material_useTexture;
+				uint32_t material_textureIndex;
+				//used by texture
+				CKTexture* exportTexture;
+				std::filesystem::path texture_origin, texture_target;
+				std::string texture_filename;
+				BOOL texture_isExternal;
+
+
+				// filter obj first
+				switch (bm_export_window->OUT_Mode) {
+					case 0:
+						// obj
+						objectList.push_back(bm_export_window->OUT_Target);
+						break;
+					case 1:
+						// group
+						filter_group = (CKGroup*)ctx->GetObjectA(bm_export_window->OUT_Target);
+						int count = filter_group->GetObjectCount();
+						for (int i = 0; i < count; i++) {
+							filter_groupItem = filter_group->GetObjectA(i);
+							switch (filter_groupItem->GetClassID()) {
+								case CKCID_3DENTITY:
+								case CKCID_3DOBJECT:
+									if (IsValidObject((CK3dEntity*)filter_groupItem))
+										objectList.push_back(filter_groupItem->GetID());
+									break;
+								default:
+									break;	// do nothing
+							}
+						}
+						break;
+					case 2:
+						// all
+						XObjectPointerArray objArray = ctx->GetObjectListByType(CKCID_3DENTITY, TRUE);
+						for (auto item = objArray.Begin(); item != objArray.End(); ++item) {
+							filter_3dentity = (CK3dEntity*)(*item);
+							if (IsValidObject(filter_3dentity))
+								objectList.push_back(filter_groupItem->GetID());
+						}
+						break;
+				}
+
+				findex.open(temp / "index.bm", std::ios_base::out | std::ios_base::binary);
+
+				//write version header
+				bm_version = BM_FILE_VERSION;
+				WriteInt(&findex, &bm_version);
+
+				//write object
+				fobject.open(temp / "object.bm", std::ios_base::out | std::ios_base::binary);
+				for (auto iter = objectList.begin(); iter != objectList.end(); iter++) {
+					exportObject = (CK3dEntity*)ctx->GetObjectA(*iter);
+					//write index first
+					SafeGetName(exportObject, &index_name);
+					WriteString(&findex, &index_name);
+					index_type = FILE_INDEX_TYPE__OBJECT;
+					WriteInt(&findex, (uint8_t*)&index_type);
+					index_offset = fobject.tellp();
+					WriteInt(&findex, &index_offset);
+
+					//write object
+					GetComponent(&index_name, &object_isComponent, &object_isForcedNoComponent, &object_meshIndex);
+					WriteInt(&fobject, (uint8_t*)&object_isComponent);
+					WriteInt(&fobject, (uint8_t*)&object_isForcedNoComponent);
+					object_isHidden = exportObject->IsVisible() == CKHIDE;
+					WriteInt(&fobject, (uint8_t*)&object_isHidden);
+					object_worldMatrix = exportObject->GetWorldMatrix();
+					for (int i = 0; i < 4; i++) {
+						for (int j = 0; j < 4; j++) {
+							WriteFloat(&fobject, &object_worldMatrix[i][j]);
+						}
+					}
+					if (!object_isComponent) {
+						object_meshIndex = TryAddWithIndex(&meshList, exportObject->GetMesh(0)->GetID());
+					}
+					WriteInt(&fobject, &object_meshIndex);
+				}
+				fobject.close();
+
+				fmesh.open(temp / "mesh.bm", std::ios_base::out | std::ios_base::binary);
+				for (auto iter = meshList.begin(); iter != meshList.end(); iter++) {
+					exportMesh = (CKMesh*)ctx->GetObjectA(*iter);
+					//write index first
+					SafeGetName(exportMesh, &index_name);
+					WriteString(&findex, &index_name);
+					index_type = FILE_INDEX_TYPE__MESH;
+					WriteInt(&findex, (uint8_t*)&index_type);
+					index_offset = fmesh.tellp();
+					WriteInt(&findex, &index_offset);
+
+					//write mesh
+					mesh_count = exportMesh->GetVertexCount();
+					WriteInt(&fmesh, &mesh_count);
+					for (uint32_t i = 0; i < mesh_count; i++) {
+						exportMesh->GetVertexPosition(i, &mesh_vector);
+						WriteFloat(&fmesh, &mesh_vector.x);
+						WriteFloat(&fmesh, &mesh_vector.y);
+						WriteFloat(&fmesh, &mesh_vector.z);
+					}
+					WriteInt(&fmesh, &mesh_count);
+					for (uint32_t i = 0; i < mesh_count; i++) {
+						exportMesh->GetVertexTextureCoordinates(i, &mesh_uvU, &mesh_uvV);
+						WriteFloat(&fmesh, &mesh_uvU);
+						WriteFloat(&fmesh, &mesh_uvV);
+					}
+					WriteInt(&fmesh, &mesh_count);
+					for (uint32_t i = 0; i < mesh_count; i++) {
+						exportMesh->GetVertexNormal(i, &mesh_vector);
+						WriteFloat(&fmesh, &mesh_vector.x);
+						WriteFloat(&fmesh, &mesh_vector.y);
+						WriteFloat(&fmesh, &mesh_vector.z);
+					}
+
+					mesh_count = exportMesh->GetFaceCount();
+					mesh_faceIndices = exportMesh->GetFacesIndices();
+					WriteInt(&fmesh, &mesh_count);
+					for (uint32_t i = 0; i < mesh_count; i++) {
+						mesh_indexValue = mesh_faceIndices[i * 3];
+						WriteInt(&fmesh, &mesh_indexValue);
+						WriteInt(&fmesh, &mesh_indexValue);
+						WriteInt(&fmesh, &mesh_indexValue);
+						mesh_indexValue = mesh_faceIndices[i * 3 + 1];
+						WriteInt(&fmesh, &mesh_indexValue);
+						WriteInt(&fmesh, &mesh_indexValue);
+						WriteInt(&fmesh, &mesh_indexValue);
+						mesh_indexValue = mesh_faceIndices[i * 3 + 2];
+						WriteInt(&fmesh, &mesh_indexValue);
+						WriteInt(&fmesh, &mesh_indexValue);
+						WriteInt(&fmesh, &mesh_indexValue);
+
+						mesh_faceMaterial = exportMesh->GetFaceMaterial(i);
+						mesh_useMaterial = mesh_faceMaterial != NULL;
+						WriteInt(&fmesh, (uint8_t*)&mesh_indexValue);
+						if (mesh_useMaterial) {
+							mesh_indexValue = TryAddWithIndex(&materialList, mesh_faceMaterial->GetID());
+						} mesh_indexValue = 0;
+						WriteInt(&fmesh, &mesh_indexValue);
+					}
+				}
+				fmesh.close();
+
+				fmaterial.open(temp / "material.bm", std::ios_base::out | std::ios_base::binary);
+				for (auto iter = materialList.begin(); iter != materialList.end(); iter++) {
+					exportMaterial = (CKMaterial*)ctx->GetObjectA(*iter);
+					//write index first
+					SafeGetName(exportMaterial, &index_name);
+					WriteString(&findex, &index_name);
+					index_type = FILE_INDEX_TYPE__MESH;
+					WriteInt(&findex, (uint8_t*)&index_type);
+					index_offset = fmaterial.tellp();
+					WriteInt(&findex, &index_offset);
+
+					//write material
+#define writeColor WriteFloat(&fmaterial, &material_color.r);WriteFloat(&fmaterial, &material_color.g);WriteFloat(&fmaterial, &material_color.b);
+					material_color = exportMaterial->GetAmbient();
+					writeColor;
+					material_color = exportMaterial->GetDiffuse();
+					writeColor;
+					material_color = exportMaterial->GetSpecular();
+					writeColor;
+					material_color = exportMaterial->GetEmissive();
+					writeColor;
+#undef writeColor
+					material_value = exportMaterial->GetPower();
+					WriteFloat(&fmaterial, &material_value);
+
+					material_tryTexture = exportMaterial->GetTexture();
+					material_useTexture = material_tryTexture != NULL && material_tryTexture->GetSlotFileName(0) != NULL;
+					WriteInt(&fmaterial, (uint8_t*)&material_useTexture);
+					if (material_useTexture) {
+						material_textureIndex = TryAddWithIndex(&textureList, material_tryTexture->GetID());
+					} else material_textureIndex = 0;
+					WriteInt(&fmaterial, &material_textureIndex);
+				}
+				fmaterial.close();
+
+				ftexture.open(temp / "texture.bm", std::ios_base::out | std::ios_base::binary);
+				for (auto iter = textureList.begin(); iter != textureList.end(); iter++) {
+					exportTexture = (CKTexture*)ctx->GetObjectA(*iter);
+					//write index first
+					SafeGetName(exportTexture, &index_name);
+					WriteString(&findex, &index_name);
+					index_type = FILE_INDEX_TYPE__MESH;
+					WriteInt(&findex, (uint8_t*)&index_type);
+					index_offset = ftexture.tellp();
+					WriteInt(&findex, &index_offset);
+
+					//write texture
+					texture_origin = exportTexture->GetSlotFileName(0);
+					texture_filename = texture_origin.filename().string();
+					texture_target = tempTexture;
+					texture_target /= texture_filename;
+					WriteString(&ftexture, &texture_filename);
+
+					texture_isExternal = IsExternalTexture(&texture_filename);
+					WriteInt(&ftexture, (uint8_t*)&texture_isExternal);
+					if (!texture_isExternal) {
+						//try copy original file. if fail, use virtools internal save function.
+						if (!CopyFile(texture_origin.string().c_str(), texture_target.string().c_str(), FALSE)) {
+							exportTexture->SaveImage((char*)texture_target.string().c_str(), 0, FALSE);
+						}
+					}
+				}
+				ftexture.close();
+				findex.close();
 
 				// ============================================write zip
 				zip_handle::Compress(&file, &temp);
@@ -468,6 +707,9 @@ namespace func_namespace {
 			}
 
 			// WARNING: all following `Write` func are based on current OS is little-endian.
+			void WriteInt(std::ofstream* fs, uint8_t* num) {
+				fs->write((char*)num, sizeof(uint8_t));
+			}
 			void WriteInt(std::ofstream* fs, uint32_t* num) {
 				fs->write((char*)num, sizeof(uint32_t));
 			}
@@ -498,6 +740,37 @@ namespace func_namespace {
 				// write data
 				fs->write((char*)func_namespace::BMNameCache, length * sizeof(char32_t));
 
+			}
+			BOOL IsValidObject(CK3dEntity* obj) {
+				CKMesh* mesh = obj->GetCurrentMesh();
+				if (mesh == NULL) return FALSE;					//no mesh
+				if (mesh->GetFaceCount() == 0) return FALSE;	//no face
+				return TRUE;
+			}
+			void GetComponent(std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id) {
+				is_component = FALSE;
+				is_forced_no_component = FALSE;
+			}
+			BOOL IsExternalTexture(std::string* name) {
+				return FALSE;
+			}
+			void SafeGetName(CKObject* obj, std::string* name) {
+				if (obj->GetName() != NULL) {
+					*name = obj->GetName();
+					return;
+				}
+
+				sprintf(func_namespace::ExecutionCache, "noname_%d", obj->GetID());
+				*name = func_namespace::ExecutionCache;
+			}
+			uint32_t TryAddWithIndex(std::vector<CK_ID>* list, CK_ID newValue) {
+				auto gotten = std::find(list->begin(), list->end(), newValue);
+				uint32_t res = 0;
+				if (gotten == list->end()) {
+					res = list->size();
+					list->push_back(newValue);
+				} else res = gotten - list->begin();
+				return res;
 			}
 
 #pragma endregion

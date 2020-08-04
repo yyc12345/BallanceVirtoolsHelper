@@ -10,7 +10,7 @@
 #include "func_namespace/mapping_Shadow.h"
 #include "func_namespace/misc_ConvertEncoding.h"
 
-#include "func_window/misc_config.h"
+#include "func_window/window_Config.h"
 
 //=============func import
 
@@ -133,7 +133,7 @@ void MenuCallback(int commandID) {
 	BOOL runResult = TRUE;
 
 	// window define
-	func_window::misc_config* window_misc_config = NULL;
+	func_window::window_Config* window_misc_config = NULL;
 
 	switch (commandID) {
 		case 2:
@@ -164,7 +164,7 @@ void MenuCallback(int commandID) {
 
 		case 4:
 			runResult = TRUE;
-			window_misc_config = new func_window::misc_config();
+			window_misc_config = new func_window::window_Config();
 			window_misc_config->DoModal();
 			delete window_misc_config;
 			break;

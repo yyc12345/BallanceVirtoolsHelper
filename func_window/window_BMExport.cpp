@@ -1,4 +1,4 @@
-﻿#include "mapping_BMExport.h"
+﻿#include "window_BMExport.h"
 #include "../resource.h"
 #include "../config_manager.h"
 #include "../func_helper.h"
@@ -9,11 +9,11 @@ extern config_manager* cfg_manager;
 
 namespace func_window {
 
-	// mapping_BMExport 对话框
+	// window_BMExport 对话框
 
-	IMPLEMENT_DYNAMIC(mapping_BMExport, CDialogEx)
+	IMPLEMENT_DYNAMIC(window_BMExport, CDialogEx)
 
-	mapping_BMExport::mapping_BMExport(CWnd* pParent /*=nullptr*/)
+	window_BMExport::window_BMExport(CWnd* pParent /*=nullptr*/)
 		: CDialogEx(IDD_DIALOG2, pParent),
 		comboboxMirror(),
 		nowMode(-1),
@@ -23,11 +23,11 @@ namespace func_window {
 		;
 	}
 
-	mapping_BMExport::~mapping_BMExport() {
+	window_BMExport::~window_BMExport() {
 		;
 	}
 
-	void mapping_BMExport::DoDataExchange(CDataExchange* pDX) {
+	void window_BMExport::DoDataExchange(CDataExchange* pDX) {
 		CDialogEx::DoDataExchange(pDX);
 
 		DDX_Control(pDX, IDC_RADIO1, m_Mode_Object);
@@ -38,7 +38,7 @@ namespace func_window {
 		DDX_Control(pDX, IDC_EDIT1, m_BM_File);
 	}
 
-	BOOL mapping_BMExport::OnInitDialog() {
+	BOOL window_BMExport::OnInitDialog() {
 		CDialogEx::OnInitDialog();
 		
 		switch (cfg_manager->CurrentConfig.window_mapping_bmExport_mode) {
@@ -61,21 +61,21 @@ namespace func_window {
 					  // 异常: OCX 属性页应返回 FALSE
 	}
 
-	BEGIN_MESSAGE_MAP(mapping_BMExport, CDialogEx)
-		ON_BN_CLICKED(IDC_RADIO1, &mapping_BMExport::On_Mode_Change)
-		ON_BN_CLICKED(IDC_RADIO2, &mapping_BMExport::On_Mode_Change)
-		ON_BN_CLICKED(IDC_RADIO3, &mapping_BMExport::On_Mode_Change)
+	BEGIN_MESSAGE_MAP(window_BMExport, CDialogEx)
+		ON_BN_CLICKED(IDC_RADIO1, &window_BMExport::On_Mode_Change)
+		ON_BN_CLICKED(IDC_RADIO2, &window_BMExport::On_Mode_Change)
+		ON_BN_CLICKED(IDC_RADIO3, &window_BMExport::On_Mode_Change)
 
-		ON_BN_CLICKED(IDOK, &mapping_BMExport::On_Dialog_OK)
-		ON_BN_CLICKED(IDCANCEL, &mapping_BMExport::On_Dialog_Cancel)
+		ON_BN_CLICKED(IDOK, &window_BMExport::On_Dialog_OK)
+		ON_BN_CLICKED(IDCANCEL, &window_BMExport::On_Dialog_Cancel)
 
-		ON_BN_CLICKED(IDC_BUTTON1, &mapping_BMExport::On_Browse_BM)
+		ON_BN_CLICKED(IDC_BUTTON1, &window_BMExport::On_Browse_BM)
 	END_MESSAGE_MAP()
 
 
-	// mapping_BMExport 消息处理程序
+	// window_BMExport 消息处理程序
 
-	void mapping_BMExport::On_Mode_Change() {
+	void window_BMExport::On_Mode_Change() {
 		int selectedMode = 0;
 		if (m_Mode_Object.GetCheck() == 1) selectedMode = 0;
 		else if (m_Mode_Group.GetCheck() == 1) selectedMode = 1;
@@ -116,12 +116,12 @@ namespace func_window {
 			}
 		} else return;
 	}
-	void mapping_BMExport::On_Browse_BM() {
+	void window_BMExport::On_Browse_BM() {
 		std::string filepath;
 		if (func_namespace::OpenFileDialog(&filepath, "BM file(*.bm)\0*.bm\0", "bm", FALSE))
 			m_BM_File.SetWindowTextA(filepath.c_str());
 	}
-	void mapping_BMExport::On_Dialog_OK() {
+	void window_BMExport::On_Dialog_OK() {
 		// check data
 		if (m_Mode_All.GetCheck() == 1)
 			OUT_Mode = 2;
@@ -151,7 +151,7 @@ namespace func_window {
 
 		CDialogEx::OnOK();
 	}
-	void mapping_BMExport::On_Dialog_Cancel() {
+	void window_BMExport::On_Dialog_Cancel() {
 		CDialogEx::OnCancel();
 	}
 }
