@@ -114,7 +114,9 @@ namespace func_window {
 					m_Target.AddString(func_namespace::ExecutionCache);
 				}
 			}
-		} else return;
+		} else;
+
+		m_Target.EnableWindow(m_Mode_All.GetCheck() != 1);
 	}
 	void window_BMExport::On_Browse_BM() {
 		std::string filepath;

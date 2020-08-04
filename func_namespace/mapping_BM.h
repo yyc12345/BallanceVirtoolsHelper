@@ -49,7 +49,7 @@ namespace func_namespace {
 			void GetComponent(std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id);
 			BOOL IsExternalTexture(std::string* name);
 			void SafeGetName(CKObject* obj, std::string* name);
-			uint32_t TryAddWithIndex(std::vector<CK_ID>::iterator begin, std::vector<CK_ID>::iterator end, CK_ID newValue);
+			uint32_t TryAddWithIndex(std::vector<CK_ID>* list, CK_ID newValue);
 
 			BOOL FixBlenderTexture();
 

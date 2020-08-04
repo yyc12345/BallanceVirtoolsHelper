@@ -458,6 +458,7 @@ namespace func_namespace {
 				//clean temp folder
 				std::filesystem::remove_all(temp);
 				std::filesystem::create_directory(temp);
+				std::filesystem::create_directory(tempTexture);
 
 				// ============================================write file
 				CKContext* ctx = s_Plugininterface->GetCKContext();
@@ -469,6 +470,7 @@ namespace func_namespace {
 				CKGroup* filter_group;
 				CKBeObject* filter_groupItem;
 				CK3dEntity* filter_3dentity;
+				int groupCount;
 				//used by index
 				uint32_t bm_version;
 				uint64_t index_offset;
@@ -511,8 +513,8 @@ namespace func_namespace {
 					case 1:
 						// group
 						filter_group = (CKGroup*)ctx->GetObjectA(bm_export_window->OUT_Target);
-						int count = filter_group->GetObjectCount();
-						for (int i = 0; i < count; i++) {
+						groupCount = filter_group->GetObjectCount();
+						for (int i = 0; i < groupCount; i++) {
 							filter_groupItem = filter_group->GetObjectA(i);
 							switch (filter_groupItem->GetClassID()) {
 								case CKCID_3DENTITY:
@@ -531,7 +533,7 @@ namespace func_namespace {
 						for (auto item = objArray.Begin(); item != objArray.End(); ++item) {
 							filter_3dentity = (CK3dEntity*)(*item);
 							if (IsValidObject(filter_3dentity))
-								objectList.push_back(filter_groupItem->GetID());
+								objectList.push_back(filter_3dentity->GetID());
 						}
 						break;
 				}
@@ -729,7 +731,9 @@ namespace func_namespace {
 				size_t convCount = 0, convPos = 0, convAll = strlen(func_namespace::ExecutionCache);
 				uint32_t length = 0;
 
-				while ((convCount = mbrtoc32(&(func_namespace::BMNameCache[length]), &(func_namespace::ExecutionCache[convPos]), convAll - convPos, &state)) > 0) {
+				while (convPos < convAll) {
+					convCount = mbrtoc32(&(func_namespace::BMNameCache[length]), &(func_namespace::ExecutionCache[convPos]), convAll - convPos, &state);
+					if (convPos == -1) continue;
 					convPos += convCount;
 					length++;
 				}
@@ -748,8 +752,8 @@ namespace func_namespace {
 				return TRUE;
 			}
 			void GetComponent(std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id) {
-				is_component = FALSE;
-				is_forced_no_component = FALSE;
+				*is_component = FALSE;
+				*is_forced_no_component = FALSE;
 			}
 			BOOL IsExternalTexture(std::string* name) {
 				return FALSE;
