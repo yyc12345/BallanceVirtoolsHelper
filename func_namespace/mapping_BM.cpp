@@ -690,7 +690,7 @@ namespace func_namespace {
 					texture_target /= texture_filename;
 					WriteString(&ftexture, &texture_filename);
 
-					texture_isExternal = IsExternalTexture(&texture_filename);
+					texture_isExternal = IsExternalTexture(ctx, exportTexture, &texture_filename);
 					WriteInt(&ftexture, (uint8_t*)&texture_isExternal);
 					if (!texture_isExternal) {
 						//try copy original file. if fail, use virtools internal save function.
@@ -755,7 +755,16 @@ namespace func_namespace {
 				*is_component = FALSE;
 				*is_forced_no_component = FALSE;
 			}
-			BOOL IsExternalTexture(std::string* name) {
+			BOOL IsExternalTexture(CKContext* ctx, CKTexture* texture, std::string* name) {
+				CK_TEXTURE_SAVEOPTIONS options;
+				if ((options = texture->GetSaveOptions()) == CKTEXTURE_USEGLOBAL)
+					options = ctx->GetGlobalImagesSaveOptions();
+				if (options != CKTEXTURE_EXTERNAL) return FALSE;
+
+				for (int i = 0; i < CONST_ExternalTextureList_Length; i++) {
+					if (*name == CONST_ExternalTextureList[i])
+						return TRUE;
+				}
 				return FALSE;
 			}
 			void SafeGetName(CKObject* obj, std::string* name) {

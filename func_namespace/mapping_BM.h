@@ -47,7 +47,7 @@ namespace func_namespace {
 			void WriteString(std::ofstream* fs, std::string* str);
 			BOOL IsValidObject(CK3dEntity* obj);
 			void GetComponent(std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id);
-			BOOL IsExternalTexture(std::string* name);
+			BOOL IsExternalTexture(CKContext* ctx, CKTexture* texture, std::string* name);
 			void SafeGetName(CKObject* obj, std::string* name);
 			uint32_t TryAddWithIndex(std::vector<CK_ID>* list, CK_ID newValue);
 
