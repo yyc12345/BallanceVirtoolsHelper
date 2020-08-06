@@ -628,10 +628,10 @@ namespace func_namespace {
 
 						mesh_faceMaterial = exportMesh->GetFaceMaterial(i);
 						mesh_useMaterial = mesh_faceMaterial != NULL;
-						WriteInt(&fmesh, (uint8_t*)&mesh_indexValue);
+						WriteInt(&fmesh, (uint8_t*)&mesh_useMaterial);
 						if (mesh_useMaterial) {
 							mesh_indexValue = TryAddWithIndex(&materialList, mesh_faceMaterial->GetID());
-						} mesh_indexValue = 0;
+						} else mesh_indexValue = 0;
 						WriteInt(&fmesh, &mesh_indexValue);
 					}
 				}
