@@ -32,6 +32,8 @@ namespace func_namespace {
 #pragma endregion
 
 			BOOL ImportBM();
+			void ReadBool(std::ifstream* fs, BOOL* boolean);
+			void ReadInt(std::ifstream* fs, uint8_t* num);
 			void ReadInt(std::ifstream* fs, uint32_t* num);
 			void ReadInt(std::ifstream* fs, uint64_t* num);
 			void ReadFloat(std::ifstream* fs, float* num);
@@ -40,13 +42,14 @@ namespace func_namespace {
 			void LoadComponenetMesh(CK3dEntity* obj, uint32_t index);
 
 			BOOL ExportBM();
+			void WriteBool(std::ofstream* fs, BOOL* boolean);
 			void WriteInt(std::ofstream* fs, uint8_t* num);
 			void WriteInt(std::ofstream* fs, uint32_t* num);
 			void WriteInt(std::ofstream* fs, uint64_t* num);
 			void WriteFloat(std::ofstream* fs, float* num);
 			void WriteString(std::ofstream* fs, std::string* str);
 			BOOL IsValidObject(CK3dEntity* obj);
-			void GetComponent(std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id);
+			void GetComponent(CKGroup* grp, std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id);
 			BOOL IsExternalTexture(CKContext* ctx, CKTexture* texture, std::string* name);
 			void SafeGetName(CKObject* obj, std::string* name);
 			uint32_t TryAddWithIndex(std::vector<CK_ID>* list, CK_ID newValue);

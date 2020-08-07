@@ -186,29 +186,43 @@ namespace func_namespace {
 				}
 				curScene = ctx->GetCurrentLevel()->GetLevelScene();
 
+				// forced no component group
+				CKGroup* forcedNoComponentGroup = NULL;
+				if (!cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.empty()) {
+					if ((forcedNoComponentGroup = (CKGroup*)ctx->GetObjectByNameAndClass((char*)cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CKCID_GROUP, NULL)) == NULL) {
+						// no needed group. generate one
+						forcedNoComponentGroup = (CKGroup*)ctx->CreateObject(CKCID_GROUP, (char*)cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str());
+						curScene->AddObjectToScene(forcedNoComponentGroup);
+					}
+				}
+
 				//used in index
 				FILE_INDEX_HELPER* helper_struct = NULL;
 				FILE_INDEX_TYPE index_type;
 				//used in texture
 				std::string texture_filename;
 				CKTexture* currenrTexture = NULL;
-				uint32_t is_external;
+				BOOL is_external;
 				std::filesystem::path texture_file;
 				//used in material
 				CKMaterial* currentMaterial = NULL;
 				VxColor color;
-				uint32_t is_texture, texture_index;
+				float colorPower;
+				BOOL is_texture;
+				uint32_t texture_index;
 				//used in mesh
 				CKMesh* currentMesh = NULL;
 				VxVector vector;
 				uint32_t vecCount;
 				std::vector<VxVector> vList, vnList, vtList; // vt only use xy to store uv
 				uint32_t face_data[9];
-				uint32_t is_material, material_index;
+				BOOL is_material;
+				uint32_t material_index;
 				//used in object
 				CK3dObject* currentObject = NULL;
 				VxMatrix world_matrix;
-				uint32_t is_component, mesh_index;
+				BOOL is_component, is_forced_no_component, is_hidden;
+				uint32_t mesh_index;
 
 
 				// read info.bm and check version first
@@ -227,7 +241,7 @@ namespace func_namespace {
 
 					helper_struct = new FILE_INDEX_HELPER();
 					ReadString(&findex, &(helper_struct->name));
-					ReadInt(&findex, (uint32_t*)&index_type);
+					ReadInt(&findex, (uint8_t*)&index_type);
 					switch (index_type) {
 						case FILE_INDEX_TYPE__OBJECT:
 							objectList.push_back(helper_struct);
@@ -257,7 +271,7 @@ namespace func_namespace {
 					ReadString(&ftexture, &texture_filename);
 					currenrTexture = (CKTexture*)ctx->CreateObject(CKCID_TEXTURE, (char*)(*iter)->name.c_str());
 					(*iter)->id = currenrTexture->GetID();
-					ReadInt(&ftexture, &is_external);
+					ReadBool(&ftexture, &is_external);
 					if (is_external) {
 						LoadExternalTexture(&texture_filename, currenrTexture);
 						currenrTexture->SetSaveOptions(CKTEXTURE_EXTERNAL);
@@ -278,14 +292,20 @@ namespace func_namespace {
 					color.a = 1;
 					currentMaterial = (CKMaterial*)ctx->CreateObject(CKCID_MATERIAL, (char*)(*iter)->name.c_str());
 					(*iter)->id = currentMaterial->GetID();
-					ReadFloat(&fmaterial, &(color.r)); ReadFloat(&fmaterial, &(color.g)); ReadFloat(&fmaterial, &(color.b));
+#define readColor() ReadFloat(&fmaterial, &(color.r)); ReadFloat(&fmaterial, &(color.g)); ReadFloat(&fmaterial, &(color.b));
+					readColor();
 					currentMaterial->SetAmbient(color);
-					ReadFloat(&fmaterial, &(color.r)); ReadFloat(&fmaterial, &(color.g)); ReadFloat(&fmaterial, &(color.b));
+					readColor();
 					currentMaterial->SetDiffuse(color);
-					ReadFloat(&fmaterial, &(color.r)); ReadFloat(&fmaterial, &(color.g)); ReadFloat(&fmaterial, &(color.b));
+					readColor();
+					currentMaterial->SetSpecular(color);
+					readColor();
 					currentMaterial->SetEmissive(color);
+					ReadFloat(&fmaterial, &colorPower);
+					currentMaterial->SetPower(colorPower);
+#undef readColor
 
-					ReadInt(&fmaterial, &is_texture);
+					ReadBool(&fmaterial, &is_texture);
 					if (is_texture) {
 						ReadInt(&fmaterial, &texture_index);
 						currentMaterial->SetTexture((CKTexture*)ctx->GetObjectA(textureList[texture_index]->id));
@@ -343,7 +363,7 @@ namespace func_namespace {
 						}
 
 						currentMesh->SetFaceVertexIndex(i, i * 3, i * 3 + 1, i * 3 + 2);
-						ReadInt(&fmesh, &is_material);
+						ReadBool(&fmesh, &is_material);
 						if (is_material) {
 							ReadInt(&fmesh, &material_index);
 							currentMesh->SetFaceMaterial(i, (CKMaterial*)ctx->GetObjectA(materialList[material_index]->id));
@@ -359,14 +379,26 @@ namespace func_namespace {
 
 					currentObject = (CK3dObject*)ctx->CreateObject(CKCID_3DOBJECT, (char*)(*iter)->name.c_str());
 					(*iter)->id = currentObject->GetID();
-					ReadInt(&fobject, &is_component);
+					ReadBool(&fobject, &is_component);
+					ReadBool(&fobject, &is_forced_no_component);
+					ReadBool(&fobject, &is_hidden);
 					for (int i = 0; i < 4; i++)
 						for (int j = 0; j < 4; j++)
 							ReadFloat(&fobject, &(world_matrix[i][j]));
 					currentObject->SetWorldMatrix(world_matrix);
+
 					ReadInt(&fobject, &mesh_index);
 					if (is_component) LoadComponenetMesh(currentObject, mesh_index);
 					else currentObject->SetCurrentMesh((CKMesh*)ctx->GetObjectA(meshList[mesh_index]->id));
+
+					// apply hidden
+					currentObject->Show(is_hidden ? CKHIDE : CKSHOW);
+
+					//apply component group
+					if ((!is_component) && is_forced_no_component && (forcedNoComponentGroup != NULL)) {
+						// current object should be grouped into forced no component group
+						forcedNoComponentGroup->AddObject(currentObject);
+					}
 
 					// all object should add into current scene with dependency
 					curScene->AddObjectToScene(currentObject);
@@ -387,6 +419,14 @@ namespace func_namespace {
 			}
 
 			// WARNING: all following `Read` func are based on current OS is little-endian.
+			void ReadBool(std::ifstream* fs, BOOL* boolean) {
+				uint8_t num;
+				ReadInt(fs, &num);
+				*boolean = num ? TRUE : FALSE;
+			}
+			void ReadInt(std::ifstream* fs, uint8_t* num) {
+				fs->read((char*)num, sizeof(uint8_t));
+			}
 			void ReadInt(std::ifstream* fs, uint32_t* num) {
 				fs->read((char*)num, sizeof(uint32_t));
 			}
@@ -436,6 +476,7 @@ namespace func_namespace {
 			void LoadComponenetMesh(CK3dEntity* obj, uint32_t index) {
 				;
 			}
+
 #pragma endregion
 
 #pragma region export
@@ -503,6 +544,12 @@ namespace func_namespace {
 				std::string texture_filename;
 				BOOL texture_isExternal;
 
+				// forced no component group
+				CKGroup* forcedNoComponentGroup = NULL;
+				if (!cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.empty()) {
+					// if no needed group. just skip this. it will be set as NULL;
+					forcedNoComponentGroup = (CKGroup*)ctx->GetObjectByNameAndClass((char*)cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CKCID_GROUP, NULL);
+				}
 
 				// filter obj first
 				switch (bm_export_window->OUT_Mode) {
@@ -557,11 +604,11 @@ namespace func_namespace {
 					WriteInt(&findex, &index_offset);
 
 					//write object
-					GetComponent(&index_name, &object_isComponent, &object_isForcedNoComponent, &object_meshIndex);
-					WriteInt(&fobject, (uint8_t*)&object_isComponent);
-					WriteInt(&fobject, (uint8_t*)&object_isForcedNoComponent);
+					GetComponent(forcedNoComponentGroup, &index_name, &object_isComponent, &object_isForcedNoComponent, &object_meshIndex);
+					WriteBool(&fobject, &object_isComponent);
+					WriteBool(&fobject, &object_isForcedNoComponent);
 					object_isHidden = exportObject->IsVisible() == CKHIDE;
-					WriteInt(&fobject, (uint8_t*)&object_isHidden);
+					WriteBool(&fobject, &object_isHidden);
 					object_worldMatrix = exportObject->GetWorldMatrix();
 					for (int i = 0; i < 4; i++) {
 						for (int j = 0; j < 4; j++) {
@@ -628,7 +675,7 @@ namespace func_namespace {
 
 						mesh_faceMaterial = exportMesh->GetFaceMaterial(i);
 						mesh_useMaterial = mesh_faceMaterial != NULL;
-						WriteInt(&fmesh, (uint8_t*)&mesh_useMaterial);
+						WriteBool(&fmesh, &mesh_useMaterial);
 						if (mesh_useMaterial) {
 							mesh_indexValue = TryAddWithIndex(&materialList, mesh_faceMaterial->GetID());
 						} else mesh_indexValue = 0;
@@ -664,7 +711,7 @@ namespace func_namespace {
 
 					material_tryTexture = exportMaterial->GetTexture();
 					material_useTexture = material_tryTexture != NULL && material_tryTexture->GetSlotFileName(0) != NULL;
-					WriteInt(&fmaterial, (uint8_t*)&material_useTexture);
+					WriteBool(&fmaterial, &material_useTexture);
 					if (material_useTexture) {
 						material_textureIndex = TryAddWithIndex(&textureList, material_tryTexture->GetID());
 					} else material_textureIndex = 0;
@@ -691,7 +738,7 @@ namespace func_namespace {
 					WriteString(&ftexture, &texture_filename);
 
 					texture_isExternal = IsExternalTexture(ctx, exportTexture, &texture_filename);
-					WriteInt(&ftexture, (uint8_t*)&texture_isExternal);
+					WriteBool(&ftexture, &texture_isExternal);
 					if (!texture_isExternal) {
 						//try copy original file. if fail, use virtools internal save function.
 						if (!CopyFile(texture_origin.string().c_str(), texture_target.string().c_str(), FALSE)) {
@@ -709,6 +756,10 @@ namespace func_namespace {
 			}
 
 			// WARNING: all following `Write` func are based on current OS is little-endian.
+			void WriteBool(std::ofstream* fs, BOOL* boolean) {
+				uint8_t num = *boolean ? 1 : 0;
+				WriteInt(fs, &num);
+			}
 			void WriteInt(std::ofstream* fs, uint8_t* num) {
 				fs->write((char*)num, sizeof(uint8_t));
 			}
@@ -751,7 +802,7 @@ namespace func_namespace {
 				if (mesh->GetFaceCount() == 0) return FALSE;	//no face
 				return TRUE;
 			}
-			void GetComponent(std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id) {
+			void GetComponent(CKGroup* grp, std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id) {
 				*is_component = FALSE;
 				*is_forced_no_component = FALSE;
 			}
