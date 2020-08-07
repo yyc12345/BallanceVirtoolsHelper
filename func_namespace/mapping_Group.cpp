@@ -79,6 +79,7 @@ namespace func_namespace {
 						GroupIntoWithCreation(ctx, obj, "Phys_Floors");
 						GroupIntoWithCreation(ctx, obj, "Sound_HitID_01");
 						GroupIntoWithCreation(ctx, obj, "Sound_RollID_01");
+						GroupIntoWithCreation(ctx, obj, "Shadow");
 						continue;
 					}
 					if (objName.starts_with("A_Rail")) {
@@ -91,6 +92,7 @@ namespace func_namespace {
 						GroupIntoWithCreation(ctx, obj, "Phys_Floors");
 						GroupIntoWithCreation(ctx, obj, "Sound_HitID_02");
 						GroupIntoWithCreation(ctx, obj, "Sound_RollID_02");
+						GroupIntoWithCreation(ctx, obj, "Shadow");
 						continue;
 					}
 

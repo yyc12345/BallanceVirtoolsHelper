@@ -191,14 +191,14 @@ namespace func_namespace {
 				if (!cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.empty()) {
 					if ((forcedNoComponentGroup = (CKGroup*)ctx->GetObjectByNameAndClass((char*)cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CKCID_GROUP, NULL)) == NULL) {
 						// no needed group. generate one
-						forcedNoComponentGroup = (CKGroup*)ctx->CreateObject(CKCID_GROUP, (char*)cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str());
+						forcedNoComponentGroup = (CKGroup*)ctx->CreateObject(CKCID_GROUP, (char*)cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CK_OBJECTCREATION_RENAME);
 						curScene->AddObjectToScene(forcedNoComponentGroup);
 					}
 				}
 
 				//used in index
 				FILE_INDEX_HELPER* helper_struct = NULL;
-				FILE_INDEX_TYPE index_type;
+				uint8_t index_type;
 				//used in texture
 				std::string texture_filename;
 				CKTexture* currenrTexture = NULL;
@@ -241,8 +241,8 @@ namespace func_namespace {
 
 					helper_struct = new FILE_INDEX_HELPER();
 					ReadString(&findex, &(helper_struct->name));
-					ReadInt(&findex, (uint8_t*)&index_type);
-					switch (index_type) {
+					ReadInt(&findex, &index_type);
+					switch ((FILE_INDEX_TYPE)index_type) {
 						case FILE_INDEX_TYPE__OBJECT:
 							objectList.push_back(helper_struct);
 							break;
@@ -269,7 +269,7 @@ namespace func_namespace {
 					ftexture.seekg((*iter)->offset);
 
 					ReadString(&ftexture, &texture_filename);
-					currenrTexture = (CKTexture*)ctx->CreateObject(CKCID_TEXTURE, (char*)(*iter)->name.c_str());
+					currenrTexture = (CKTexture*)ctx->CreateObject(CKCID_TEXTURE, (char*)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
 					(*iter)->id = currenrTexture->GetID();
 					ReadBool(&ftexture, &is_external);
 					if (is_external) {
@@ -290,24 +290,24 @@ namespace func_namespace {
 					fmaterial.seekg((*iter)->offset);
 
 					color.a = 1;
-					currentMaterial = (CKMaterial*)ctx->CreateObject(CKCID_MATERIAL, (char*)(*iter)->name.c_str());
+					currentMaterial = (CKMaterial*)ctx->CreateObject(CKCID_MATERIAL, (char*)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
 					(*iter)->id = currentMaterial->GetID();
-#define readColor() ReadFloat(&fmaterial, &(color.r)); ReadFloat(&fmaterial, &(color.g)); ReadFloat(&fmaterial, &(color.b));
-					readColor();
+#define readColor ReadFloat(&fmaterial, &(color.r)); ReadFloat(&fmaterial, &(color.g)); ReadFloat(&fmaterial, &(color.b));
+					readColor;
 					currentMaterial->SetAmbient(color);
-					readColor();
+					readColor;
 					currentMaterial->SetDiffuse(color);
-					readColor();
+					readColor;
 					currentMaterial->SetSpecular(color);
-					readColor();
+					readColor;
 					currentMaterial->SetEmissive(color);
+#undef readColor
 					ReadFloat(&fmaterial, &colorPower);
 					currentMaterial->SetPower(colorPower);
-#undef readColor
 
 					ReadBool(&fmaterial, &is_texture);
+					ReadInt(&fmaterial, &texture_index);
 					if (is_texture) {
-						ReadInt(&fmaterial, &texture_index);
 						currentMaterial->SetTexture((CKTexture*)ctx->GetObjectA(textureList[texture_index]->id));
 					}
 				}
@@ -318,7 +318,7 @@ namespace func_namespace {
 				for (auto iter = meshList.begin(); iter != meshList.end(); iter++) {
 					fmesh.seekg((*iter)->offset);
 
-					currentMesh = (CKMesh*)ctx->CreateObject(CKCID_MESH, (char*)(*iter)->name.c_str());
+					currentMesh = (CKMesh*)ctx->CreateObject(CKCID_MESH, (char*)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
 					(*iter)->id = currentMesh->GetID();
 					vList.clear(); vnList.clear(); vtList.clear();
 					ReadInt(&fmesh, &vecCount);
@@ -364,8 +364,8 @@ namespace func_namespace {
 
 						currentMesh->SetFaceVertexIndex(i, i * 3, i * 3 + 1, i * 3 + 2);
 						ReadBool(&fmesh, &is_material);
+						ReadInt(&fmesh, &material_index);
 						if (is_material) {
-							ReadInt(&fmesh, &material_index);
 							currentMesh->SetFaceMaterial(i, (CKMaterial*)ctx->GetObjectA(materialList[material_index]->id));
 						}
 					}
@@ -377,7 +377,7 @@ namespace func_namespace {
 				for (auto iter = objectList.begin(); iter != objectList.end(); iter++) {
 					fobject.seekg((*iter)->offset);
 
-					currentObject = (CK3dObject*)ctx->CreateObject(CKCID_3DOBJECT, (char*)(*iter)->name.c_str());
+					currentObject = (CK3dObject*)ctx->CreateObject(CKCID_3DOBJECT, (char*)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
 					(*iter)->id = currentObject->GetID();
 					ReadBool(&fobject, &is_component);
 					ReadBool(&fobject, &is_forced_no_component);
@@ -475,7 +475,7 @@ namespace func_namespace {
 			}
 			void LoadComponenetMesh(CK3dEntity* obj, CKContext* ctx, uint32_t index) {
 				// NOTE: this code is sync with bm_import mesh creaion. if something changed, please sync them.
-				
+
 				// declare value
 				std::filesystem::path meshfile;
 				CKMesh* currentMesh;
@@ -494,8 +494,8 @@ namespace func_namespace {
 
 				// then, create mesh
 				sprintf(func_namespace::ExecutionCache, "%s_MESH", CONST_ExternalComponent[index]);
-				CKMesh* currentMesh = (CKMesh*)ctx->CreateObject(CKCID_MESH, func_namespace::ExecutionCache, CK_OBJECTCREATION_RENAME);
-				
+				currentMesh = (CKMesh*)ctx->CreateObject(CKCID_MESH, func_namespace::ExecutionCache, CK_OBJECTCREATION_RENAME);
+
 				// read data
 				ReadInt(&fmesh, &vecCount);
 				// lazy load v
@@ -523,10 +523,12 @@ namespace func_namespace {
 
 					for (int j = 0; j < 6; j += 2) {
 						vector = vList[face_data[j]];
-						currentMesh->SetVertexPosition(i * 2 + j / 2, &vector);
+						currentMesh->SetVertexPosition(i * 3 + j / 2, &vector);
 						vector = vnList[face_data[j + 1]];
-						currentMesh->SetVertexNormal(i * 2 + j / 2, &vector);
+						currentMesh->SetVertexNormal(i * 3 + j / 2, &vector);
 					}
+
+					currentMesh->SetFaceVertexIndex(i, i * 3, i * 3 + 1, i * 3 + 2);
 				}
 
 				fmesh.close();
@@ -609,8 +611,10 @@ namespace func_namespace {
 					ck_instance_forcedNoComponentGroup = (CKGroup*)ctx->GetObjectByNameAndClass((char*)cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CKCID_GROUP, NULL);
 				}
 				std::vector<CK_ID> forcedNoComponentGroup;
-				for (int i = 0, count = ck_instance_forcedNoComponentGroup->GetObjectCount(); i < count; i++) {
-					forcedNoComponentGroup.push_back(ck_instance_forcedNoComponentGroup->GetObjectA(i)->GetID());
+				if (ck_instance_forcedNoComponentGroup != NULL) {
+					for (int i = 0, count = ck_instance_forcedNoComponentGroup->GetObjectCount(); i < count; i++) {
+						forcedNoComponentGroup.push_back(ck_instance_forcedNoComponentGroup->GetObjectA(i)->GetID());
+					}
 				}
 
 				// filter obj first
