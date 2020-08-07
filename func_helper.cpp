@@ -95,4 +95,11 @@ namespace func_namespace {
 		*temp_folder = SelfCache;
 	}
 
+	void GetVirtoolsFolder(std::filesystem::path* vt_folder) {
+		std::filesystem::path vtname;
+		GetModuleFileName(NULL, func_namespace::SelfCache, CACHE_SIZE);
+		vtname = func_namespace::SelfCache;
+		*vt_folder = vtname.parent_path();
+	}
+
 }

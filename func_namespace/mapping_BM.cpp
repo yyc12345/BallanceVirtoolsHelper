@@ -388,7 +388,7 @@ namespace func_namespace {
 					currentObject->SetWorldMatrix(world_matrix);
 
 					ReadInt(&fobject, &mesh_index);
-					if (is_component) LoadComponenetMesh(currentObject, mesh_index);
+					if (is_component) LoadComponenetMesh(currentObject, ctx, mesh_index);
 					else currentObject->SetCurrentMesh((CKMesh*)ctx->GetObjectA(meshList[mesh_index]->id));
 
 					// apply hidden
@@ -473,8 +473,66 @@ namespace func_namespace {
 				texture->LoadImageA((char*)external_folder.string().c_str());
 				texture->SetSaveOptions(CKTEXTURE_EXTERNAL);
 			}
-			void LoadComponenetMesh(CK3dEntity* obj, uint32_t index) {
-				;
+			void LoadComponenetMesh(CK3dEntity* obj, CKContext* ctx, uint32_t index) {
+				// NOTE: this code is sync with bm_import mesh creaion. if something changed, please sync them.
+				
+				// declare value
+				std::filesystem::path meshfile;
+				CKMesh* currentMesh;
+				std::vector<VxVector> vList, vnList;
+				VxVector vector;
+				uint32_t vecCount;
+				uint32_t face_data[6];
+				std::ifstream fmesh;
+
+				// first, get file
+				func_namespace::GetVirtoolsFolder(&meshfile);
+				meshfile /= "BMMeshes";
+				sprintf(func_namespace::ExecutionCache, "%s.bin", CONST_ExternalComponent[index]);
+				meshfile /= func_namespace::ExecutionCache;
+				fmesh.open(meshfile, std::ios_base::in | std::ios_base::binary);
+
+				// then, create mesh
+				sprintf(func_namespace::ExecutionCache, "%s_MESH", CONST_ExternalComponent[index]);
+				CKMesh* currentMesh = (CKMesh*)ctx->CreateObject(CKCID_MESH, func_namespace::ExecutionCache, CK_OBJECTCREATION_RENAME);
+				
+				// read data
+				ReadInt(&fmesh, &vecCount);
+				// lazy load v
+				for (int i = 0; i < vecCount; i++) {
+					ReadFloat(&fmesh, &(vector.x));
+					ReadFloat(&fmesh, &(vector.y));
+					ReadFloat(&fmesh, &(vector.z));
+					vList.push_back(vector);
+				}
+				ReadInt(&fmesh, &vecCount);
+				for (int i = 0; i < vecCount; i++) {
+					ReadFloat(&fmesh, &(vector.x));
+					ReadFloat(&fmesh, &(vector.y));
+					ReadFloat(&fmesh, &(vector.z));
+					vnList.push_back(vector);
+				}
+				// read face
+				ReadInt(&fmesh, &vecCount);
+				// init vector and face count
+				currentMesh->SetVertexCount(vecCount * 3);
+				currentMesh->SetFaceCount(vecCount);
+				for (int i = 0; i < vecCount; i++) {
+					for (int j = 0; j < 6; j++)
+						ReadInt(&fmesh, &(face_data[j]));
+
+					for (int j = 0; j < 6; j += 2) {
+						vector = vList[face_data[j]];
+						currentMesh->SetVertexPosition(i * 2 + j / 2, &vector);
+						vector = vnList[face_data[j + 1]];
+						currentMesh->SetVertexNormal(i * 2 + j / 2, &vector);
+					}
+				}
+
+				fmesh.close();
+
+				// apply current mesh into object
+				obj->SetCurrentMesh(currentMesh);
 			}
 
 #pragma endregion
@@ -545,10 +603,14 @@ namespace func_namespace {
 				BOOL texture_isExternal;
 
 				// forced no component group
-				CKGroup* forcedNoComponentGroup = NULL;
+				CKGroup* ck_instance_forcedNoComponentGroup = NULL;
 				if (!cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.empty()) {
 					// if no needed group. just skip this. it will be set as NULL;
-					forcedNoComponentGroup = (CKGroup*)ctx->GetObjectByNameAndClass((char*)cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CKCID_GROUP, NULL);
+					ck_instance_forcedNoComponentGroup = (CKGroup*)ctx->GetObjectByNameAndClass((char*)cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CKCID_GROUP, NULL);
+				}
+				std::vector<CK_ID> forcedNoComponentGroup;
+				for (int i = 0, count = ck_instance_forcedNoComponentGroup->GetObjectCount(); i < count; i++) {
+					forcedNoComponentGroup.push_back(ck_instance_forcedNoComponentGroup->GetObjectA(i)->GetID());
 				}
 
 				// filter obj first
@@ -604,7 +666,7 @@ namespace func_namespace {
 					WriteInt(&findex, &index_offset);
 
 					//write object
-					GetComponent(forcedNoComponentGroup, &index_name, &object_isComponent, &object_isForcedNoComponent, &object_meshIndex);
+					GetComponent(&forcedNoComponentGroup, exportObject->GetID(), &index_name, &object_isComponent, &object_isForcedNoComponent, &object_meshIndex);
 					WriteBool(&fobject, &object_isComponent);
 					WriteBool(&fobject, &object_isForcedNoComponent);
 					object_isHidden = exportObject->IsVisible() == CKHIDE;
@@ -802,9 +864,24 @@ namespace func_namespace {
 				if (mesh->GetFaceCount() == 0) return FALSE;	//no face
 				return TRUE;
 			}
-			void GetComponent(CKGroup* grp, std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id) {
+			void GetComponent(std::vector<CK_ID>* grp, CK_ID objId, std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id) {
 				*is_component = FALSE;
 				*is_forced_no_component = FALSE;
+				*gottten_id = 0;
+				for (uint32_t i = 0; i < CONST_ExternalComponent_Length; i++) {
+					if (name->starts_with(CONST_ExternalComponent[i])) {
+						//comfirm component
+						*is_component = TRUE;
+						*gottten_id = i;
+						break;
+					}
+				}
+
+				if (std::find(grp->begin(), grp->end(), objId) != grp->end()) {
+					// change it to forced no component
+					*is_component = FALSE;
+					*is_forced_no_component = TRUE;
+				}
 			}
 			BOOL IsExternalTexture(CKContext* ctx, CKTexture* texture, std::string* name) {
 				CK_TEXTURE_SAVEOPTIONS options;

@@ -13,9 +13,8 @@ config_manager::~config_manager() {
 }
 
 void config_manager::GetConfigFilePath(std::filesystem::path* path) {
-	GetModuleFileName(NULL, func_namespace::ConfigCache, CACHE_SIZE);
-	*path = func_namespace::ConfigCache;
-	path->replace_filename("BallanceVirtoolsHelper.cfg");
+	func_namespace::GetVirtoolsFolder(path);
+	*path /= "BallanceVirtoolsHelper.cfg";
 }
 void config_manager::InitConfig() {
 	CurrentConfig.func_mapping_bm_ExternalTextureFolder = "";
