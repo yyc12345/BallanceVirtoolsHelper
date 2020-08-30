@@ -88,7 +88,7 @@ namespace func_namespace {
 						GroupIntoWithCreation(ctx, obj, "Sound_RollID_03");
 						continue;
 					}
-					if (objName.starts_with("A_Floor")) {
+					if (objName.starts_with("A_Wood")) {
 						GroupIntoWithCreation(ctx, obj, "Phys_Floors");
 						GroupIntoWithCreation(ctx, obj, "Sound_HitID_02");
 						GroupIntoWithCreation(ctx, obj, "Sound_RollID_02");
