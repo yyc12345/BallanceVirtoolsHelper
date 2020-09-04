@@ -79,7 +79,7 @@ It is not recommended to compile or debug this project by yourself, because some
 
 It takes some time to compile this project. You first need the Virtools 3.5 SDK, and then you need to change many absolute paths to your SDK path in the project settings, such as external references, link libraries, etc.
 
-In addition, the files that need to be deployed in the `BMMeshes` folder under the Virtools root directory are shared with another project of mine, which can be found in [here](https://github.com/yyc12345/BallanceBlenderHelper/tree/master/ ballance_blender_plugin/meshes) found. You need to copy it manually.
+In addition, the files that need to be deployed in the `BMMeshes` folder under the Virtools root directory are shared with another project of mine, which can be found in [here](https://github.com/yyc12345/BallanceBlenderHelper/tree/master/ballance_blender_plugin/meshes) found. You need to copy it manually.
 
 If you manually modify the layout information of the configuration file in the code (for example, adding new fields), please delete the configuration file, or increase the version number of the configuration file, and reconfigure the settings in Virtools.
 
