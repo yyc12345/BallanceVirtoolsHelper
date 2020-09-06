@@ -1032,11 +1032,14 @@ namespace func_namespace {
 							material->SetPower(0);
 
 							//disable for temporary fix
-							material->EnableAlphaTest(FALSE);
+							material->EnableAlphaTest(TRUE);
+							material->SetAlphaFunc(VXCMP_GREATEREQUAL);
+							material->SetAlphaRef(1);
 							material->EnableAlphaBlend(TRUE);
 							material->SetSourceBlend(VXBLEND_SRCALPHA);
 							material->SetDestBlend(VXBLEND_INVSRCALPHA);
-							material->EnableZWrite(FALSE);
+							material->EnableZWrite(TRUE);
+							material->SetZFunc(VXCMP_LESSEQUAL);
 							//original code
 							//material->EnableAlphaTest(FALSE);
 							//material->SetAlphaFunc(VXCMP_GREATER);
@@ -1130,11 +1133,14 @@ namespace func_namespace {
 							material->SetPower(0);
 
 							//disable for temporary fix
-							material->EnableAlphaTest(FALSE);
+							material->EnableAlphaTest(TRUE);
+							material->SetAlphaFunc(VXCMP_GREATEREQUAL);
+							material->SetAlphaRef(1);
 							material->EnableAlphaBlend(TRUE);
 							material->SetSourceBlend(VXBLEND_SRCALPHA);
 							material->SetDestBlend(VXBLEND_INVSRCALPHA);
-							material->EnableZWrite(FALSE);
+							material->EnableZWrite(TRUE);
+							material->SetZFunc(VXCMP_LESSEQUAL);
 							//original code
 							//material->EnableAlphaTest();
 							//material->SetAlphaFunc(VXCMP_GREATER);
@@ -1194,11 +1200,14 @@ namespace func_namespace {
 							material->SetPower(13);
 
 							//disable for temporary fix
-							material->EnableAlphaTest(FALSE);
+							material->EnableAlphaTest(TRUE);
+							material->SetAlphaFunc(VXCMP_GREATEREQUAL);
+							material->SetAlphaRef(1);
 							material->EnableAlphaBlend(TRUE);
 							material->SetSourceBlend(VXBLEND_SRCALPHA);
 							material->SetDestBlend(VXBLEND_INVSRCALPHA);
-							material->EnableZWrite(FALSE);
+							material->EnableZWrite(TRUE);
+							material->SetZFunc(VXCMP_LESSEQUAL);
 							//original code
 							//material->EnableAlphaTest(FALSE);
 							//material->SetAlphaFunc(VXCMP_GREATER);
