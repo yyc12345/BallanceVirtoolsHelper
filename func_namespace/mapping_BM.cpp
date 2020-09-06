@@ -1031,14 +1031,21 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(0);
 
+							//disable for temporary fix
 							material->EnableAlphaTest(FALSE);
-							material->SetAlphaFunc(VXCMP_GREATER);
-							material->SetAlphaRef(1);
-							material->EnableAlphaBlend();
+							material->EnableAlphaBlend(TRUE);
 							material->SetSourceBlend(VXBLEND_SRCALPHA);
-							material->SetDestBlend(VXBLEND_INVSRCCOLOR);
-							material->EnableZWrite();
-							material->SetZFunc(VXCMP_LESSEQUAL);
+							material->SetDestBlend(VXBLEND_INVSRCALPHA);
+							material->EnableZWrite(FALSE);
+							//original code
+							//material->EnableAlphaTest(FALSE);
+							//material->SetAlphaFunc(VXCMP_GREATER);
+							//material->SetAlphaRef(1);
+							//material->EnableAlphaBlend();
+							//material->SetSourceBlend(VXBLEND_SRCALPHA);
+							//material->SetDestBlend(VXBLEND_INVSRCCOLOR);
+							//material->EnableZWrite(FALSE);
+							//material->SetZFunc(VXCMP_LESSEQUAL);
 							break;
 						case 14:    //Column_blue.bmp
 							color.r = 0; color.g = 0; color.b = 0;
@@ -1122,14 +1129,21 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(0);
 
-							material->EnableAlphaTest();
-							material->SetAlphaFunc(VXCMP_GREATER);
-							material->SetAlphaRef(1);
-							material->EnableAlphaBlend();
+							//disable for temporary fix
+							material->EnableAlphaTest(FALSE);
+							material->EnableAlphaBlend(TRUE);
 							material->SetSourceBlend(VXBLEND_SRCALPHA);
-							material->SetDestBlend(VXBLEND_INVSRCCOLOR);
-							material->EnableZWrite();
-							material->SetZFunc(VXCMP_LESSEQUAL);
+							material->SetDestBlend(VXBLEND_INVSRCALPHA);
+							material->EnableZWrite(FALSE);
+							//original code
+							//material->EnableAlphaTest();
+							//material->SetAlphaFunc(VXCMP_GREATER);
+							//material->SetAlphaRef(1);
+							//material->EnableAlphaBlend();
+							//material->SetSourceBlend(VXBLEND_SRCALPHA);
+							//material->SetDestBlend(VXBLEND_INVSRCCOLOR);
+							//material->EnableZWrite(FALSE);
+							//material->SetZFunc(VXCMP_LESSEQUAL);
 							material->SetTwoSided(TRUE);
 							break;
 							//case 36:    //Logo.bmp
@@ -1179,14 +1193,21 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(13);
 
+							//disable for temporary fix
 							material->EnableAlphaTest(FALSE);
-							material->SetAlphaFunc(VXCMP_GREATER);
-							material->SetAlphaRef(1);
-							material->EnableAlphaBlend();
+							material->EnableAlphaBlend(TRUE);
 							material->SetSourceBlend(VXBLEND_SRCALPHA);
-							material->SetDestBlend(VXBLEND_INVSRCCOLOR);
-							material->EnableZWrite();
-							material->SetZFunc(VXCMP_LESSEQUAL);
+							material->SetDestBlend(VXBLEND_INVSRCALPHA);
+							material->EnableZWrite(FALSE);
+							//original code
+							//material->EnableAlphaTest(FALSE);
+							//material->SetAlphaFunc(VXCMP_GREATER);
+							//material->SetAlphaRef(1);
+							//material->EnableAlphaBlend();
+							//material->SetSourceBlend(VXBLEND_SRCALPHA);
+							//material->SetDestBlend(VXBLEND_INVSRCCOLOR);
+							//material->EnableZWrite(TRUE);
+							//material->SetZFunc(VXCMP_LESSEQUAL);
 							break;
 						case 63:    //Stick_Stripes.bmp
 							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
