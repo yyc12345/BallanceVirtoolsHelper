@@ -1030,6 +1030,7 @@ namespace func_namespace {
 							color.r = 80 / 255.0; color.g = 80 / 255.0; color.b = 80 / 255.0;
 							material->SetEmissive(color);
 							material->SetPower(0);
+
 							material->EnableAlphaTest(FALSE);
 							material->SetAlphaFunc(VXCMP_GREATER);
 							material->SetAlphaRef(1);
@@ -1120,6 +1121,7 @@ namespace func_namespace {
 							color.r = 1; color.g = 1; color.b = 1;
 							material->SetEmissive(color);
 							material->SetPower(0);
+
 							material->EnableAlphaTest();
 							material->SetAlphaFunc(VXCMP_GREATER);
 							material->SetAlphaRef(1);
@@ -1176,6 +1178,7 @@ namespace func_namespace {
 							color.r = 124 / 255.0; color.g = 134 / 255.0; color.b = 150 / 255.0;
 							material->SetEmissive(color);
 							material->SetPower(13);
+
 							material->EnableAlphaTest(FALSE);
 							material->SetAlphaFunc(VXCMP_GREATER);
 							material->SetAlphaRef(1);

@@ -37,7 +37,7 @@ namespace func_namespace {
 
 	void DisplayLastMessage(BOOL status, CKContext* ctx) {
 		if (status) {
-			ctx->OutputToConsole("Execution OK", FALSE);
+			ctx->OutputToConsole("Execution OK", TRUE);
 			ctx->OutputToInfo("Execution OK");
 		} else {
 			ctx->OutputToConsoleExBeep("Execution failed, reason: %s", ExecutionResult);
