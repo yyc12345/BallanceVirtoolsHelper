@@ -153,7 +153,7 @@ namespace func_namespace {
 				// get file
 				std::string filepath;
 				std::filesystem::path file, temp, tempTexture;
-				if (!func_namespace::OpenFileDialog(&filepath, "BM file(*.bm)\0*.bm\0", "bm", TRUE)) {
+				if (!func_namespace::OpenFileDialog(&filepath, "BM file(*.bmx)\0*.bmx\0", "bmx", TRUE)) {
 					strcpy(func_namespace::ExecutionResult, "No selected BM file.");
 					return FALSE;
 				}

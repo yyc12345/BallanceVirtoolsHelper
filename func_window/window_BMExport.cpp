@@ -121,7 +121,7 @@ namespace func_window {
 	}
 	void window_BMExport::On_Browse_BM() {
 		std::string filepath;
-		if (func_namespace::OpenFileDialog(&filepath, "BM file(*.bm)\0*.bm\0", "bm", FALSE))
+		if (func_namespace::OpenFileDialog(&filepath, "BM file(*.bmx)\0*.bmx\0", "bmx", FALSE))
 			m_BM_File.SetWindowTextA(filepath.c_str());
 	}
 	void window_BMExport::On_Dialog_OK() {
