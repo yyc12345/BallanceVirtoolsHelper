@@ -18,16 +18,13 @@ namespace func_namespace {
 				CKBeObject* cache = NULL;
 				CK3dEntity* obj = NULL;
 				int count = group->GetObjectCount();
-				DWORD objFlag;
 				CK_CLASSID objClass;
 				for (int i = 0; i < count; i++) {
 					cache = group->GetObjectA(i);
 					objClass = cache->GetClassID();
 					if (objClass == CKCID_3DENTITY || objClass == CKCID_3DOBJECT) {
 						obj = (CK3dEntity*)cache;
-						objFlag = obj->GetMoveableFlags();
-						objFlag |= 8;
-						obj->SetMoveableFlags(objFlag);
+						obj->ModifyMoveableFlags(8, 0);
 					}
 				}
 

@@ -182,5 +182,9 @@ void MenuCallback(int commandID) {
 			break;
 	}
 
+	//we need a force refresh and mark change
+	s_Plugininterface->DoOneRenderNow();
+	s_Plugininterface->SetProjectModified(TRUE);
+
 	func_namespace::DisplayLastMessage(runResult, s_Plugininterface->GetCKContext());
 }

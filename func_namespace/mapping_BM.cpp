@@ -1031,24 +1031,14 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(0);
 
-							//disable for temporary fix
-							material->EnableAlphaTest(TRUE);
-							material->SetAlphaFunc(VXCMP_GREATEREQUAL);
+							material->EnableAlphaTest(FALSE);
+							material->SetAlphaFunc(VXCMP_GREATER);
 							material->SetAlphaRef(1);
 							material->EnableAlphaBlend(TRUE);
 							material->SetSourceBlend(VXBLEND_SRCALPHA);
 							material->SetDestBlend(VXBLEND_INVSRCALPHA);
 							material->EnableZWrite(TRUE);
 							material->SetZFunc(VXCMP_LESSEQUAL);
-							//original code
-							//material->EnableAlphaTest(FALSE);
-							//material->SetAlphaFunc(VXCMP_GREATER);
-							//material->SetAlphaRef(1);
-							//material->EnableAlphaBlend();
-							//material->SetSourceBlend(VXBLEND_SRCALPHA);
-							//material->SetDestBlend(VXBLEND_INVSRCCOLOR);
-							//material->EnableZWrite(FALSE);
-							//material->SetZFunc(VXCMP_LESSEQUAL);
 							break;
 						case 14:    //Column_blue.bmp
 							color.r = 0; color.g = 0; color.b = 0;
@@ -1121,7 +1111,6 @@ namespace func_namespace {
 							material->SetPower(0);
 							break;
 						case 34:    //Laterne_Schatten.tga
-						case 35:    //Laterne_Verlauf.tga
 							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
 							material->SetAmbient(color);
 							color.r = 0; color.g = 0; color.b = 0;
@@ -1132,38 +1121,126 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(0);
 
-							//disable for temporary fix
 							material->EnableAlphaTest(TRUE);
-							material->SetAlphaFunc(VXCMP_GREATEREQUAL);
+							material->SetAlphaFunc(VXCMP_GREATER);
 							material->SetAlphaRef(1);
 							material->EnableAlphaBlend(TRUE);
 							material->SetSourceBlend(VXBLEND_SRCALPHA);
 							material->SetDestBlend(VXBLEND_INVSRCALPHA);
 							material->EnableZWrite(TRUE);
 							material->SetZFunc(VXCMP_LESSEQUAL);
-							//original code
-							//material->EnableAlphaTest();
-							//material->SetAlphaFunc(VXCMP_GREATER);
-							//material->SetAlphaRef(1);
-							//material->EnableAlphaBlend();
-							//material->SetSourceBlend(VXBLEND_SRCALPHA);
-							//material->SetDestBlend(VXBLEND_INVSRCCOLOR);
-							//material->EnableZWrite(FALSE);
-							//material->SetZFunc(VXCMP_LESSEQUAL);
+							break;
+						case 35:    //Laterne_Verlauf.tga
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetAmbient(color);
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetDiffuse(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetSpecular(color);
+							color.r = 59 / 255.0; color.g = 59 / 255.0; color.b = 59 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(0);
+
+							material->EnableAlphaTest(TRUE);
+							material->SetAlphaFunc(VXCMP_GREATER);
+							material->SetAlphaRef(1);
+							material->EnableAlphaBlend(TRUE);
+							material->SetSourceBlend(VXBLEND_SRCALPHA);
+							material->SetDestBlend(VXBLEND_INVSRCALPHA);
+							material->EnableZWrite(TRUE);
+							material->SetZFunc(VXCMP_LESSEQUAL);
 							material->SetTwoSided(TRUE);
 							break;
 							//case 36:    //Logo.bmp
-							//case 37:    //Metal_stained.bmp
+						case 37:    //Metal_stained.bmp
+							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+							material->SetSpecular(color);
+							color.r = 65 / 255.0; color.g = 65 / 255.0; color.b = 65 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(25);
+							break;
 							//case 38:    //Misc_Ufo.bmp
 							//case 39:    //Misc_UFO_Flash.bmp
 							//case 40:    //Modul03_Floor.bmp
 							//case 41:    //Modul03_Wall.bmp
-							//case 42:    //Modul11_13_Wood.bmp
-							//case 43:    //Modul11_Wood.bmp
-							//case 44:    //Modul15.bmp
-							//case 45:    //Modul16.bmp
-							//case 46:    //Modul18.bmp
-							//case 47:    //Modul18_Gitter.tga
+						case 42:    //Modul11_13_Wood.bmp
+							color.r = 9 / 255.0; color.g = 9 / 255.0; color.b = 9 / 255.0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+							material->SetSpecular(color);
+							color.r = 70 / 255.0; color.g = 70 / 255.0; color.b = 70 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(50);
+						case 43:    //Modul11_Wood.bmp
+							color.r = 9 / 255.0; color.g = 9 / 255.0; color.b = 9 / 255.0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+							material->SetSpecular(color);
+							color.r = 50 / 255.0; color.g = 50 / 255.0; color.b = 50 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(50);
+							break;
+						case 44:    //Modul15.bmp
+							color.r = 16 / 255.0; color.g = 16 / 255.0; color.b = 16 / 255.0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+							material->SetSpecular(color);
+							color.r = 70 / 255.0; color.g = 70 / 255.0; color.b = 70 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(100);
+							break;
+						case 45:    //Modul16.bmp
+							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+							material->SetSpecular(color);
+							color.r = 85 / 255.0; color.g = 85 / 255.0; color.b = 85 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(100);
+							break;
+						case 46:    //Modul18.bmp
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+							material->SetSpecular(color);
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetEmissive(color);
+							material->SetPower(25);
+							break;
+						case 47:    //Modul18_Gitter.tga
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+							material->SetSpecular(color);
+							color.r = 0; color.g = 0; color.b = 0;
+							material->SetEmissive(color);
+							material->SetPower(25);
+
+							material->EnableAlphaTest(TRUE);
+							material->SetAlphaFunc(VXCMP_GREATER);
+							material->SetAlphaRef(1);
+							material->EnableAlphaBlend(TRUE);
+							material->SetSourceBlend(VXBLEND_SRCALPHA);
+							material->SetDestBlend(VXBLEND_INVSRCALPHA);
+							material->EnableZWrite(TRUE);
+							material->SetZFunc(VXCMP_LESSEQUAL);
+							break;
 							//case 48:    //Modul30_d_Seiten.bmp
 							//case 49:    //Particle_Flames.bmp
 							//case 50:    //Particle_Smoke.bmp
@@ -1199,24 +1276,14 @@ namespace func_namespace {
 							material->SetEmissive(color);
 							material->SetPower(13);
 
-							//disable for temporary fix
-							material->EnableAlphaTest(TRUE);
-							material->SetAlphaFunc(VXCMP_GREATEREQUAL);
+							material->EnableAlphaTest(FALSE);
+							material->SetAlphaFunc(VXCMP_GREATER);
 							material->SetAlphaRef(1);
 							material->EnableAlphaBlend(TRUE);
 							material->SetSourceBlend(VXBLEND_SRCALPHA);
 							material->SetDestBlend(VXBLEND_INVSRCALPHA);
 							material->EnableZWrite(TRUE);
 							material->SetZFunc(VXCMP_LESSEQUAL);
-							//original code
-							//material->EnableAlphaTest(FALSE);
-							//material->SetAlphaFunc(VXCMP_GREATER);
-							//material->SetAlphaRef(1);
-							//material->EnableAlphaBlend();
-							//material->SetSourceBlend(VXBLEND_SRCALPHA);
-							//material->SetDestBlend(VXBLEND_INVSRCCOLOR);
-							//material->EnableZWrite(TRUE);
-							//material->SetZFunc(VXCMP_LESSEQUAL);
 							break;
 						case 63:    //Stick_Stripes.bmp
 							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
@@ -1247,7 +1314,17 @@ namespace func_namespace {
 							//case 69:    //Tut_Pfeil01.tga
 							//case 70:    //Tut_Pfeil_Hoch.tga
 							//case 71:    //Wolken_intro.tga
-							//case 72:    //Wood_Metal.bmp
+						case 72:    //Wood_Metal.bmp
+							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+							material->SetSpecular(color);
+							color.r = 40 / 255.0; color.g = 40 / 255.0; color.b = 40 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(0);
+							break;
 							//case 73:    //Wood_MetalStripes.bmp
 							//case 74:    //Wood_Misc.bmp
 							//case 75:    //Wood_Nailed.bmp
@@ -1264,7 +1341,17 @@ namespace func_namespace {
 							material->SetPower(25);
 							break;
 							//case 78:    //Wood_Plain.bmp
-							//case 79:    //Wood_Plain2.bmp
+						case 79:    //Wood_Plain2.bmp
+							color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+							material->SetAmbient(color);
+							color.r = 1; color.g = 1; color.b = 1;
+							material->SetDiffuse(color);
+							color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+							material->SetSpecular(color);
+							color.r = 50 / 255.0; color.g = 50 / 255.0; color.b = 50 / 255.0;
+							material->SetEmissive(color);
+							material->SetPower(50);
+							break;
 							//case 80:    //Wood_Raft.bmp
 
 					}
