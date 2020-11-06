@@ -16,6 +16,7 @@
 #include "../config_manager.h"
 #include "../func_helper.h"
 #include "../func_window/window_BMExport.h"
+#include "mapping_Group.h"
 
 #pragma warning(disable:4305)
 
@@ -222,6 +223,8 @@ namespace func_namespace {
 				CK3dObject* currentObject = NULL;
 				VxMatrix world_matrix;
 				BOOL is_component, is_forced_no_component, is_hidden;
+				uint32_t group_list_count;
+				std::string group_name_cache;
 				uint32_t mesh_index;
 
 
@@ -386,6 +389,16 @@ namespace func_namespace {
 						for (int j = 0; j < 4; j++)
 							ReadFloat(&fobject, &(world_matrix[i][j]));
 					currentObject->SetWorldMatrix(world_matrix);
+
+					ReadInt(&fobject, &group_list_count);
+					for (uint32_t i = 0; i < group_list_count; i++) {
+						ReadString(&fobject, &group_name_cache);
+						func_namespace::mapping::Group::GroupIntoWithCreation(
+							ctx,
+							currentObject,
+							group_name_cache.c_str()
+						);
+					}
 
 					ReadInt(&fobject, &mesh_index);
 					if (is_component) LoadComponenetMesh(currentObject, ctx, mesh_index);
@@ -566,6 +579,10 @@ namespace func_namespace {
 				std::vector<CK_ID> objectList, meshList, materialList, textureList;
 				std::ofstream findex, fobject, fmesh, fmaterial, ftexture;
 
+				//used by grouping catch
+				CKGroup* grouping_data_target;
+				std::string* grouping_data_name;
+				int grouping_group_count;
 				//used by filter
 				std::string filter_name;
 				CKGroup* filter_group;
@@ -582,6 +599,8 @@ namespace func_namespace {
 				BOOL object_isComponent, object_isForcedNoComponent, object_isHidden;
 				uint32_t object_meshIndex;
 				VxMatrix object_worldMatrix;
+				uint64_t object_filepointer_start, object_filepointer_end;
+				uint32_t object_group_list_count;
 				//used by mesh
 				CKMesh* exportMesh;
 				VxVector mesh_vector;
@@ -616,6 +635,31 @@ namespace func_namespace {
 						forcedNoComponentGroup.push_back(ck_instance_forcedNoComponentGroup->GetObjectA(i)->GetID());
 					}
 				}
+
+				// get all grouping data
+				std::unordered_multimap<CK_ID, std::string*> grouping_data;
+				std::vector<std::string*> alloced_grouping_string;
+				XObjectPointerArray groupArray = ctx->GetObjectListByType(CKCID_GROUP, FALSE);
+				for (auto item = groupArray.Begin(); item != groupArray.End(); ++item) {
+					grouping_data_target = (CKGroup*)(*item);
+					if (grouping_data_target->GetName() == NULL) continue; // skip group with blank name
+					if ((!cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.empty()) &&
+						cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName == grouping_data_target->GetName())
+						continue; // we don't need NoComponentGroup data
+
+					grouping_data_name = new std::string();
+					*grouping_data_name = grouping_data_target->GetName();
+
+					// add into alloc vector
+					alloced_grouping_string.push_back(grouping_data_name);
+
+					// iterate group object
+					grouping_group_count = grouping_data_target->GetObjectCount();
+					for (int i = 0; i < grouping_group_count; ++i)
+						grouping_data.insert({ grouping_data_target->GetObject(i)->GetID(), grouping_data_name });
+
+				}
+
 
 				// filter obj first
 				switch (bm_export_window->OUT_Mode) {
@@ -681,6 +725,23 @@ namespace func_namespace {
 							WriteFloat(&fobject, &object_worldMatrix[i][j]);
 						}
 					}
+
+					// write group list
+					// record length position and ready back to there to write count
+					object_group_list_count = 0;
+					object_filepointer_start = fobject.tellp();
+					WriteInt(&fobject, &object_group_list_count);
+					auto grouping_data_range = grouping_data.equal_range(exportObject->GetID());
+					for (auto it = grouping_data_range.first; it != grouping_data_range.second; ++it) {
+						WriteString(&fobject, it->second);
+						++object_group_list_count;
+					}
+					// backups current position, back to count position, write it and back to current position
+					object_filepointer_end = fobject.tellp();
+					fobject.seekp(object_filepointer_start);
+					WriteInt(&fobject, &object_group_list_count);
+					fobject.seekp(object_filepointer_end);
+
 					if (!object_isComponent) {
 						object_meshIndex = TryAddWithIndex(&meshList, exportObject->GetMesh(0)->GetID());
 					}
@@ -814,6 +875,11 @@ namespace func_namespace {
 				}
 				ftexture.close();
 				findex.close();
+
+				// release alloced grouping data string
+				for (auto it = alloced_grouping_string.begin(); it != alloced_grouping_string.end(); it++) {
+					delete ((std::string*)(*it));
+				}
 
 				// ============================================write zip
 				zip_handle::Compress(&file, &temp);

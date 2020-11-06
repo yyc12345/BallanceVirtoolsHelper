@@ -8,7 +8,7 @@
 #include <unzip.h>
 #include <zip.h>
 
-#define BM_FILE_VERSION 12
+#define BM_FILE_VERSION 13
 
 namespace func_namespace {
 	namespace mapping {
