@@ -3,7 +3,7 @@
 
 config_manager::config_manager() :
 	CurrentConfig(),
-	config_version(12) {
+	config_version(13) {
 	;
 }
 config_manager::~config_manager() {
@@ -19,6 +19,7 @@ void config_manager::GetConfigFilePath(std::filesystem::path* path) {
 void config_manager::InitConfig() {
 	CurrentConfig.func_mapping_bm_ExternalTextureFolder = "";
 	CurrentConfig.func_mapping_bm_NoComponentGroupName = "";
+	CurrentConfig.func_mapping_bm_OmittedMaterialPrefix = "";
 
 	CurrentConfig.window_mapping_bmExport_mode = 2;
 	CurrentConfig.window_mapping_bmExport_filename = "";
@@ -43,6 +44,7 @@ void config_manager::SaveConfig() {
 	//write data
 	WriteString(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
 	WriteString(f, &CurrentConfig.func_mapping_bm_NoComponentGroupName);
+	WriteString(f, &CurrentConfig.func_mapping_bm_OmittedMaterialPrefix);
 
 	WriteInt(f, &CurrentConfig.window_mapping_bmExport_mode);
 	WriteString(f, &CurrentConfig.window_mapping_bmExport_filename);
@@ -76,6 +78,7 @@ void config_manager::LoadConfig() {
 	//read data
 	ReadString(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
 	ReadString(f, &CurrentConfig.func_mapping_bm_NoComponentGroupName);
+	ReadString(f, &CurrentConfig.func_mapping_bm_OmittedMaterialPrefix);
 
 	ReadInt(f, &CurrentConfig.window_mapping_bmExport_mode);
 	ReadString(f, &CurrentConfig.window_mapping_bmExport_filename);

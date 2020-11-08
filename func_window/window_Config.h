@@ -28,6 +28,7 @@ namespace func_window {
 
 		CEdit m_BM_ExternalTextureFolder;
 		CEdit m_BM_NoComponentGroup;
+		CEdit m_BM_OmittedMaterialPrefix;
 
 		afx_msg void On_BM_ExternalTextureFolderBrowse();
 		afx_msg void On_Dialog_OK();

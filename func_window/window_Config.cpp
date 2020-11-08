@@ -21,6 +21,7 @@ namespace func_window {
 	void window_Config::DoDataExchange(CDataExchange* pDX) {
 		DDX_Control(pDX, IDC_EDIT1, m_BM_ExternalTextureFolder);
 		DDX_Control(pDX, IDC_EDIT2, m_BM_NoComponentGroup);
+		DDX_Control(pDX, IDC_EDIT3, m_BM_OmittedMaterialPrefix);
 	}
 
 
@@ -36,6 +37,7 @@ namespace func_window {
 		// load config
 		m_BM_ExternalTextureFolder.SetWindowTextA(cfg_manager->CurrentConfig.func_mapping_bm_ExternalTextureFolder.c_str());
 		m_BM_NoComponentGroup.SetWindowTextA(cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str());
+		m_BM_OmittedMaterialPrefix.SetWindowTextA(cfg_manager->CurrentConfig.func_mapping_bm_OmittedMaterialPrefix.c_str());
 		return TRUE;  // return TRUE unless you set the focus to a control
 					  // 异常: OCX 属性页应返回 FALSE
 	}
@@ -54,6 +56,8 @@ namespace func_window {
 		cfg_manager->CurrentConfig.func_mapping_bm_ExternalTextureFolder = func_namespace::ExecutionCache;
 		m_BM_NoComponentGroup.GetWindowTextA(func_namespace::ExecutionCache, CACHE_SIZE);
 		cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName = func_namespace::ExecutionCache;
+		m_BM_OmittedMaterialPrefix.GetWindowTextA(func_namespace::ExecutionCache, CACHE_SIZE);
+		cfg_manager->CurrentConfig.func_mapping_bm_OmittedMaterialPrefix = func_namespace::ExecutionCache;
 
 		cfg_manager->SaveConfig();
 

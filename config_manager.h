@@ -9,6 +9,7 @@ struct config_body {
 	//func_mapping_bm
 	std::string func_mapping_bm_ExternalTextureFolder;
 	std::string func_mapping_bm_NoComponentGroupName;
+	std::string func_mapping_bm_OmittedMaterialPrefix;
 	//window_mapping_bm_export
 	int window_mapping_bmExport_mode;	//0 is object, 1 is group, 2 is all
 	std::string window_mapping_bmExport_filename;

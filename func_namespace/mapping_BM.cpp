@@ -994,6 +994,7 @@ namespace func_namespace {
 				CKTexture* texture = NULL; CKMaterial* material = NULL;
 				std::filesystem::path filepath;
 				std::string filename;
+				std::string materialname;
 				VxColor color;
 				color.a = 1;
 
@@ -1024,8 +1025,18 @@ namespace func_namespace {
 				count = objArray2.Size();
 				for (int i = 0; i < count; i++) {
 					material = (CKMaterial*)objArray2[i];
-					texture = material->GetTexture(0);
 
+					// detect omitted material
+					if (material->GetName() != NULL) {
+						materialname = material->GetName();
+						if ((!cfg_manager->CurrentConfig.func_mapping_bm_OmittedMaterialPrefix.empty()) && 
+							materialname.starts_with(cfg_manager->CurrentConfig.func_mapping_bm_OmittedMaterialPrefix)) {
+							continue;
+						}
+					}
+					
+					// get texture index
+					texture = material->GetTexture(0);
 					if (texture == NULL) continue;
 					auto target = textureList.find(texture->GetID());
 					if (target == textureList.end())
