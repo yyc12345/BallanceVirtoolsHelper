@@ -96,7 +96,7 @@
       <AdditionalDependencies>vxmath.lib;DllEditor.lib;ck2.lib;InterfaceControls.lib;CKControls.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>BallanceVirtoolsHelper.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>E:\Virtools\Virtools Dev 5.0\InterfacePlugins\$(ProjectName).pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>E:\Virtools\Virtools Dev 3.5\InterfacePlugins\$(ProjectName).pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
