@@ -123,6 +123,12 @@ namespace func_namespace {
 					}
 					if (objName.starts_with("PR_Resetpoint")) {
 						GroupIntoWithCreation(ctx, obj, "PR_Resetpoints");
+
+						// solve the problem that the sector is not be created
+						// when this sector don't contain any elements
+						// sector group
+						sprintf(func_namespace::ExecutionCache, "Sector_0%c", objName[13 - 1 + 3]); // 13 is "PR_Resetpoint"'s length.
+						GroupIntoWithCreation(ctx, obj, func_namespace::ExecutionCache);
 						continue;
 					}
 
