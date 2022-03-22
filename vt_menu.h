@@ -1,5 +1,4 @@
-#if !defined(_YYCDLL_VT_MENU_H__IMPORTED_)
-#define _YYCDLL_VT_MENU_H__IMPORTED_
+#pragma once
 
 #include "stdafx.h"
 
@@ -10,5 +9,3 @@ void RemoveMenu();
 void UpdateMenu();
 
 void MenuCallback(int commandID);
-
-#endif

@@ -1,5 +1,3 @@
-#if !defined(_YYCDLL_STDAFX_H__IMPORTED_)
-#define _YYCDLL_STDAFX_H__IMPORTED_
 // stdafx.h : include file for standard system include files,
 //  or project specific include files that are used frequently, but
 //      are changed infrequently
@@ -40,5 +38,3 @@
 #include "VEP_ScriptActionMenu.h"
 #include "VEP_KeyboardShortcutManager.h"
 #include "VEP_All.h"
-
-#endif

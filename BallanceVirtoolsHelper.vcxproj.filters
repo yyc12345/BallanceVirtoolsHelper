@@ -1,124 +1,181 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
+    <Filter Include="Sources">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="头文件">
+    <Filter Include="Headers">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="资源文件">
+    <Filter Include="Resources">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件\func_namespace">
+    <Filter Include="Headers\features">
       <UniqueIdentifier>{6f809a28-b39f-4cf8-9c3c-23b9db9485d2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\func_namespace">
+    <Filter Include="Sources\features">
       <UniqueIdentifier>{1c21900c-8045-4863-bb0c-499f62223166}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\func_window">
+    <Filter Include="Headers\features\mapping">
+      <UniqueIdentifier>{e1a83fc8-19aa-424e-80d4-fe2e9c502277}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\features\mapping">
+      <UniqueIdentifier>{8652d488-0b1b-469a-bed8-9ed40c852b9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\features\misc">
+      <UniqueIdentifier>{10f7e777-d70f-471b-8e18-be296193f8a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\features\misc">
+      <UniqueIdentifier>{896532ce-0bb9-4743-92e5-ac0ecc460bc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\features\script">
+      <UniqueIdentifier>{a9ddadd4-9cbc-4cf8-9e26-97cc8be2d479}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\features\script">
+      <UniqueIdentifier>{b52b45f1-c094-4205-af02-408d5ba45f40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\mfcwindows">
       <UniqueIdentifier>{621de344-8d01-4caa-a2da-400ee41aa66d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\func_window">
+    <Filter Include="Sources\mfcwindows">
       <UniqueIdentifier>{6cbd239d-10f4-49d5-854e-1138ec7db805}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\utils">
+      <UniqueIdentifier>{fb3f8b24-b9b6-4c2f-8159-55a58bfd2fcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\utils">
+      <UniqueIdentifier>{30c2b74b-3acc-4a62-9344-2fe710b5d412}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
-      <Filter>头文件</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="vt_menu.h">
-      <Filter>头文件</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="func_namespace\script_CKDataArray.h">
-      <Filter>头文件\func_namespace</Filter>
+    <ClInclude Include="bvh\features\script\ck_data_array.h">
+      <Filter>Headers\features\script</Filter>
     </ClInclude>
-    <ClInclude Include="func_helper.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="bvh\utils\win32_helper.h">
+      <Filter>Headers\utils</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>头文件</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="func_namespace\misc_SpecialNMO.h">
-      <Filter>头文件\func_namespace</Filter>
+    <ClInclude Include="bvh\features\misc\special_nmo.h">
+      <Filter>Headers\features\misc</Filter>
     </ClInclude>
-    <ClInclude Include="config_manager.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="bvh\utils\config_manager.h">
+      <Filter>Headers\utils</Filter>
     </ClInclude>
-    <ClInclude Include="func_namespace\mapping_BM.h">
-      <Filter>头文件\func_namespace</Filter>
+    <ClInclude Include="bvh\features\mapping\bmfile.h">
+      <Filter>Headers\features\mapping</Filter>
     </ClInclude>
-    <ClInclude Include="func_namespace\mapping_Group.h">
-      <Filter>头文件\func_namespace</Filter>
+    <ClInclude Include="bvh\features\mapping\grouping.h">
+      <Filter>Headers\features\mapping</Filter>
     </ClInclude>
-    <ClInclude Include="func_namespace\mapping_Shadow.h">
-      <Filter>头文件\func_namespace</Filter>
+    <ClInclude Include="bvh\features\mapping\shadow.h">
+      <Filter>Headers\features\mapping</Filter>
     </ClInclude>
-    <ClInclude Include="func_window\window_ConvertEncoding.h">
-      <Filter>头文件\func_window</Filter>
+    <ClInclude Include="bvh\mfcwindows\convert_encoding.h">
+      <Filter>Headers\mfcwindows</Filter>
     </ClInclude>
-    <ClInclude Include="func_namespace\misc_ConvertEncoding.h">
-      <Filter>头文件\func_namespace</Filter>
+    <ClInclude Include="bvh\features\misc\convert_encoding.h">
+      <Filter>Headers\features\misc</Filter>
     </ClInclude>
-    <ClInclude Include="func_window\window_BMExport.h">
-      <Filter>头文件\func_window</Filter>
+    <ClInclude Include="bvh\mfcwindows\bmfile_export.h">
+      <Filter>Headers\mfcwindows</Filter>
     </ClInclude>
-    <ClInclude Include="func_window\window_Config.h">
-      <Filter>头文件\func_window</Filter>
+    <ClInclude Include="bvh\mfcwindows\bvh_config.h">
+      <Filter>Headers\mfcwindows</Filter>
+    </ClInclude>
+    <ClInclude Include="bvh\utils\string_helper.h">
+      <Filter>Headers\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="bvh\utils\error_proc.h">
+      <Filter>Headers\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="bvh\utils\param_package.h">
+      <Filter>Headers\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="bvh\utils\zip_helper.h">
+      <Filter>Headers\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="vt_menu.cpp">
-      <Filter>源文件</Filter>
+      <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="func_namespace\script_CKDataArray.cpp">
-      <Filter>源文件\func_namespace</Filter>
+    <ClCompile Include="bvh\features\script\ck_data_array.cpp">
+      <Filter>Sources\features\script</Filter>
     </ClCompile>
-    <ClCompile Include="func_helper.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="bvh\utils\win32_helper.cpp">
+      <Filter>Sources\utils</Filter>
     </ClCompile>
-    <ClCompile Include="func_namespace\misc_SpecialNMO.cpp">
-      <Filter>源文件\func_namespace</Filter>
+    <ClCompile Include="bvh\features\misc\special_nmo.cpp">
+      <Filter>Sources\features\misc</Filter>
     </ClCompile>
-    <ClCompile Include="config_manager.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="bvh\utils\config_manager.cpp">
+      <Filter>Sources\utils</Filter>
     </ClCompile>
-    <ClCompile Include="func_namespace\mapping_BM.cpp">
-      <Filter>源文件\func_namespace</Filter>
+    <ClCompile Include="bvh\features\mapping\bmfile_shared.cpp">
+      <Filter>Sources\features\mapping</Filter>
     </ClCompile>
-    <ClCompile Include="func_namespace\mapping_Group.cpp">
-      <Filter>源文件\func_namespace</Filter>
+    <ClCompile Include="bvh\features\mapping\grouping.cpp">
+      <Filter>Sources\features\mapping</Filter>
     </ClCompile>
-    <ClCompile Include="func_namespace\mapping_Shadow.cpp">
-      <Filter>源文件\func_namespace</Filter>
+    <ClCompile Include="bvh\features\mapping\shadow.cpp">
+      <Filter>Sources\features\mapping</Filter>
     </ClCompile>
-    <ClCompile Include="func_window\window_ConvertEncoding.cpp">
-      <Filter>源文件\func_window</Filter>
+    <ClCompile Include="bvh\mfcwindows\convert_encoding.cpp">
+      <Filter>Sources\mfcwindows</Filter>
     </ClCompile>
-    <ClCompile Include="func_namespace\misc_ConvertEncoding.cpp">
-      <Filter>源文件\func_namespace</Filter>
+    <ClCompile Include="bvh\features\misc\convert_encoding.cpp">
+      <Filter>Sources\features\misc</Filter>
     </ClCompile>
-    <ClCompile Include="func_window\window_BMExport.cpp">
-      <Filter>源文件\func_window</Filter>
+    <ClCompile Include="bvh\mfcwindows\bmfile_export.cpp">
+      <Filter>Sources\mfcwindows</Filter>
     </ClCompile>
-    <ClCompile Include="func_window\window_Config.cpp">
-      <Filter>源文件\func_window</Filter>
+    <ClCompile Include="bvh\mfcwindows\bvh_config.cpp">
+      <Filter>Sources\mfcwindows</Filter>
+    </ClCompile>
+    <ClCompile Include="bvh\utils\string_helper.cpp">
+      <Filter>Sources\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="bvh\utils\error_proc.cpp">
+      <Filter>Sources\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="bvh\utils\param_package.cpp">
+      <Filter>Sources\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="bvh\utils\zip_helper.cpp">
+      <Filter>Sources\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="bvh\features\mapping\bmfile_fix_texture.cpp">
+      <Filter>Sources\features\mapping</Filter>
+    </ClCompile>
+    <ClCompile Include="bvh\features\mapping\bmfile_export.cpp">
+      <Filter>Sources\features\mapping</Filter>
+    </ClCompile>
+    <ClCompile Include="bvh\features\mapping\bmfile_import.cpp">
+      <Filter>Sources\features\mapping</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="BallanceVirtoolsHelper.def">
-      <Filter>源文件</Filter>
+      <Filter>Sources</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BallanceVirtoolsHelper.rc">
-      <Filter>资源文件</Filter>
+      <Filter>Resources</Filter>
     </ResourceCompile>
   </ItemGroup>
 </Project>

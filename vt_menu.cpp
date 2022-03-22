@@ -1,25 +1,25 @@
 #include "vt_menu.h"
-#include "func_helper.h"
+#include "bvh/utils/win32_helper.h"
 
 //=============func import
 
-#include "func_namespace/script_CKDataArray.h"
-#include "func_namespace/misc_SpecialNMO.h"
-#include "func_namespace/mapping_BM.h"
-#include "func_namespace/mapping_Group.h"
-#include "func_namespace/mapping_Shadow.h"
-#include "func_namespace/misc_ConvertEncoding.h"
+#include "bvh/features/script//ck_data_array.h"
+#include "bvh/features/misc/special_nmo.h"
+#include "bvh/features/mapping/bmfile.h"
+#include "bvh/features/mapping/grouping.h"
+#include "bvh/features/mapping/shadow.h"
+#include "bvh/features/misc/convert_encoding.h"
 
-#include "func_window/window_Config.h"
+#include "bvh/mfcwindows/bvh_config.h"
 
 //=============func import
 
 extern PluginInterface* s_Plugininterface;
+extern bvh::utils::config_manager* cfg_manager;
 
 CMenu* s_MappingMenu = NULL;
 CMenu* s_ScriptMenu = NULL;
 CMenu* s_MiscMenu = NULL;
-
 
 void PluginCallback(PluginInfo::CALLBACK_REASON reason, PluginInterface* plugininterface) {
 	switch (reason) {
@@ -76,7 +76,7 @@ void UpdateMenu() { //current max id: 32
 	s_Plugininterface->AddPluginMenuItem(sub_bm, 2, "Import BM file");
 	s_Plugininterface->AddPluginMenuItem(sub_bm, 3, "Export BM file");
 	s_Plugininterface->AddPluginMenuItem(sub_bm, -1, NULL, TRUE);
-	s_Plugininterface->AddPluginMenuItem(sub_bm, 7, "Fix Blender texture");
+	s_Plugininterface->AddPluginMenuItem(sub_bm, 7, "Fix texture");
 
 	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 5, "Align");
 	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 6, "Center distribute");
@@ -132,59 +132,74 @@ void MenuCallback(int commandID) {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	BOOL runResult = TRUE;
 
-	// window define
-	func_window::window_Config* window_misc_config = NULL;
+	// define error_proc
+	// and param package
+	bvh::utils::ErrorProc error_proc;
+	bvh::utils::ParamPackage pkg(s_Plugininterface, &error_proc, cfg_manager);
 
 	switch (commandID) {
 		case 2:
-			runResult = func_namespace::mapping::BM::ImportBM();
+			bvh::features::mapping::bmfile::ImportBM(&pkg);
+			//we need a force refresh and mark change
+			s_Plugininterface->DoOneRenderNow();
+			s_Plugininterface->SetProjectModified(TRUE);
 			break;
 		case 3:
-			runResult = func_namespace::mapping::BM::ExportBM();
+			bvh::features::mapping::bmfile::ExportBM(&pkg);
 			break;
 		case 7:
-			runResult = func_namespace::mapping::BM::FixBlenderTexture();
+			bvh::features::mapping::bmfile::FixTexture(&pkg);
+			s_Plugininterface->DoOneRenderNow();
+			s_Plugininterface->SetProjectModified(TRUE);
 			break;
 		case 5:
-			runResult = func_namespace::mapping::Group::AutoGrouping();
+			bvh::features::mapping::grouping::AutoGrouping(&pkg);
+			s_Plugininterface->DoOneRenderNow();
+			s_Plugininterface->SetProjectModified(TRUE);
 			break;
 		case 8:
-			runResult = func_namespace::mapping::Shadow::AddShadow();
+			bvh::features::mapping::shadow::AddShadow(&pkg);
+			s_Plugininterface->DoOneRenderNow();
+			s_Plugininterface->SetProjectModified(TRUE);
 			break;
 
 		case 27:
-			runResult = func_namespace::script::CKDataArray::ExportCsv(s_Plugininterface);
+			bvh::features::script::ck_data_array::ExportCsv(&pkg);
+			s_Plugininterface->DoOneRenderNow();
+			s_Plugininterface->SetProjectModified(TRUE);
 			break;
 		case 28:
-			runResult = func_namespace::script::CKDataArray::ImportCsv(s_Plugininterface);
+			bvh::features::script::ck_data_array::ImportCsv(&pkg);
+			s_Plugininterface->DoOneRenderNow();
+			s_Plugininterface->SetProjectModified(TRUE);
 			break;
 		case 29:
-			runResult = func_namespace::script::CKDataArray::Clean(s_Plugininterface);
+			bvh::features::script::ck_data_array::Clean(&pkg);
+			s_Plugininterface->DoOneRenderNow();
+			s_Plugininterface->SetProjectModified(TRUE);
 			break;
 
 		case 4:
-			runResult = TRUE;
-			window_misc_config = new func_window::window_Config();
+		{
+			bvh::mfcwindows::BVHConfig* window_misc_config = new bvh::mfcwindows::BVHConfig(&pkg);
 			window_misc_config->DoModal();
 			delete window_misc_config;
-			break;
+		}break;
 		case 32:
-			runResult = func_namespace::misc::SpecialNMO::SaveSpecialNMO(s_Plugininterface);
+			bvh::features::misc::special_nmo::SaveSpecialNMO(&pkg);
 			break;
 		case 33:
-			runResult = func_namespace::misc::ConvertEncoding::DoConvertEncoding();
+			bvh::features::misc::convert_encoding::DoConvertEncoding(&pkg);
+			s_Plugininterface->DoOneRenderNow();
+			s_Plugininterface->SetProjectModified(TRUE);
 			break;
 		case 30:
 			ShellExecute(NULL, "open", "https://github.com/yyc12345/BallanceVirtoolsHelper/issues", NULL, NULL, SW_SHOWNORMAL);
 			break;
 		case 31:
-			AfxMessageBox("BallanceVirtoolsHelper - The plugin which can help Ballance mapping and script.\nBM file spec version: 1.3(13)\nConfig file version: 13\nPlugin version: 1.1\nUnder GPL v3 License.\nProject homepage: https://github.com/yyc12345/BallanceVirtoolsHelper", MB_ICONINFORMATION + MB_OK);
+			AfxMessageBox("BallanceVirtoolsHelper - The plugin which can help Ballance mapping and script.\nBM file spec version: 1.3(13)\nConfig file version: 13\nPlugin version: 2.0\nUnder GPL v3 License.\nProject homepage: https://github.com/yyc12345/BallanceVirtoolsHelper", MB_ICONINFORMATION + MB_OK);
 			break;
 	}
 
-	//we need a force refresh and mark change
-	s_Plugininterface->DoOneRenderNow();
-	s_Plugininterface->SetProjectModified(TRUE);
-
-	func_namespace::DisplayLastMessage(runResult, s_Plugininterface->GetCKContext());
+	error_proc.DisplayMessage(s_Plugininterface->GetCKContext());
 }
