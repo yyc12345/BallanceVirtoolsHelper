@@ -4,8 +4,10 @@
 #include <filesystem>
 #include <string>
 #include <fstream>
+#include <zlib.h>
 #include <unzip.h>
 #include <zip.h>
+#include <iowin32.h>
 
 #define BVH_ZIP_BUFFER 2048
 

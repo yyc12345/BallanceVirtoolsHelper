@@ -402,7 +402,7 @@ namespace bvh {
 					*is_forced_no_component = FALSE;
 					*gottten_id = 0;
 					for (uint32_t i = 0; i < CONST_ExternalComponent_Length; i++) {
-						if (utils::string_helper::StdtringStartsWith(*name, CONST_ExternalComponent[i])) {
+						if (utils::string_helper::StdstringStartsWith(*name, CONST_ExternalComponent[i])) {
 							//comfirm component
 							*is_component = TRUE;
 							*gottten_id = i;

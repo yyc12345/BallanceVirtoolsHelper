@@ -57,7 +57,7 @@ namespace bvh {
 
 						// ====================== elements
 						for (int j = 0; j < CONST_ElementsList_Length; j++) {
-							if (utils::string_helper::StdtringStartsWith(objName, CONST_ElementsList[j])) {
+							if (utils::string_helper::StdstringStartsWith(objName, CONST_ElementsList[j])) {
 								strlength = strlen(CONST_ElementsList[j]);
 								if (objName.size() < strlength + 3)
 									continue;	// not allowed name. skip. check next element
@@ -75,20 +75,20 @@ namespace bvh {
 						}
 
 						// ====================== road
-						if (utils::string_helper::StdtringStartsWith(objName, "A_Floor")) {
+						if (utils::string_helper::StdstringStartsWith(objName, "A_Floor")) {
 							groupIntoWithCreation(ctx, obj, "Phys_Floors");
 							groupIntoWithCreation(ctx, obj, "Sound_HitID_01");
 							groupIntoWithCreation(ctx, obj, "Sound_RollID_01");
 							groupIntoWithCreation(ctx, obj, "Shadow");
 							continue;
 						}
-						if (utils::string_helper::StdtringStartsWith(objName, "A_Rail")) {
+						if (utils::string_helper::StdstringStartsWith(objName, "A_Rail")) {
 							groupIntoWithCreation(ctx, obj, "Phys_FloorRails");
 							groupIntoWithCreation(ctx, obj, "Sound_HitID_03");
 							groupIntoWithCreation(ctx, obj, "Sound_RollID_03");
 							continue;
 						}
-						if (utils::string_helper::StdtringStartsWith(objName, "A_Wood")) {
+						if (utils::string_helper::StdstringStartsWith(objName, "A_Wood")) {
 							groupIntoWithCreation(ctx, obj, "Phys_Floors");
 							groupIntoWithCreation(ctx, obj, "Sound_HitID_02");
 							groupIntoWithCreation(ctx, obj, "Sound_RollID_02");
@@ -97,13 +97,13 @@ namespace bvh {
 						}
 
 						// ====================== death cube
-						if (utils::string_helper::StdtringStartsWith(objName, "DepthCubes")) {
+						if (utils::string_helper::StdstringStartsWith(objName, "DepthCubes")) {
 							groupIntoWithCreation(ctx, obj, "DepthTestCubes");
 							continue;
 						}
 
 						// ====================== stopper
-						if (utils::string_helper::StdtringStartsWith(objName, "A_Stopper")) {
+						if (utils::string_helper::StdstringStartsWith(objName, "A_Stopper")) {
 							groupIntoWithCreation(ctx, obj, "Phys_FloorStopper");
 							continue;
 						}
@@ -117,11 +117,11 @@ namespace bvh {
 							groupIntoWithCreation(ctx, obj, "PE_Levelende");
 							continue;
 						}
-						if (utils::string_helper::StdtringStartsWith(objName, "PC_TwoFlames")) {
+						if (utils::string_helper::StdstringStartsWith(objName, "PC_TwoFlames")) {
 							groupIntoWithCreation(ctx, obj, "PC_Checkpoints");
 							continue;
 						}
-						if (utils::string_helper::StdtringStartsWith(objName, "PR_Resetpoint")) {
+						if (utils::string_helper::StdstringStartsWith(objName, "PR_Resetpoint")) {
 							groupIntoWithCreation(ctx, obj, "PR_Resetpoints");
 
 							// solve the problem that the sector is not be created

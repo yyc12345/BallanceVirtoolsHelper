@@ -51,7 +51,7 @@ namespace bvh {
 						if (material->GetName() != NULL) {
 							materialname = material->GetName();
 							if ((!pkg->cfg_manager->CurrentConfig.func_mapping_bm_OmittedMaterialPrefix.empty()) &&
-								utils::string_helper::StdtringStartsWith(materialname, pkg->cfg_manager->CurrentConfig.func_mapping_bm_OmittedMaterialPrefix)) {
+								utils::string_helper::StdstringStartsWith(materialname, pkg->cfg_manager->CurrentConfig.func_mapping_bm_OmittedMaterialPrefix)) {
 								continue;
 							}
 						}

@@ -6,16 +6,6 @@ namespace bvh {
 	namespace utils {
 		namespace string_helper {
 
-			// Implements references
-			// https://github.com/AshampooSystems/boden/blob/master/framework/foundation/include/bdn/String.h
-			// https://zh.cppreference.com/w/cpp/string/basic_string/find
-			inline bool StdtringStartsWith(const std::string& source, const std::string& needle) {
-				return source.length() >= needle.length() && source.find(needle) == 0;
-			}
-			inline bool StdtringStartsWith(const std::string& source, const char* needle) {
-				return source.length() >= strlen(needle) && source.find(needle) == 0;
-			}
-
 			BOOL Stdstring2Uint(std::string* strl, UINT* number) {
 				return (sscanf(strl->c_str(), "%u", number) > 0);
 			}

@@ -6,6 +6,10 @@
 
 #include "zip_helper.h"
 #include "string_helper.h"
+#include <zlib.h>
+#include <unzip.h>
+#include <zip.h>
+#include <iowin32.h>
 
 namespace bvh {
 	namespace utils {
@@ -13,7 +17,7 @@ namespace bvh {
 
 			void Compress(std::filesystem::path* filepath, std::filesystem::path* folder) {
 				zlib_filefunc_def ffunc;
-				fill_fopen_filefunc(&ffunc);
+				fill_win32_filefunc(&ffunc);
 				zipFile zip_file = NULL;
 				zip_file = zipOpen2(filepath->string().c_str(), APPEND_STATUS_CREATE, NULL, &ffunc);
 				if (zip_file == NULL) throw std::bad_alloc();
@@ -105,7 +109,7 @@ namespace bvh {
 				std::filesystem::path folder;
 				folder = *_folder;
 
-				fill_fopen_filefunc(&ffunc);
+				fill_win32_filefunc(&ffunc);
 				unzFile zip_file = NULL;
 				zip_file = unzOpen2(filepath->string().c_str(), &ffunc);
 				if (zip_file == NULL) throw std::bad_alloc();
