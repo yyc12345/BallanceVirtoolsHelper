@@ -16,10 +16,10 @@ namespace bvh {
 		namespace zip_helper {
 
 			void Compress(std::filesystem::path* filepath, std::filesystem::path* folder);
-			BOOL do_compress_currentFolder(zipFile* zip_file, std::filesystem::path* basefolder, std::filesystem::path* nowFolder);
+			BOOL doCompressCurrentFolder(zipFile* zip_file, std::filesystem::path* basefolder, std::filesystem::path* nowFolder);
 
 			void Decompress(std::filesystem::path* filepath, std::filesystem::path* folder);
-			BOOL do_extract_currentfile(unzFile* zip_file, std::string* inner_name, std::filesystem::path* folder);
+			BOOL doExtractCurrentFile(unzFile* zip_file, std::string* inner_name, std::filesystem::path* folder);
 
 		}
 	}
