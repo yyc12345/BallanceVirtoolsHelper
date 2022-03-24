@@ -11,9 +11,9 @@ namespace bvh {
 		public:
 			PluginInterface* plgif;
 			ErrorProc* error_proc;
-			config_manager* cfg_manager;
+			ConfigManager* cfg_manager;
 
-			ParamPackage(PluginInterface* _plgif, ErrorProc* _error_proc, config_manager* _cfg_manager);
+			ParamPackage(PluginInterface* _plgif, ErrorProc* _error_proc, ConfigManager* _cfg_manager);
 			~ParamPackage();
 		};
 	}

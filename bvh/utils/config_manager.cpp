@@ -4,22 +4,22 @@
 namespace bvh {
 	namespace utils {
 
-		config_manager::config_manager() :
+		ConfigManager::ConfigManager() :
 			CurrentConfig(),
 			config_version(13) {
 			;
 		}
-		config_manager::~config_manager() {
+		ConfigManager::~ConfigManager() {
 			//destroy config vector's string
 			// todo: add vector in there
 
 		}
 
-		void config_manager::GetConfigFilePath(std::filesystem::path* path) {
+		void ConfigManager::GetConfigFilePath(std::filesystem::path* path) {
 			win32_helper::GetVirtoolsFolder(path);
 			*path /= "BallanceVirtoolsHelper.cfg";
 		}
-		void config_manager::InitConfig() {
+		void ConfigManager::InitConfig() {
 			CurrentConfig.func_mapping_bm_ExternalTextureFolder = "";
 			CurrentConfig.func_mapping_bm_NoComponentGroupName = "";
 			CurrentConfig.func_mapping_bm_OmittedMaterialPrefix = "";
@@ -35,7 +35,7 @@ namespace bvh {
 
 			//todo: add setting default value in there
 		}
-		void config_manager::SaveConfig() {
+		void ConfigManager::SaveConfig() {
 			std::filesystem::path filepath;
 			GetConfigFilePath(&filepath);
 
@@ -62,7 +62,7 @@ namespace bvh {
 
 			fclose(f);
 		}
-		void config_manager::LoadConfig() {
+		void ConfigManager::LoadConfig() {
 			std::filesystem::path filepath;
 			GetConfigFilePath(&filepath);
 
@@ -105,10 +105,10 @@ namespace bvh {
 
 #pragma region read/write func
 
-		void config_manager::ReadInt(FILE* fs, int* num) {
+		void ConfigManager::ReadInt(FILE* fs, int* num) {
 			fread(num, sizeof(int), 1, fs);
 		}
-		void config_manager::ReadInt(FILE* fs, std::vector<int>* num) {
+		void ConfigManager::ReadInt(FILE* fs, std::vector<int>* num) {
 			int count = 0, cache = 0;
 			ReadInt(fs, &count);
 			for (int i = 0; i < count; ++i) {
@@ -116,10 +116,10 @@ namespace bvh {
 				num->push_back(cache);
 			}
 		}
-		void config_manager::WriteInt(FILE* fs, int* num) {
+		void ConfigManager::WriteInt(FILE* fs, int* num) {
 			fwrite(num, sizeof(int), 1, fs);
 		}
-		void config_manager::WriteInt(FILE* fs, std::vector<int>* num) {
+		void ConfigManager::WriteInt(FILE* fs, std::vector<int>* num) {
 			int count = num->size(), cache = 0;
 			WriteInt(fs, &count);
 			for (auto iter = num->begin(); iter != num->end(); iter++) {
@@ -127,13 +127,13 @@ namespace bvh {
 				WriteInt(fs, &cache);
 			}
 		}
-		void config_manager::ReadString(FILE* fs, std::string* str) {
+		void ConfigManager::ReadString(FILE* fs, std::string* str) {
 			int count = 0;
 			ReadInt(fs, &count);
 			str->resize(count);
 			fread(str->data(), sizeof(char), count, fs);
 		}
-		void config_manager::ReadString(FILE* fs, std::vector<std::string*>* str) {
+		void ConfigManager::ReadString(FILE* fs, std::vector<std::string*>* str) {
 			int count = 0;
 			std::string* cache;
 			ReadInt(fs, &count);
@@ -143,12 +143,12 @@ namespace bvh {
 				str->push_back(cache);
 			}
 		}
-		void config_manager::WriteString(FILE* fs, std::string* str) {
+		void ConfigManager::WriteString(FILE* fs, std::string* str) {
 			int count = str->size();
 			WriteInt(fs, &count);
 			fwrite(str->c_str(), sizeof(char), count, fs);
 		}
-		void config_manager::WriteString(FILE* fs, std::vector<std::string*>* str) {
+		void ConfigManager::WriteString(FILE* fs, std::vector<std::string*>* str) {
 			int count = str->size();
 			WriteInt(fs, &count);
 			for (auto iter = str->begin(); iter != str->end(); iter++) {

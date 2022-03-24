@@ -15,7 +15,7 @@
 //=============func import
 
 extern PluginInterface* s_Plugininterface;
-extern bvh::utils::config_manager* cfg_manager;
+extern bvh::utils::ConfigManager* cfg_manager;
 
 CMenu* s_MappingMenu = NULL;
 CMenu* s_ScriptMenu = NULL;

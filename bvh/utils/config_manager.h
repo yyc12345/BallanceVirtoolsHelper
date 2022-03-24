@@ -7,7 +7,7 @@
 namespace bvh {
 	namespace utils {
 
-		struct config_body {
+		struct ConfigBody {
 			//func_mapping_bm
 			std::string func_mapping_bm_ExternalTextureFolder;
 			std::string func_mapping_bm_NoComponentGroupName;
@@ -25,14 +25,14 @@ namespace bvh {
 			//todo: add setting in there
 		};
 
-		class config_manager {
+		class ConfigManager {
 		public:
-			config_manager();
-			~config_manager();
+			ConfigManager();
+			~ConfigManager();
 
 			void SaveConfig();
 			void LoadConfig();
-			config_body CurrentConfig;
+			ConfigBody CurrentConfig;
 
 		private:
 			void GetConfigFilePath(std::filesystem::path* path);

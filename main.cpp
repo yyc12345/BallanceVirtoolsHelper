@@ -4,7 +4,7 @@
 #include "bvh/utils/config_manager.h"
 #include "bvh/utils/win32_helper.h"
 
-bvh::utils::config_manager* cfg_manager = NULL;
+bvh::utils::ConfigManager* cfg_manager = NULL;
 PluginInterface* s_Plugininterface = NULL;
 PluginInfo g_PluginInfo0;
 
@@ -32,7 +32,7 @@ BOOL SuperScriptMaterializer::InitInstance() {
 	// set locale
 	//setlocale(LC_ALL, "");
 
-	cfg_manager = new bvh::utils::config_manager();
+	cfg_manager = new bvh::utils::ConfigManager();
 	cfg_manager->LoadConfig();
 
 	strcpy(g_PluginInfo0.m_Name, "BallanceVirtoolsHelper");

@@ -71,36 +71,36 @@ namespace bvh {
 							//case 3:    //Ball_LightningSphere2.bmp
 							//case 4:    //Ball_LightningSphere3.bmp
 							case 5:    //Ball_Paper.bmp
-								color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+								color.r = 25 / 255.0f; color.g = 25 / 255.0f; color.b = 25 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetSpecular(color);
-								color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+								color.r = 100 / 255.0f; color.g = 100 / 255.0f; color.b = 100 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(0);
 								break;
 							case 6:    //Ball_Stone.bmp
 							case 7:    //Ball_Wood.bmp
-								color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+								color.r = 25 / 255.0f; color.g = 25 / 255.0f; color.b = 25 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+								color.r = 229 / 255.0f; color.g = 229 / 255.0f; color.b = 229 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 60 / 255.0; color.g = 60 / 255.0; color.b = 60 / 255.0;
+								color.r = 60 / 255.0f; color.g = 60 / 255.0f; color.b = 60 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(0);
 								break;
 							case 8:    //Brick.bmp
-								color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+								color.r = 25 / 255.0f; color.g = 25 / 255.0f; color.b = 25 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetSpecular(color);
-								color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+								color.r = 100 / 255.0f; color.g = 100 / 255.0f; color.b = 100 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(0);
 								break;
@@ -110,22 +110,22 @@ namespace bvh {
 							case 12:    //Column_beige.bmp
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetAmbient(color);
-								color.r = 233 / 255.0; color.g = 233 / 255.0; color.b = 233 / 255.0;
+								color.r = 233 / 255.0f; color.g = 233 / 255.0f; color.b = 233 / 255.0f;
 								material->SetDiffuse(color);
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetSpecular(color);
-								color.r = 80 / 255.0; color.g = 80 / 255.0; color.b = 80 / 255.0;
+								color.r = 80 / 255.0f; color.g = 80 / 255.0f; color.b = 80 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(0);
 								break;
 							case 13:    //Column_beige_fade.tga
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetAmbient(color);
-								color.r = 233 / 255.0; color.g = 233 / 255.0; color.b = 233 / 255.0;
+								color.r = 233 / 255.0f; color.g = 233 / 255.0f; color.b = 233 / 255.0f;
 								material->SetDiffuse(color);
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetSpecular(color);
-								color.r = 80 / 255.0; color.g = 80 / 255.0; color.b = 80 / 255.0;
+								color.r = 80 / 255.0f; color.g = 80 / 255.0f; color.b = 80 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(0);
 
@@ -141,11 +141,11 @@ namespace bvh {
 							case 14:    //Column_blue.bmp
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetAmbient(color);
-								color.r = 209 / 255.0; color.g = 209 / 255.0; color.b = 209 / 255.0;
+								color.r = 209 / 255.0f; color.g = 209 / 255.0f; color.b = 209 / 255.0f;
 								material->SetDiffuse(color);
-								color.r = 150 / 255.0; color.g = 150 / 255.0; color.b = 150 / 255.0;
+								color.r = 150 / 255.0f; color.g = 150 / 255.0f; color.b = 150 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 80 / 255.0; color.g = 80 / 255.0; color.b = 80 / 255.0;
+								color.r = 80 / 255.0f; color.g = 80 / 255.0f; color.b = 80 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(31);
 								break;
@@ -158,11 +158,11 @@ namespace bvh {
 							case 21:    //E_Holzbeschlag.bmp
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetAmbient(color);
-								color.r = 186 / 255.0; color.g = 186 / 255.0; color.b = 186 / 255.0;
+								color.r = 186 / 255.0f; color.g = 186 / 255.0f; color.b = 186 / 255.0f;
 								material->SetDiffuse(color);
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetSpecular(color);
-								color.r = 65 / 255.0; color.g = 65 / 255.0; color.b = 65 / 255.0;
+								color.r = 65 / 255.0f; color.g = 65 / 255.0f; color.b = 65 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(0);
 								break;
@@ -170,11 +170,11 @@ namespace bvh {
 							case 23:    //Floor_Side.bmp
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetAmbient(color);
-								color.r = 122 / 255.0; color.g = 122 / 255.0; color.b = 122 / 255.0;
+								color.r = 122 / 255.0f; color.g = 122 / 255.0f; color.b = 122 / 255.0f;
 								material->SetDiffuse(color);
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetSpecular(color);
-								color.r = 104 / 255.0; color.g = 104 / 255.0; color.b = 104 / 255.0;
+								color.r = 104 / 255.0f; color.g = 104 / 255.0f; color.b = 104 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(0);
 								break;
@@ -188,7 +188,7 @@ namespace bvh {
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 80 / 255.0; color.g = 80 / 255.0; color.b = 80 / 255.0;
+								color.r = 80 / 255.0f; color.g = 80 / 255.0f; color.b = 80 / 255.0f;
 								material->SetSpecular(color);
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetEmissive(color);
@@ -202,18 +202,18 @@ namespace bvh {
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+								color.r = 229 / 255.0f; color.g = 229 / 255.0f; color.b = 229 / 255.0f;
 								material->SetSpecular(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetEmissive(color);
 								material->SetPower(0);
 								break;
 							case 34:    //Laterne_Schatten.tga
-								color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+								color.r = 25 / 255.0f; color.g = 25 / 255.0f; color.b = 25 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetDiffuse(color);
-								color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+								color.r = 229 / 255.0f; color.g = 229 / 255.0f; color.b = 229 / 255.0f;
 								material->SetSpecular(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetEmissive(color);
@@ -235,7 +235,7 @@ namespace bvh {
 								material->SetDiffuse(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetSpecular(color);
-								color.r = 59 / 255.0; color.g = 59 / 255.0; color.b = 59 / 255.0;
+								color.r = 59 / 255.0f; color.g = 59 / 255.0f; color.b = 59 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(0);
 
@@ -251,13 +251,13 @@ namespace bvh {
 								break;
 								//case 36:    //Logo.bmp
 							case 37:    //Metal_stained.bmp
-								color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+								color.r = 25 / 255.0f; color.g = 25 / 255.0f; color.b = 25 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+								color.r = 229 / 255.0f; color.g = 229 / 255.0f; color.b = 229 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 65 / 255.0; color.g = 65 / 255.0; color.b = 65 / 255.0;
+								color.r = 65 / 255.0f; color.g = 65 / 255.0f; color.b = 65 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(25);
 								break;
@@ -266,45 +266,46 @@ namespace bvh {
 								//case 40:    //Modul03_Floor.bmp
 								//case 41:    //Modul03_Wall.bmp
 							case 42:    //Modul11_13_Wood.bmp
-								color.r = 9 / 255.0; color.g = 9 / 255.0; color.b = 9 / 255.0;
+								color.r = 9 / 255.0f; color.g = 9 / 255.0f; color.b = 9 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+								color.r = 100 / 255.0f; color.g = 100 / 255.0f; color.b = 100 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 70 / 255.0; color.g = 70 / 255.0; color.b = 70 / 255.0;
+								color.r = 70 / 255.0f; color.g = 70 / 255.0f; color.b = 70 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(50);
+								break;
 							case 43:    //Modul11_Wood.bmp
-								color.r = 9 / 255.0; color.g = 9 / 255.0; color.b = 9 / 255.0;
+								color.r = 9 / 255.0f; color.g = 9 / 255.0f; color.b = 9 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+								color.r = 100 / 255.0f; color.g = 100 / 255.0f; color.b = 100 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 50 / 255.0; color.g = 50 / 255.0; color.b = 50 / 255.0;
+								color.r = 50 / 255.0f; color.g = 50 / 255.0f; color.b = 50 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(50);
 								break;
 							case 44:    //Modul15.bmp
-								color.r = 16 / 255.0; color.g = 16 / 255.0; color.b = 16 / 255.0;
+								color.r = 16 / 255.0f; color.g = 16 / 255.0f; color.b = 16 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+								color.r = 100 / 255.0f; color.g = 100 / 255.0f; color.b = 100 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 70 / 255.0; color.g = 70 / 255.0; color.b = 70 / 255.0;
+								color.r = 70 / 255.0f; color.g = 70 / 255.0f; color.b = 70 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(100);
 								break;
 							case 45:    //Modul16.bmp
-								color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+								color.r = 25 / 255.0f; color.g = 25 / 255.0f; color.b = 25 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+								color.r = 100 / 255.0f; color.g = 100 / 255.0f; color.b = 100 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 85 / 255.0; color.g = 85 / 255.0; color.b = 85 / 255.0;
+								color.r = 85 / 255.0f; color.g = 85 / 255.0f; color.b = 85 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(100);
 								break;
@@ -313,7 +314,7 @@ namespace bvh {
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+								color.r = 229 / 255.0f; color.g = 229 / 255.0f; color.b = 229 / 255.0f;
 								material->SetSpecular(color);
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetEmissive(color);
@@ -324,7 +325,7 @@ namespace bvh {
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+								color.r = 229 / 255.0f; color.g = 229 / 255.0f; color.b = 229 / 255.0f;
 								material->SetSpecular(color);
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetEmissive(color);
@@ -352,11 +353,11 @@ namespace bvh {
 							case 58:    //Rail_Environment.bmp
 								color.r = 0; color.g = 0; color.b = 0;
 								material->SetAmbient(color);
-								color.r = 100 / 255.0; color.g = 118 / 255.0; color.b = 133 / 255.0;
+								color.r = 100 / 255.0f; color.g = 118 / 255.0f; color.b = 133 / 255.0f;
 								material->SetDiffuse(color);
-								color.r = 210 / 255.0; color.g = 210 / 255.0; color.b = 210 / 255.0;
+								color.r = 210 / 255.0f; color.g = 210 / 255.0f; color.b = 210 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 124 / 255.0; color.g = 134 / 255.0; color.b = 150 / 255.0;
+								color.r = 124 / 255.0f; color.g = 134 / 255.0f; color.b = 150 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(10);
 								break;
@@ -364,13 +365,13 @@ namespace bvh {
 								//case 60:    //SkyLayer.bmp
 								//case 61:    //Sky_Vortex.bmp
 							case 62:    //Stick_Bottom.tga
-								color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+								color.r = 25 / 255.0f; color.g = 25 / 255.0f; color.b = 25 / 255.0f;
 								material->SetAmbient(color);
-								color.r = 100 / 255.0; color.g = 118 / 255.0; color.b = 133 / 255.0;
+								color.r = 100 / 255.0f; color.g = 118 / 255.0f; color.b = 133 / 255.0f;
 								material->SetDiffuse(color);
-								color.r = 210 / 255.0; color.g = 210 / 255.0; color.b = 210 / 255.0;
+								color.r = 210 / 255.0f; color.g = 210 / 255.0f; color.b = 210 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 124 / 255.0; color.g = 134 / 255.0; color.b = 150 / 255.0;
+								color.r = 124 / 255.0f; color.g = 134 / 255.0f; color.b = 150 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(13);
 
@@ -384,25 +385,25 @@ namespace bvh {
 								material->SetZFunc(VXCMP_LESSEQUAL);
 								break;
 							case 63:    //Stick_Stripes.bmp
-								color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+								color.r = 25 / 255.0f; color.g = 25 / 255.0f; color.b = 25 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+								color.r = 229 / 255.0f; color.g = 229 / 255.0f; color.b = 229 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 106 / 255.0; color.g = 106 / 255.0; color.b = 106 / 255.0;
+								color.r = 106 / 255.0f; color.g = 106 / 255.0f; color.b = 106 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(13);
 								break;
 								//case 64:    //Target.bmp
 							case 65:    //Tower_Roof.bmp
-								color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+								color.r = 25 / 255.0f; color.g = 25 / 255.0f; color.b = 25 / 255.0f;
 								material->SetAmbient(color);
-								color.r = 218 / 255.0; color.g = 218 / 255.0; color.b = 218 / 255.0;
+								color.r = 218 / 255.0f; color.g = 218 / 255.0f; color.b = 218 / 255.0f;
 								material->SetDiffuse(color);
-								color.r = 64 / 255.0; color.g = 64 / 255.0; color.b = 64 / 255.0;
+								color.r = 64 / 255.0f; color.g = 64 / 255.0f; color.b = 64 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 103 / 255.0; color.g = 103 / 255.0; color.b = 103 / 255.0;
+								color.r = 103 / 255.0f; color.g = 103 / 255.0f; color.b = 103 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(100);
 								break;
@@ -413,13 +414,13 @@ namespace bvh {
 								//case 70:    //Tut_Pfeil_Hoch.tga
 								//case 71:    //Wolken_intro.tga
 							case 72:    //Wood_Metal.bmp
-								color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+								color.r = 25 / 255.0f; color.g = 25 / 255.0f; color.b = 25 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 229 / 255.0; color.g = 229 / 255.0; color.b = 229 / 255.0;
+								color.r = 229 / 255.0f; color.g = 229 / 255.0f; color.b = 229 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 40 / 255.0; color.g = 40 / 255.0; color.b = 40 / 255.0;
+								color.r = 40 / 255.0f; color.g = 40 / 255.0f; color.b = 40 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(0);
 								break;
@@ -428,25 +429,25 @@ namespace bvh {
 								//case 75:    //Wood_Nailed.bmp
 								//case 76:    //Wood_Old.bmp
 							case 77:    //Wood_Panel.bmp
-								color.r = 2 / 255.0; color.g = 2 / 255.0; color.b = 2 / 255.0;
+								color.r = 2 / 255.0f; color.g = 2 / 255.0f; color.b = 2 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 59 / 255.0; color.g = 59 / 255.0; color.b = 59 / 255.0;
+								color.r = 59 / 255.0f; color.g = 59 / 255.0f; color.b = 59 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 30 / 255.0; color.g = 30 / 255.0; color.b = 30 / 255.0;
+								color.r = 30 / 255.0f; color.g = 30 / 255.0f; color.b = 30 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(25);
 								break;
 								//case 78:    //Wood_Plain.bmp
 							case 79:    //Wood_Plain2.bmp
-								color.r = 25 / 255.0; color.g = 25 / 255.0; color.b = 25 / 255.0;
+								color.r = 25 / 255.0f; color.g = 25 / 255.0f; color.b = 25 / 255.0f;
 								material->SetAmbient(color);
 								color.r = 1; color.g = 1; color.b = 1;
 								material->SetDiffuse(color);
-								color.r = 100 / 255.0; color.g = 100 / 255.0; color.b = 100 / 255.0;
+								color.r = 100 / 255.0f; color.g = 100 / 255.0f; color.b = 100 / 255.0f;
 								material->SetSpecular(color);
-								color.r = 50 / 255.0; color.g = 50 / 255.0; color.b = 50 / 255.0;
+								color.r = 50 / 255.0f; color.g = 50 / 255.0f; color.b = 50 / 255.0f;
 								material->SetEmissive(color);
 								material->SetPower(50);
 								break;
