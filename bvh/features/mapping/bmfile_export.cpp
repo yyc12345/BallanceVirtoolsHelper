@@ -4,6 +4,7 @@
 #include "../../utils/win32_helper.h"
 #include "../../utils/string_helper.h"
 #include <unordered_map>
+#include <unordered_set>
 #include <cuchar>
 
 namespace bvh {
@@ -12,52 +13,61 @@ namespace bvh {
 			namespace bmfile {
 
 				void ExportBM(utils::ParamPackage* pkg) {
-					// ============================================get file
-					std::string filepath;
-					std::filesystem::path file, temp, tempTexture;
+					// ============================================ 
+					// preparing temp folder and decompress file
+					// allocate file path variables
+					std::filesystem::path bmx_file, temp_folder, temp_texture_folder;
+					// call export windows to get exported file path
 					mfcwindows::BMFileExport* bm_export_window = new mfcwindows::BMFileExport(pkg);
 					if (bm_export_window->DoModal() != IDOK) {
 						delete bm_export_window;
 						pkg->error_proc->SetExecutionResult(FALSE, "You cancel this process.");
 						return;
 					}
-					file = bm_export_window->OUT_File;
-					// get temp folder
-					utils::win32_helper::GetTempFolder(&temp);
-					temp /= "a6694fa9ca1c46588cf4b6e6d376c3bd";	// a6694fa9ca1c46588cf4b6e6d376c3bd is guid
-					tempTexture = temp / "Texture";
-					//clean temp folder
-					std::filesystem::remove_all(temp);
-					std::filesystem::create_directory(temp);
-					std::filesystem::create_directory(tempTexture);
+					bmx_file = bm_export_window->OUT_File;
+					// get temp folder path
+					utils::win32_helper::GetTempFolder(&temp_folder);
+					temp_folder /= "a6694fa9ca1c46588cf4b6e6d376c3bd";	// a6694fa9ca1c46588cf4b6e6d376c3bd is guid
+					temp_texture_folder = temp_folder / "Texture";
+					// clean temp folder
+					std::filesystem::remove_all(temp_folder);
+					std::filesystem::create_directory(temp_folder);
+					std::filesystem::create_directory(temp_texture_folder);
 
-					// ============================================write file
+					// ============================================
+					// allocate some variables and preparing exporting work
 					CKContext* ctx = pkg->plgif->GetCKContext();
 					std::vector<CK_ID> objectList, meshList, materialList, textureList;
 					std::ofstream findex, fobject, fmesh, fmaterial, ftexture;
 
-					//used by grouping catch
-					CKGroup* grouping_data_target;
-					std::string* grouping_data_name;
-					int grouping_group_count;
+					// used by forced non-component group
+					// fncg stands for `forced non-component group`
+					std::unordered_set<CK_ID> utils_fncgSet;
+					CKGroup* utils_fncgCkGroup;
+					//used by grouping info catch
+					std::unordered_multimap<CK_ID, std::string*> grouping_data;
+					std::vector<std::string*> grouping_dataNeedFree;
+					CKGroup* grouping_ckGroupPtr;
+					std::string* grouping_ckGroupNamePtr;
+					int grouping_ckGroupLength;
 					//used by filter
 					std::string filter_name;
 					CKGroup* filter_group;
 					CKBeObject* filter_groupItem;
 					CK3dEntity* filter_3dentity;
-					int groupCount;
+					int filter_groupCount;
 					//used by index
-					uint32_t bm_version;
+					uint32_t index_bmVersion;
 					uint64_t index_offset;
 					FILE_INDEX_TYPE index_type;
 					std::string index_name;
 					//used by object
 					CK3dEntity* exportObject;
-					BOOL object_isComponent, object_isForcedNoComponent, object_isHidden;
+					BOOL object_isComponent, object_isHidden;
 					uint32_t object_meshIndex;
 					VxMatrix object_worldMatrix;
-					uint64_t object_filepointer_start, object_filepointer_end;
-					uint32_t object_group_list_count;
+					uint64_t object_chunkPtrHeader, object_chunkPtrTail;
+					uint32_t object_groupListCount;
 					//used by mesh
 					CKMesh* exportMesh;
 					VxVector mesh_vector;
@@ -71,54 +81,58 @@ namespace bvh {
 					CKMaterial* exportMaterial;
 					VxColor material_color;
 					float material_value;
-					CKTexture* material_tryTexture;
+					CKTexture* material_tryGottonTexture;
 					BOOL material_useTexture;
 					uint32_t material_textureIndex;
 					//used by texture
 					CKTexture* exportTexture;
-					std::filesystem::path texture_origin, texture_target;
+					std::filesystem::path texture_absoluteTexturePath, texture_tempTexturePath;
 					std::string texture_filename;
 					BOOL texture_isExternal;
 
-					// forced no component group
-					CKGroup* ck_instance_forcedNoComponentGroup = NULL;
+					// collecting forced non component group data
+					utils_fncgCkGroup = NULL;
 					if (!pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.empty()) {
 						// if no needed group. just skip this. it will be set as NULL;
-						ck_instance_forcedNoComponentGroup = (CKGroup*)ctx->GetObjectByNameAndClass((CKSTRING)pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CKCID_GROUP, NULL);
+						utils_fncgCkGroup = (CKGroup*)ctx->GetObjectByNameAndClass((CKSTRING)pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CKCID_GROUP, NULL);
 					}
-					std::vector<CK_ID> forcedNoComponentGroup;
-					if (ck_instance_forcedNoComponentGroup != NULL) {
-						for (int i = 0, count = ck_instance_forcedNoComponentGroup->GetObjectCount(); i < count; i++) {
-							forcedNoComponentGroup.push_back(ck_instance_forcedNoComponentGroup->GetObjectA(i)->GetID());
+					if (utils_fncgCkGroup != NULL) {
+						for (int i = 0, count = utils_fncgCkGroup->GetObjectCount(); i < count; i++) {
+							utils_fncgSet.insert(utils_fncgCkGroup->GetObjectA(i)->GetID());
 						}
 					}
 
-					// get all grouping data
-					std::unordered_multimap<CK_ID, std::string*> grouping_data;
-					std::vector<std::string*> alloced_grouping_string;
+					// pre-collect grouping data from all groups
+					// and put infos into unordered_multimap
+					// then we can quickly get grouping info
+					// in following processing step
 					XObjectPointerArray groupArray = ctx->GetObjectListByType(CKCID_GROUP, FALSE);
 					for (auto item = groupArray.Begin(); item != groupArray.End(); ++item) {
-						grouping_data_target = (CKGroup*)(*item);
-						if (grouping_data_target->GetName() == NULL) continue; // skip group with blank name
+						grouping_ckGroupPtr = (CKGroup*)(*item);
+						if (grouping_ckGroupPtr->GetName() == NULL) continue; // skip group with blank name
 						if ((!pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.empty()) &&
-							pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName == grouping_data_target->GetName())
+							pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName == grouping_ckGroupPtr->GetName()) {
 							continue; // we don't need NoComponentGroup data
+						}
+						
+						// allocate new string from heap to store group name
+						grouping_ckGroupNamePtr = new std::string();
+						*grouping_ckGroupNamePtr = grouping_ckGroupPtr->GetName();
+						// add into free list immediately for future's release
+						grouping_dataNeedFree.push_back(grouping_ckGroupNamePtr);
 
-						grouping_data_name = new std::string();
-						*grouping_data_name = grouping_data_target->GetName();
-
-						// add into alloc vector
-						alloced_grouping_string.push_back(grouping_data_name);
-
-						// iterate group object
-						grouping_group_count = grouping_data_target->GetObjectCount();
-						for (int i = 0; i < grouping_group_count; ++i)
-							grouping_data.insert({ grouping_data_target->GetObject(i)->GetID(), grouping_data_name });
-
+						// iterate group object and 
+						// record all items
+						grouping_ckGroupLength = grouping_ckGroupPtr->GetObjectCount();
+						for (int i = 0; i < grouping_ckGroupLength; ++i) {
+							grouping_data.insert({ grouping_ckGroupPtr->GetObject(i)->GetID(), grouping_ckGroupNamePtr });
+						}
+						
 					}
 
-
-					// filter obj first
+					// collecting exported objects data
+					// according to user specific config 
+					// from export window
 					switch (bm_export_window->OUT_Mode) {
 						case 0:
 							// obj
@@ -127,8 +141,8 @@ namespace bvh {
 						case 1:
 							// group
 							filter_group = (CKGroup*)ctx->GetObjectA(bm_export_window->OUT_Target);
-							groupCount = filter_group->GetObjectCount();
-							for (int i = 0; i < groupCount; i++) {
+							filter_groupCount = filter_group->GetObjectCount();
+							for (int i = 0; i < filter_groupCount; i++) {
 								filter_groupItem = filter_group->GetObjectA(i);
 								switch (filter_groupItem->GetClassID()) {
 									case CKCID_3DENTITY:
@@ -152,14 +166,19 @@ namespace bvh {
 							break;
 					}
 
-					findex.open(temp / "index.bm", std::ios_base::out | std::ios_base::binary);
-
+					// ============================================
+					// write bmx internal file in temp folder
+					
+					// now we open `index.bm` first
+					// this file should be opened in the whole of exporting
+					// because it store all index infomations
+					findex.open(temp_folder / "index.bm", std::ios_base::out | std::ios_base::binary);
 					//write version header
-					bm_version = BM_FILE_VERSION;
-					writeInt(&findex, &bm_version);
+					index_bmVersion = BM_FILE_VERSION;
+					writeInt(&findex, &index_bmVersion);
 
 					//write object
-					fobject.open(temp / "object.bm", std::ios_base::out | std::ios_base::binary);
+					fobject.open(temp_folder / "object.bm", std::ios_base::out | std::ios_base::binary);
 					for (auto iter = objectList.begin(); iter != objectList.end(); iter++) {
 						exportObject = (CK3dEntity*)ctx->GetObjectA(*iter);
 						//write index first
@@ -171,9 +190,8 @@ namespace bvh {
 						writeInt(&findex, &index_offset);
 
 						//write object
-						getComponent(&forcedNoComponentGroup, exportObject->GetID(), &index_name, &object_isComponent, &object_isForcedNoComponent, &object_meshIndex);
+						getComponent(&utils_fncgSet, exportObject->GetID(), &index_name, &object_isComponent, &object_meshIndex);
 						writeBool(&fobject, &object_isComponent);
-						writeBool(&fobject, &object_isForcedNoComponent);
 						object_isHidden = exportObject->IsVisible() == CKHIDE;
 						writeBool(&fobject, &object_isHidden);
 						object_worldMatrix = exportObject->GetWorldMatrix();
@@ -185,20 +203,24 @@ namespace bvh {
 
 						// write group list
 						// record length position and ready back to there to write count
-						object_group_list_count = 0;
-						object_filepointer_start = fobject.tellp();
-						writeInt(&fobject, &object_group_list_count);
+						object_groupListCount = 0;
+						object_chunkPtrHeader = fobject.tellp();
+						writeInt(&fobject, &object_groupListCount);
 						auto grouping_data_range = grouping_data.equal_range(exportObject->GetID());
 						for (auto it = grouping_data_range.first; it != grouping_data_range.second; ++it) {
 							writeString(&fobject, it->second);
-							++object_group_list_count;
+							++object_groupListCount;
 						}
 						// backups current position, back to count position, write it and back to current position
-						object_filepointer_end = fobject.tellp();
-						fobject.seekp(object_filepointer_start);
-						writeInt(&fobject, &object_group_list_count);
-						fobject.seekp(object_filepointer_end);
+						object_chunkPtrTail = fobject.tellp();
+						fobject.seekp(object_chunkPtrHeader);
+						writeInt(&fobject, &object_groupListCount);
+						fobject.seekp(object_chunkPtrTail);
 
+						// if this object is normal object, we need to register it in mesh list
+						// and write corresponding index
+						// otherwise, write corresponding component id gotten from
+						// previous function calling
 						if (!object_isComponent) {
 							object_meshIndex = tryAddWithIndex(&meshList, exportObject->GetMesh(0)->GetID());
 						}
@@ -206,7 +228,8 @@ namespace bvh {
 					}
 					fobject.close();
 
-					fmesh.open(temp / "mesh.bm", std::ios_base::out | std::ios_base::binary);
+					// write mesh
+					fmesh.open(temp_folder / "mesh.bm", std::ios_base::out | std::ios_base::binary);
 					for (auto iter = meshList.begin(); iter != meshList.end(); iter++) {
 						exportMesh = (CKMesh*)ctx->GetObjectA(*iter);
 						//write index first
@@ -268,7 +291,8 @@ namespace bvh {
 					}
 					fmesh.close();
 
-					fmaterial.open(temp / "material.bm", std::ios_base::out | std::ios_base::binary);
+					// write material
+					fmaterial.open(temp_folder / "material.bm", std::ios_base::out | std::ios_base::binary);
 					for (auto iter = materialList.begin(); iter != materialList.end(); iter++) {
 						exportMaterial = (CKMaterial*)ctx->GetObjectA(*iter);
 						//write index first
@@ -293,17 +317,19 @@ namespace bvh {
 						material_value = exportMaterial->GetPower();
 						writeFloat(&fmaterial, &material_value);
 
-						material_tryTexture = exportMaterial->GetTexture();
-						material_useTexture = material_tryTexture != NULL && material_tryTexture->GetSlotFileName(0) != NULL;
+						// try get material
+						material_tryGottonTexture = exportMaterial->GetTexture();
+						material_useTexture = material_tryGottonTexture != NULL && material_tryGottonTexture->GetSlotFileName(0) != NULL;
 						writeBool(&fmaterial, &material_useTexture);
 						if (material_useTexture) {
-							material_textureIndex = tryAddWithIndex(&textureList, material_tryTexture->GetID());
+							material_textureIndex = tryAddWithIndex(&textureList, material_tryGottonTexture->GetID());
 						} else material_textureIndex = 0;
 						writeInt(&fmaterial, &material_textureIndex);
 					}
 					fmaterial.close();
 
-					ftexture.open(temp / "texture.bm", std::ios_base::out | std::ios_base::binary);
+					// write texture
+					ftexture.open(temp_folder / "texture.bm", std::ios_base::out | std::ios_base::binary);
 					for (auto iter = textureList.begin(); iter != textureList.end(); iter++) {
 						exportTexture = (CKTexture*)ctx->GetObjectA(*iter);
 						//write index first
@@ -315,31 +341,35 @@ namespace bvh {
 						writeInt(&findex, &index_offset);
 
 						//write texture
-						texture_origin = exportTexture->GetSlotFileName(0);
-						texture_filename = texture_origin.filename().string();
-						texture_target = tempTexture;
-						texture_target /= texture_filename;
+						texture_absoluteTexturePath = exportTexture->GetSlotFileName(0);
+						texture_filename = texture_absoluteTexturePath.filename().string();
+						texture_tempTexturePath = temp_texture_folder / texture_filename;
 						writeString(&ftexture, &texture_filename);
 
 						texture_isExternal = isExternalTexture(ctx, exportTexture, &texture_filename);
 						writeBool(&ftexture, &texture_isExternal);
 						if (!texture_isExternal) {
-							//try copy original file. if fail, use virtools internal save function.
-							if (!CopyFile(texture_origin.string().c_str(), texture_target.string().c_str(), FALSE)) {
-								exportTexture->SaveImage((char*)texture_target.string().c_str(), 0, FALSE);
+							//try copy original file. if function failed, use virtools internal save function.
+							if (!CopyFile(texture_absoluteTexturePath.string().c_str(), texture_tempTexturePath.string().c_str(), FALSE)) {
+								exportTexture->SaveImage((char*)texture_tempTexturePath.string().c_str(), 0, FALSE);
 							}
 						}
 					}
 					ftexture.close();
+
+					// close `index.bm` here
 					findex.close();
 
-					// release alloced grouping data string
-					for (auto it = alloced_grouping_string.begin(); it != alloced_grouping_string.end(); it++) {
+					// clear pre-collected grouping data
+					grouping_data.clear();
+					// and free all allocated std::string variables
+					for (auto it = grouping_dataNeedFree.begin(); it != grouping_dataNeedFree.end(); it++) {
 						delete ((std::string*)(*it));
 					}
 
-					// ============================================write zip
-					utils::zip_helper::Compress(&file, &temp);
+					// ============================================
+					// compress temp folder and write zip
+					utils::zip_helper::Compress(&bmx_file, &temp_folder);
 					delete bm_export_window;
 					pkg->error_proc->SetExecutionResult(TRUE);
 				}
@@ -370,25 +400,29 @@ namespace bvh {
 
 					// start convert
 					std::mbstate_t state{};
-					size_t convCount = 0, convPos = 0, convAll = strlen(utf8str.c_str());
-					uint32_t length = 0;
+					char32_t c32;
+					const char* ptr = utf8str.c_str(), * end = utf8str.c_str() + utf8str.size() + 1;
+					uint32_t c32Length = 0;
 					std::u32string bmstr;
-					char32_t convedchar;
 					bmstr.reserve(utf8str.size());	// pre-alloc for avoiding mem realloc
 
-					while (convPos < convAll) {
-						convCount = mbrtoc32(&convedchar, &(utf8str[convPos]), convAll - convPos, &state);
-						if (convPos == -1) continue;
-						bmstr.append(1, convedchar);
-						convPos += convCount;
-						length++;
+					while (std::size_t rc = std::mbrtoc32(&c32, ptr, end - ptr, &state)) {
+						if (rc == (std::size_t)-3) {
+							throw std::logic_error("writeString(): no surrogates in UTF-32.");
+						}
+						
+						if (rc <= ((std::size_t)-1) / 2) {
+							bmstr.append(1, c32);
+							ptr += rc;
+							c32Length++;
+						} else break;
 					}
 					
 					// write length
-					writeInt(fs, &length);
+					writeInt(fs, &c32Length);
 
 					// write data
-					fs->write((char*)bmstr.data(), length * sizeof(char32_t));
+					fs->write((char*)bmstr.data(), c32Length * sizeof(char32_t));
 
 				}
 				BOOL isValidObject(CK3dEntity* obj) {
@@ -397,24 +431,31 @@ namespace bvh {
 					if (mesh->GetFaceCount() == 0) return FALSE;	//no face
 					return TRUE;
 				}
-				void getComponent(std::vector<CK_ID>* grp, CK_ID objId, std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id) {
-					*is_component = FALSE;
-					*is_forced_no_component = FALSE;
-					*gottten_id = 0;
+				void getComponent(std::unordered_set<CK_ID>* fncgSet, CK_ID objId, std::string* name, BOOL* is_component, uint32_t* gottten_id) {
+					// we check it whether in FNCG first
+					if (fncgSet->find(objId) != fncgSet->end()) {
+						// got, return it as normal object immediately
+						*is_component = FALSE;
+						*gottten_id = 0;
+						return;
+					}
+
+					// if it is not in FNCG, we should check it by tools chain standard prefix
 					for (uint32_t i = 0; i < CONST_ExternalComponent_Length; i++) {
 						if (utils::string_helper::StdstringStartsWith(*name, CONST_ExternalComponent[i])) {
-							//comfirm component
+							// obj is matched with tools chain's standard prefix
+							// process obj as a component
 							*is_component = TRUE;
 							*gottten_id = i;
-							break;
+							return;
 						}
 					}
 
-					if (std::find(grp->begin(), grp->end(), objId) != grp->end()) {
-						// change it to forced no component
-						*is_component = FALSE;
-						*is_forced_no_component = TRUE;
-					}
+					// this object do not in FNCG
+					// also do not matched with any prefix
+					// so it is a normal object
+					*is_component = FALSE;
+					*gottten_id = 0;
 				}
 				BOOL isExternalTexture(CKContext* ctx, CKTexture* texture, std::string* name) {
 					CK_TEXTURE_SAVEOPTIONS options;

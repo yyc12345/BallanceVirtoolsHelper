@@ -3,6 +3,7 @@
 #include "../../../stdafx.h"
 #include "../../utils/param_package.h"
 #include <fstream>
+#include <unordered_set>
 #include <vector>
 
 #define BM_FILE_VERSION 13
@@ -48,7 +49,7 @@ namespace bvh {
 				void writeFloat(std::ofstream* fs, float* num);
 				void writeString(std::ofstream* fs, std::string* str);
 				BOOL isValidObject(CK3dEntity* obj);
-				void getComponent(std::vector<CK_ID>* grp, CK_ID objId, std::string* name, BOOL* is_component, BOOL* is_forced_no_component, uint32_t* gottten_id);
+				void getComponent(std::unordered_set<CK_ID>* grp, CK_ID objId, std::string* name, BOOL* is_component, uint32_t* gottten_id);
 				BOOL isExternalTexture(CKContext* ctx, CKTexture* texture, std::string* name);
 				void safelyGetName(CKObject* obj, std::string* name);
 				uint32_t tryAddWithIndex(std::vector<CK_ID>* list, CK_ID newValue);

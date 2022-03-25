@@ -20,15 +20,15 @@ PluginInfo* GetVirtoolsPluginInfo(int index) {
 	return NULL;
 }
 
-class SuperScriptMaterializer : CWinApp {
+class BallanceVirtoolsHelper : CWinApp {
 	public:
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
 };
 
-SuperScriptMaterializer theApp;
+BallanceVirtoolsHelper theApp;
 
-BOOL SuperScriptMaterializer::InitInstance() {
+BOOL BallanceVirtoolsHelper::InitInstance() {
 	// set locale
 	//setlocale(LC_ALL, "");
 
@@ -43,7 +43,7 @@ BOOL SuperScriptMaterializer::InitInstance() {
 	return CWinApp::InitInstance();
 }
 
-int SuperScriptMaterializer::ExitInstance() {
+int BallanceVirtoolsHelper::ExitInstance() {
 
 	delete cfg_manager;
 

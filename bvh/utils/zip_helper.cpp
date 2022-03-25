@@ -11,7 +11,6 @@
 #include <zip.h>
 #include <iowin32.h>
 #include <stdexcept>
-#include "../features/mapping/bmfile.h"
 
 #define BVH_ZIP_GLOBAL_COMMENT (u8"Use BM Spec 1.4")
 #define BVH_ZIP_FLAG_UNICODE (1 << 10)
