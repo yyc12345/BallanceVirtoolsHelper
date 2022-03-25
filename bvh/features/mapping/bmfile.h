@@ -6,7 +6,7 @@
 #include <unordered_set>
 #include <vector>
 
-#define BM_FILE_VERSION 13
+#define BM_FILE_VERSION 14
 
 namespace bvh {
 	namespace features {
@@ -40,6 +40,7 @@ namespace bvh {
 				void readString(std::ifstream* fs, std::string* str);
 				void loadExternalTexture(std::string* name, CKTexture* texture, utils::ParamPackage* pkg);
 				void loadComponenetMesh(CK3dEntity* obj, CKContext* ctx, uint32_t index);
+				BOOL isComponentInStandard(std::string* name);
 
 				void ExportBM(utils::ParamPackage* pkg);
 				void writeBool(std::ofstream* fs, BOOL* boolean);

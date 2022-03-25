@@ -11,275 +11,317 @@ namespace bvh {
 			namespace bmfile {
 			
 				void ImportBM(utils::ParamPackage* pkg) {
-					// ====================================== decompress
-					// get file
-					std::string filepath;
-					std::filesystem::path file, temp, tempTexture;
-					if (!utils::win32_helper::OpenFileDialog(&filepath, "BM file(*.bmx)\0*.bmx\0", "bmx", TRUE)) {
+					// ====================================== 
+					// preparing temp folder
+					// get bmx file and decompress it into temp folder
+					std::string gotten_bmx_file;
+					std::filesystem::path bmx_file_path, temp_folder, temp_texture_folder;
+					if (!utils::win32_helper::OpenFileDialog(&gotten_bmx_file, "BM file(*.bmx)\0*.bmx\0", "bmx", TRUE)) {
 						pkg->error_proc->SetExecutionResult(FALSE, "No selected BM file.");
 						return;
 					}
-					file = filepath;
+					bmx_file_path = gotten_bmx_file;
 					// get temp folder
-					utils::win32_helper::GetTempFolder(&temp);
-					temp /= "9d2aa26133b94afaa2edcaf580c71e86";	// 9d2aa26133b94afaa2edcaf580c71e86 is guid
-					tempTexture = temp / "Texture";
-					//clean temp folder
-					std::filesystem::remove_all(temp);
-					std::filesystem::create_directory(temp);
-					// decompress it
-					utils::zip_helper::Decompress(&file, &temp);
+					utils::win32_helper::GetTempFolder(&temp_folder);
+					temp_folder /= "9d2aa26133b94afaa2edcaf580c71e86";	// 9d2aa26133b94afaa2edcaf580c71e86 is guid
+					temp_texture_folder = temp_folder / "Texture";
+					// clean temp folder
+					std::filesystem::remove_all(temp_folder);
+					std::filesystem::create_directory(temp_folder);
+					// decompress bmx file
+					utils::zip_helper::Decompress(&bmx_file_path, &temp_folder);
 
-
-					// ====================================== read
-					std::ifstream findex, fobject, fmesh, fmaterial, ftexture;
-					std::vector<FILE_INDEX_HELPER*> objectList, meshList, materialList, textureList;
-					// ckcontext ensurance
+					// ====================================== 
+					// preparing virtools enviroment
+					// ensure ckContext, ckScene and ckLevel
 					CKContext* ctx = pkg->plgif->GetCKContext();
-					CKScene* curScene = NULL;
-					XObjectPointerArray tmpArray = ctx->GetObjectListByType(CKCID_OBJECT, TRUE);
-					int count = tmpArray.Size();
+					CKScene* vtenv_currentScene = NULL;
+					XObjectPointerArray vtenv_tempObjArray = ctx->GetObjectListByType(CKCID_OBJECT, TRUE);
+					int count = vtenv_tempObjArray.Size();
 					if (ctx->GetCurrentLevel() == NULL) {
 						//no level, add it and add all object into it.
-						CKLevel* levels = (CKLevel*)ctx->CreateObject(CKCID_LEVEL);
-						for (unsigned int i = 0; i < count; i++)
-							levels->AddObject(tmpArray.GetObjectA(i));
-						ctx->SetCurrentLevel(levels);
+						CKLevel* vtenv_ckLevel = (CKLevel*)ctx->CreateObject(CKCID_LEVEL);
+						for (unsigned int i = 0; i < (unsigned int)count; i++)
+							vtenv_ckLevel->AddObject(vtenv_tempObjArray.GetObjectA(i));
+						ctx->SetCurrentLevel(vtenv_ckLevel);
 					}
-					curScene = ctx->GetCurrentLevel()->GetLevelScene();
+					vtenv_currentScene = ctx->GetCurrentLevel()->GetLevelScene();
 
-					// forced no component group
-					CKGroup* forcedNoComponentGroup = NULL;
+					// process forced no component group
+					// vtenv stands for virtools environment
+					// fncg stands for forced non-component group
+					CKGroup* vtenv_fncgCkGroup = NULL;
 					if (!pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.empty()) {
-						if ((forcedNoComponentGroup = (CKGroup*)ctx->GetObjectByNameAndClass((char*)pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CKCID_GROUP, NULL)) == NULL) {
-							// no needed group. generate one
-							forcedNoComponentGroup = (CKGroup*)ctx->CreateObject(CKCID_GROUP, (char*)pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CK_OBJECTCREATION_RENAME);
-							curScene->AddObjectToScene(forcedNoComponentGroup);
+						if ((vtenv_fncgCkGroup = (CKGroup*)ctx->GetObjectByNameAndClass((char*)pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CKCID_GROUP, NULL)) == NULL) {
+							// no forced no component group, generate one
+							vtenv_fncgCkGroup = (CKGroup*)ctx->CreateObject(CKCID_GROUP, (char*)pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str(), CK_OBJECTCREATION_RENAME);
+							vtenv_currentScene->AddObjectToScene(vtenv_fncgCkGroup);
 						}
 					}
 
+					// ====================================== 
+					// read bmx file from temp folder
+					std::ifstream findex, fobject, fmesh, fmaterial, ftexture;
+					std::vector<FILE_INDEX_HELPER*> objectList, meshList, materialList, textureList;
+
 					//used in index
-					FILE_INDEX_HELPER* helper_struct = NULL;
+					FILE_INDEX_HELPER* index_entryChunk = NULL;
 					uint8_t index_type;
 					//used in texture
+					CKTexture* importTexture = NULL;
 					std::string texture_filename;
-					CKTexture* currenrTexture = NULL;
-					BOOL is_external;
-					std::filesystem::path texture_file;
+					BOOL texture_isExternal;
+					std::filesystem::path texture_absolutePath;
 					//used in material
-					CKMaterial* currentMaterial = NULL;
-					VxColor color;
-					float colorPower;
-					BOOL is_texture;
-					uint32_t texture_index;
+					CKMaterial* importMaterial = NULL;
+					VxColor material_color;
+					float material_colorPower;
+					BOOL material_useTexture;
+					uint32_t material_textureIndex;
 					//used in mesh
-					CKMesh* currentMesh = NULL;
-					VxVector vector;
-					uint32_t vecCount;
-					std::vector<VxVector> vList, vnList, vtList; // vt only use xy to store uv
-					uint32_t face_data[9];
-					BOOL is_material;
-					uint32_t material_index;
+					CKMesh* importMesh = NULL;
+					VxVector mesh_3dvector;
+					Vx2DVector mesh_2dvector;
+					uint32_t mesh_listCount;
+					std::vector<VxVector> mesh_vList, mesh_vnList;
+					std::vector<Vx2DVector> mesh_vtList;
+					uint32_t mesh_faceData[9];
+					BOOL mesh_useMaterial;
+					uint32_t mesh_materialIndex;
 					//used in object
-					CK3dObject* currentObject = NULL;
-					VxMatrix world_matrix;
-					BOOL is_component, is_forced_no_component, is_hidden;
-					uint32_t group_list_count;
-					std::string group_name_cache;
-					uint32_t mesh_index;
+					CK3dObject* importObject = NULL;
+					VxMatrix object_worldMatrix;
+					BOOL object_isComponent, object_isHidden;
+					uint32_t object_groupListCount;
+					std::string object_groupNameCache;
+					uint32_t object_meshIndex;
 
 
 					// read info.bm and check version first
-					findex.open(temp / "index.bm", std::ios_base::in | std::ios_base::binary);
+					findex.open(temp_folder / "index.bm", std::ios_base::in | std::ios_base::binary);
 
 					uint32_t vercmp;
 					readInt(&findex, &vercmp);
 					if (vercmp != BM_FILE_VERSION) {
 						findex.close();
-						pkg->error_proc->SetExecutionResult(FALSE, "Not supported BM version. Need: %d, Got: %d", BM_FILE_VERSION, vercmp);
+						pkg->error_proc->SetExecutionResult(FALSE, "Not supported BM version. Expect: %d, Gotten: %d", BM_FILE_VERSION, vercmp);
 						return;
 					}
 
 					while (TRUE) {
+						// chec eof
 						if (findex.peek(), findex.eof()) break;
 
-						helper_struct = new FILE_INDEX_HELPER();
-						readString(&findex, &(helper_struct->name));
+						// this allocation will be freed at the end of this function
+						// via iterating obj/mesh/mtl/texture list.
+						index_entryChunk = new FILE_INDEX_HELPER();
+
+						// reading entry and distinguish them
+						// then put them into different bucket via its type
+						readString(&findex, &(index_entryChunk->name));
 						readInt(&findex, &index_type);
 						switch ((FILE_INDEX_TYPE)index_type) {
 							case FILE_INDEX_TYPE__OBJECT:
-								objectList.push_back(helper_struct);
+								objectList.push_back(index_entryChunk);
 								break;
 							case FILE_INDEX_TYPE__MESH:
-								meshList.push_back(helper_struct);
+								meshList.push_back(index_entryChunk);
 								break;
 							case FILE_INDEX_TYPE__MATERIAL:
-								materialList.push_back(helper_struct);
+								materialList.push_back(index_entryChunk);
 								break;
 							case FILE_INDEX_TYPE__TEXTURE:
-								textureList.push_back(helper_struct);
+								textureList.push_back(index_entryChunk);
 								break;
 							default:
-								;
+								break;
 						}
-						readInt(&findex, &(helper_struct->offset));
+						readInt(&findex, &(index_entryChunk->offset));
 					}
-
 					findex.close();
 
 					// read texture
-					ftexture.open(temp / "texture.bm", std::ios_base::in | std::ios_base::binary);
+					ftexture.open(temp_folder / "texture.bm", std::ios_base::in | std::ios_base::binary);
 					for (auto iter = textureList.begin(); iter != textureList.end(); iter++) {
+						// seek position accoring to entry
 						ftexture.seekg((*iter)->offset);
 
+						// create new virtools object
+						importTexture = (CKTexture*)ctx->CreateObject(CKCID_TEXTURE, (CKSTRING)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
+						(*iter)->id = importTexture->GetID();
+
 						readString(&ftexture, &texture_filename);
-						currenrTexture = (CKTexture*)ctx->CreateObject(CKCID_TEXTURE, (char*)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
-						(*iter)->id = currenrTexture->GetID();
-						readBool(&ftexture, &is_external);
-						if (is_external) {
-							loadExternalTexture(&texture_filename, currenrTexture, pkg);
-							currenrTexture->SetSaveOptions(CKTEXTURE_EXTERNAL);
+						readBool(&ftexture, &texture_isExternal);
+						if (texture_isExternal) {
+							// external texture, read from ballance texture folder
+							loadExternalTexture(&texture_filename, importTexture, pkg);
+							importTexture->SetSaveOptions(CKTEXTURE_EXTERNAL);
 						} else {
-							texture_file = tempTexture / texture_filename;
-							currenrTexture->LoadImageA((char*)texture_file.string().c_str());
-							currenrTexture->SetSaveOptions(CKTEXTURE_RAWDATA);
+							// internal folder, read from temp folder
+							texture_absolutePath = temp_texture_folder / texture_filename;
+							importTexture->LoadImageA((char*)texture_absolutePath.string().c_str());
+							importTexture->SetSaveOptions(CKTEXTURE_RAWDATA);
 						}
-						currenrTexture->FreeVideoMemory();
+						importTexture->FreeVideoMemory();
 					}
 					ftexture.close();
 
 					// read material
-					fmaterial.open(temp / "material.bm", std::ios_base::in | std::ios_base::binary);
+					fmaterial.open(temp_folder / "material.bm", std::ios_base::in | std::ios_base::binary);
 					for (auto iter = materialList.begin(); iter != materialList.end(); iter++) {
+						// seek position accoring to entry
 						fmaterial.seekg((*iter)->offset);
 
-						color.a = 1;
-						currentMaterial = (CKMaterial*)ctx->CreateObject(CKCID_MATERIAL, (char*)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
-						(*iter)->id = currentMaterial->GetID();
-#define readColor readFloat(&fmaterial, &(color.r)); readFloat(&fmaterial, &(color.g)); readFloat(&fmaterial, &(color.b));
-						readColor;
-						currentMaterial->SetAmbient(color);
-						readColor;
-						currentMaterial->SetDiffuse(color);
-						readColor;
-						currentMaterial->SetSpecular(color);
-						readColor;
-						currentMaterial->SetEmissive(color);
-#undef readColor
-						readFloat(&fmaterial, &colorPower);
-						currentMaterial->SetPower(colorPower);
+						// create new virtools obj
+						importMaterial = (CKMaterial*)ctx->CreateObject(CKCID_MATERIAL, (char*)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
+						(*iter)->id = importMaterial->GetID();
 
-						readBool(&fmaterial, &is_texture);
-						readInt(&fmaterial, &texture_index);
-						if (is_texture) {
-							currentMaterial->SetTexture((CKTexture*)ctx->GetObjectA(textureList[texture_index]->id));
+						// pre-set for alpha channel
+						material_color.a = 1;
+#define readColor readFloat(&fmaterial, &(material_color.r)); readFloat(&fmaterial, &(material_color.g)); readFloat(&fmaterial, &(material_color.b));
+						readColor;
+						importMaterial->SetAmbient(material_color);
+						readColor;
+						importMaterial->SetDiffuse(material_color);
+						readColor;
+						importMaterial->SetSpecular(material_color);
+						readColor;
+						importMaterial->SetEmissive(material_color);
+#undef readColor
+						readFloat(&fmaterial, &material_colorPower);
+						importMaterial->SetPower(material_colorPower);
+
+						readBool(&fmaterial, &material_useTexture);
+						readInt(&fmaterial, &material_textureIndex);
+						if (material_useTexture) {
+							importMaterial->SetTexture((CKTexture*)ctx->GetObjectA(textureList[material_textureIndex]->id));
 						}
 					}
 					fmaterial.close();
 
 					// read mesh
-					fmesh.open(temp / "mesh.bm", std::ios_base::in | std::ios_base::binary);
+					fmesh.open(temp_folder / "mesh.bm", std::ios_base::in | std::ios_base::binary);
 					for (auto iter = meshList.begin(); iter != meshList.end(); iter++) {
+						// seek position accoring to entry
 						fmesh.seekg((*iter)->offset);
 
-						currentMesh = (CKMesh*)ctx->CreateObject(CKCID_MESH, (char*)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
-						(*iter)->id = currentMesh->GetID();
-						vList.clear(); vnList.clear(); vtList.clear();
-						readInt(&fmesh, &vecCount);
-						// lazy load v
-						for (int i = 0; i < vecCount; i++) {
-							readFloat(&fmesh, &(vector.x));
-							readFloat(&fmesh, &(vector.y));
-							readFloat(&fmesh, &(vector.z));
-							vList.push_back(vector);
+						// create new virtools obj
+						importMesh = (CKMesh*)ctx->CreateObject(CKCID_MESH, (CKSTRING)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
+						(*iter)->id = importMesh->GetID();
+
+						// load mesh
+						mesh_vList.clear(); mesh_vnList.clear(); mesh_vtList.clear();
+						readInt(&fmesh, &mesh_listCount);
+						// lazy load v, vn, vt
+						for (uint32_t i = 0; i < mesh_listCount; i++) {
+							readFloat(&fmesh, &(mesh_3dvector.x));
+							readFloat(&fmesh, &(mesh_3dvector.y));
+							readFloat(&fmesh, &(mesh_3dvector.z));
+							mesh_vList.push_back(mesh_3dvector);
 						}
-						// vn and vt need stored in vector
-						readInt(&fmesh, &vecCount);
-						vector.z = 0;
-						for (int i = 0; i < vecCount; i++) {
-							readFloat(&fmesh, &(vector.x));
-							readFloat(&fmesh, &(vector.y));
-							vtList.push_back(vector);
+						readInt(&fmesh, &mesh_listCount);
+						for (uint32_t i = 0; i < mesh_listCount; i++) {
+							readFloat(&fmesh, &(mesh_2dvector.x));
+							readFloat(&fmesh, &(mesh_2dvector.y));
+							mesh_vtList.push_back(mesh_2dvector);
 						}
-						readInt(&fmesh, &vecCount);
-						for (int i = 0; i < vecCount; i++) {
-							readFloat(&fmesh, &(vector.x));
-							readFloat(&fmesh, &(vector.y));
-							readFloat(&fmesh, &(vector.z));
-							vnList.push_back(vector);
+						readInt(&fmesh, &mesh_listCount);
+						for (uint32_t i = 0; i < mesh_listCount; i++) {
+							readFloat(&fmesh, &(mesh_3dvector.x));
+							readFloat(&fmesh, &(mesh_3dvector.y));
+							readFloat(&fmesh, &(mesh_3dvector.z));
+							mesh_vnList.push_back(mesh_3dvector);
 						}
 						// read face
-						readInt(&fmesh, &vecCount);
+						readInt(&fmesh, &mesh_listCount);
 						// init vector and face count
-						currentMesh->SetVertexCount(vecCount * 3);
-						currentMesh->SetFaceCount(vecCount);
-						for (int i = 0; i < vecCount; i++) {
-							for (int j = 0; j < 9; j++)
-								readInt(&fmesh, &(face_data[j]));
-
+						importMesh->SetVertexCount(mesh_listCount * 3);
+						importMesh->SetFaceCount(mesh_listCount);
+						for (uint32_t i = 0; i < mesh_listCount; i++) {
+							// read one face data
+							for (int j = 0; j < 9; j++) {
+								readInt(&fmesh, &(mesh_faceData[j]));
+							}
+							
+							// manipulate face data
 							for (int j = 0; j < 9; j += 3) {
-								vector = vList[face_data[j]];
-								currentMesh->SetVertexPosition(i * 3 + j / 3, &vector);
-								vector = vtList[face_data[j + 1]];
-								currentMesh->SetVertexTextureCoordinates(i * 3 + j / 3, vector.x, vector.y);
-								vector = vnList[face_data[j + 2]];
-								currentMesh->SetVertexNormal(i * 3 + j / 3, &vector);
+								mesh_3dvector = mesh_vList[mesh_faceData[j]];
+								importMesh->SetVertexPosition(i * 3 + j / 3, &mesh_3dvector);
+								mesh_2dvector = mesh_vtList[mesh_faceData[j + 1]];
+								importMesh->SetVertexTextureCoordinates(i * 3 + j / 3, mesh_3dvector.x, mesh_3dvector.y);
+								mesh_3dvector = mesh_vnList[mesh_faceData[j + 2]];
+								importMesh->SetVertexNormal(i * 3 + j / 3, &mesh_3dvector);
 							}
 
-							currentMesh->SetFaceVertexIndex(i, i * 3, i * 3 + 1, i * 3 + 2);
-							readBool(&fmesh, &is_material);
-							readInt(&fmesh, &material_index);
-							if (is_material) {
-								currentMesh->SetFaceMaterial(i, (CKMaterial*)ctx->GetObjectA(materialList[material_index]->id));
+							// set indices
+							importMesh->SetFaceVertexIndex(i, i * 3, i * 3 + 1, i * 3 + 2);
+
+							// set material
+							readBool(&fmesh, &mesh_useMaterial);
+							readInt(&fmesh, &mesh_materialIndex);
+							if (mesh_useMaterial) {
+								importMesh->SetFaceMaterial(i, (CKMaterial*)ctx->GetObjectA(materialList[mesh_materialIndex]->id));
 							}
 						}
 					}
 					fmesh.close();
 
 					// read object
-					fobject.open(temp / "object.bm", std::ios_base::in | std::ios_base::binary);
+					fobject.open(temp_folder / "object.bm", std::ios_base::in | std::ios_base::binary);
 					for (auto iter = objectList.begin(); iter != objectList.end(); iter++) {
+						// seek position accoring to entry
 						fobject.seekg((*iter)->offset);
 
-						currentObject = (CK3dObject*)ctx->CreateObject(CKCID_3DOBJECT, (char*)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
-						(*iter)->id = currentObject->GetID();
-						readBool(&fobject, &is_component);
-						readBool(&fobject, &is_forced_no_component);
-						readBool(&fobject, &is_hidden);
-						for (int i = 0; i < 4; i++)
-							for (int j = 0; j < 4; j++)
-								readFloat(&fobject, &(world_matrix[i][j]));
-						currentObject->SetWorldMatrix(world_matrix);
+						// create new virtools obj
+						importObject = (CK3dObject*)ctx->CreateObject(CKCID_3DOBJECT, (CKSTRING)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
+						(*iter)->id = importObject->GetID();
 
-						readInt(&fobject, &group_list_count);
-						for (uint32_t i = 0; i < group_list_count; i++) {
-							readString(&fobject, &group_name_cache);
+						// load object
+						// read basic data
+						readBool(&fobject, &object_isComponent);
+						readBool(&fobject, &object_isHidden);
+						for (int i = 0; i < 4; i++) {
+							for (int j = 0; j < 4; j++) {
+								readFloat(&fobject, &(object_worldMatrix[i][j]));
+							}
+						}
+						importObject->SetWorldMatrix(object_worldMatrix);
+
+						// read grouping message
+						readInt(&fobject, &object_groupListCount);
+						for (uint32_t i = 0; i < object_groupListCount; i++) {
+							readString(&fobject, &object_groupNameCache);
 							features::mapping::grouping::groupIntoWithCreation(
 								ctx,
-								currentObject,
-								group_name_cache.c_str()
+								importObject,
+								object_groupNameCache.c_str()
 							);
 						}
 
-						readInt(&fobject, &mesh_index);
-						if (is_component) loadComponenetMesh(currentObject, ctx, mesh_index);
-						else currentObject->SetCurrentMesh((CKMesh*)ctx->GetObjectA(meshList[mesh_index]->id));
+						// read mesh index
+						// process it differently by isComponent
+						readInt(&fobject, &object_meshIndex);
+						if (object_isComponent) loadComponenetMesh(importObject, ctx, object_meshIndex);
+						else {
+							// simplely point to mesh
+							importObject->SetCurrentMesh((CKMesh*)ctx->GetObjectA(meshList[object_meshIndex]->id));
 
-						// apply hidden
-						currentObject->Show(is_hidden ? CKHIDE : CKSHOW);
-
-						//apply component group
-						if ((!is_component) && is_forced_no_component && (forcedNoComponentGroup != NULL)) {
-							// current object should be grouped into forced no component group
-							forcedNoComponentGroup->AddObject(currentObject);
+							// this is a normal object, but we should check whether it is a forced no component via its name.
+							// names following tools chain standard
+							if (vtenv_fncgCkGroup != NULL && isComponentInStandard(&((*iter)->name))) {
+								// yes, it is a forcec non-component, group it into group
+								vtenv_fncgCkGroup->AddObject(importObject);
+							}
 						}
 
+						// apply hidden
+						importObject->Show(object_isHidden ? CKHIDE : CKSHOW);
 						// all object should add into current scene with dependency
-						curScene->AddObjectToScene(currentObject);
+						vtenv_currentScene->AddObjectToScene(importObject);
 					}
 					fobject.close();
 
-					// release all list data
+					// release all chunks allocated from index reading
 					for (auto iter = textureList.begin(); iter != textureList.end(); iter++)
 						delete (*iter);
 					for (auto iter = materialList.begin(); iter != materialList.end(); iter++)
@@ -323,17 +365,16 @@ namespace bvh {
 					readInt(fs, &length);
 					bmstr.resize(length);
 					fs->read((char*)bmstr.data(), length * sizeof(char32_t));
+					utf8str.reserve(length * 2);	// reserve double space for trying avoiding re-alloc
 
 					// decode
-					utf8str.reserve(length * 2);	// reserve double dpace for trying avoiding re-alloc
 					std::mbstate_t state{};
 					char mbout[MB_LEN_MAX]{};
-					size_t convCount;
+					size_t rc;
 					for (uint32_t i = 0; i < length; i++) {
-						convCount = c32rtomb(mbout, bmstr[i], &state);
-						if (convCount == -1) continue;
-						else {
-							utf8str.append(mbout, convCount);
+						rc = c32rtomb(mbout, bmstr[i], &state);
+						if (rc != (std::size_t)-1) {
+							utf8str.append(mbout, rc);
 						}
 					}
 
@@ -377,14 +418,14 @@ namespace bvh {
 					// read data
 					readInt(&fmesh, &vecCount);
 					// lazy load v
-					for (int i = 0; i < vecCount; i++) {
+					for (uint32_t i = 0; i < vecCount; i++) {
 						readFloat(&fmesh, &(vector.x));
 						readFloat(&fmesh, &(vector.y));
 						readFloat(&fmesh, &(vector.z));
 						vList.push_back(vector);
 					}
 					readInt(&fmesh, &vecCount);
-					for (int i = 0; i < vecCount; i++) {
+					for (uint32_t i = 0; i < vecCount; i++) {
 						readFloat(&fmesh, &(vector.x));
 						readFloat(&fmesh, &(vector.y));
 						readFloat(&fmesh, &(vector.z));
@@ -395,7 +436,7 @@ namespace bvh {
 					// init vector and face count
 					currentMesh->SetVertexCount(vecCount * 3);
 					currentMesh->SetFaceCount(vecCount);
-					for (int i = 0; i < vecCount; i++) {
+					for (uint32_t i = 0; i < vecCount; i++) {
 						for (int j = 0; j < 6; j++)
 							readInt(&fmesh, &(face_data[j]));
 
@@ -413,6 +454,19 @@ namespace bvh {
 
 					// apply current mesh into object
 					obj->SetCurrentMesh(currentMesh);
+				}
+				BOOL isComponentInStandard(std::string* name) {
+					// check in prefix list
+					for (uint32_t i = 0; i < CONST_ExternalComponent_Length; i++) {
+						if (utils::string_helper::StdstringStartsWith(*name, CONST_ExternalComponent[i])) {
+							// obj is matched with tools chain's standard prefix
+							// process obj as a component
+							return TRUE;
+						}
+					}
+
+					// couldn't find it
+					return FALSE;
 				}
 
 			}

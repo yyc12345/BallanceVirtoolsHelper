@@ -463,7 +463,7 @@ namespace bvh {
 						options = ctx->GetGlobalImagesSaveOptions();
 					if (options != CKTEXTURE_EXTERNAL) return FALSE;
 
-					for (int i = 0; i < CONST_ExternalTextureList_Length; i++) {
+					for (int i = 0; (uint32_t)i < CONST_ExternalTextureList_Length; i++) {
 						if (*name == CONST_ExternalTextureList[i])
 							return TRUE;
 					}
