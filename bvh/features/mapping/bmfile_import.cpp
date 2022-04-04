@@ -20,7 +20,7 @@ namespace bvh {
 						pkg->error_proc->SetExecutionResult(FALSE, "No selected BM file.");
 						return;
 					}
-					bmx_file_path = gotten_bmx_file;
+					bmx_file_path = gotten_bmx_file.c_str();
 					// get temp folder
 					utils::win32_helper::GetTempFolder(&temp_folder);
 					temp_folder /= "9d2aa26133b94afaa2edcaf580c71e86";	// 9d2aa26133b94afaa2edcaf580c71e86 is guid
@@ -248,7 +248,7 @@ namespace bvh {
 								mesh_3dvector = mesh_vList[mesh_faceData[j]];
 								importMesh->SetVertexPosition(i * 3 + j / 3, &mesh_3dvector);
 								mesh_2dvector = mesh_vtList[mesh_faceData[j + 1]];
-								importMesh->SetVertexTextureCoordinates(i * 3 + j / 3, mesh_3dvector.x, mesh_3dvector.y);
+								importMesh->SetVertexTextureCoordinates(i * 3 + j / 3, mesh_2dvector.x, mesh_2dvector.y);
 								mesh_3dvector = mesh_vnList[mesh_faceData[j + 2]];
 								importMesh->SetVertexNormal(i * 3 + j / 3, &mesh_3dvector);
 							}

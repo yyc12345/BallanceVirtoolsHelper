@@ -13,7 +13,7 @@
 #include <stdexcept>
 
 #define BVH_ZIP_GLOBAL_COMMENT (u8"Use BM Spec 1.4")
-#define BVH_ZIP_FLAG_UNICODE (1 << 10)
+#define BVH_ZIP_FLAG_UNICODE (1 << 11)
 
 // copy from zip.c
 #ifndef VERSIONMADEBY
@@ -177,7 +177,7 @@ namespace bvh {
 						throw std::bad_alloc();
 
 					// check unicode flag
-					if (file_info.flag & BVH_ZIP_FLAG_UNICODE) {
+					if (!(file_info.flag & BVH_ZIP_FLAG_UNICODE)) {
 						throw std::invalid_argument("Zip file entry lost UNICODE flag.");
 					}
 
