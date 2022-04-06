@@ -12,9 +12,6 @@
 #include <iowin32.h>
 #include <stdexcept>
 
-#define BVH_ZIP_GLOBAL_COMMENT (u8"Use BM Spec 1.4")
-#define BVH_ZIP_FLAG_UNICODE (1 << 11)
-
 // copy from zip.c
 #ifndef VERSIONMADEBY
 # define VERSIONMADEBY   (0x0) /* platform depedent */
@@ -31,13 +28,17 @@ namespace bvh {
 				zip_file = zipOpen2(filepath->string().c_str(), APPEND_STATUS_CREATE, NULL, &ffunc);
 				if (zip_file == NULL) throw std::logic_error("Fail to opne zip file.");
 
-				if (!doCompressCurrentFolder(&zip_file, folder, folder))
+				char* file_swap = (char*)malloc(BVH_ZIP_BUFFER * sizeof(char));
+				if (file_swap == NULL)
+					throw std::bad_alloc();
+				if (!doCompressCurrentFolder(&zip_file, folder, folder, file_swap))
 					throw std::logic_error("Fail to compress zip file");
+				free(file_swap);
 
 				zipClose(zip_file, BVH_ZIP_GLOBAL_COMMENT);
 			}
 
-			BOOL doCompressCurrentFolder(zipFile* zip_file, std::filesystem::path* base_folder, std::filesystem::path* current_folder) {
+			BOOL doCompressCurrentFolder(zipFile* zip_file, std::filesystem::path* base_folder, std::filesystem::path* current_folder, char* file_swap) {
 				// init zip data struct
 				zip_fileinfo zi;
 				ZeroMemory(&zi, sizeof(zip_fileinfo));
@@ -47,7 +48,6 @@ namespace bvh {
 				std::ifstream cpoied_file;
 				std::streamsize copied_file_gotten_char;
 				std::string zip_internal_path_utf8, zip_internal_path_acp;
-				char buffer[BVH_ZIP_BUFFER];
 
 				// build win32 fs query string
 				std::string win32_query_filepath;
@@ -93,7 +93,7 @@ namespace bvh {
 							zipCloseFileInZip(*zip_file);
 
 							// iterate sub folder file
-							if (!doCompressCurrentFolder(zip_file, base_folder, &processing_folder_absolute))
+							if (!doCompressCurrentFolder(zip_file, base_folder, &processing_folder_absolute, file_swap))
 								return FALSE;
 						} else {
 							// process file
@@ -123,9 +123,9 @@ namespace bvh {
 							while (TRUE) {
 								if (cpoied_file.peek(), cpoied_file.eof()) break;
 
-								cpoied_file.read(buffer, BVH_ZIP_BUFFER);
+								cpoied_file.read(file_swap, BVH_ZIP_BUFFER);
 								copied_file_gotten_char = cpoied_file.gcount();
-								zipWriteInFileInZip(*zip_file, buffer, (uint32_t)copied_file_gotten_char);
+								zipWriteInFileInZip(*zip_file, file_swap, (uint32_t)copied_file_gotten_char);
 							}
 
 							cpoied_file.close();
@@ -164,6 +164,10 @@ namespace bvh {
 				if (unzGetGlobalInfo(zip_file, &gi) != UNZ_OK)
 					throw std::bad_alloc();
 
+				// allocate file swap
+				char* file_swap = (char*)malloc(BVH_ZIP_BUFFER * sizeof(char));
+				if (file_swap == NULL)
+					throw std::bad_alloc();
 				// iterate file entry
 				for (uLong i = 0; i < gi.number_entry; i++) {
 					// get entry
@@ -183,7 +187,7 @@ namespace bvh {
 
 					// convert filename and decompress file
 					utils::string_helper::ConvertEncoding(&zip_internal_path_utf8, &zip_internal_path_acp, CP_UTF8, CP_ACP);
-					if (!doExtractCurrentFile(&zip_file, &zip_internal_path_utf8, base_folder))
+					if (!doExtractCurrentFile(&zip_file, &zip_internal_path_utf8, base_folder, file_swap))
 						throw std::logic_error("Fail to decompress file");
 
 					// to next file and check it.
@@ -193,16 +197,16 @@ namespace bvh {
 					}
 				}
 
+				free(file_swap);
 				unzClose(zip_file);
 			}
 
-			BOOL doExtractCurrentFile(unzFile* zip_file, std::string* relative_path, std::filesystem::path* base_folder) {
+			BOOL doExtractCurrentFile(unzFile* zip_file, std::string* relative_path, std::filesystem::path* base_folder, char* file_swap) {
 				// allocate for generate absolute path
 				std::filesystem::path absolute_path;
 
 				// allocate for file cpoy
 				std::ofstream cpoied_file;
-				char buffer[BVH_ZIP_BUFFER];
 				int copied_file_gotten;
 
 				// distinguish file or folder
@@ -226,11 +230,11 @@ namespace bvh {
 					// copy file
 					cpoied_file.open(absolute_path, std::ios_base::out | std::ios_base::binary);
 					while (TRUE) {
-						copied_file_gotten = unzReadCurrentFile(*zip_file, buffer, BVH_ZIP_BUFFER);
+						copied_file_gotten = unzReadCurrentFile(*zip_file, file_swap, BVH_ZIP_BUFFER);
 						if (copied_file_gotten < 0)
 							return FALSE;
 						else if (copied_file_gotten > 0) {
-							cpoied_file.write(buffer, copied_file_gotten);
+							cpoied_file.write(file_swap, copied_file_gotten);
 						} else break; // no any more data
 					}
 					cpoied_file.close();
