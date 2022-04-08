@@ -212,6 +212,7 @@ namespace bvh {
 						// load mesh
 						mesh_vList.clear(); mesh_vnList.clear(); mesh_vtList.clear();
 						readInt(&fmesh, &mesh_listCount);
+						mesh_vList.reserve(mesh_listCount);
 						// lazy load v, vn, vt
 						for (uint32_t i = 0; i < mesh_listCount; i++) {
 							readFloat(&fmesh, &(mesh_3dvector.x));
@@ -220,12 +221,14 @@ namespace bvh {
 							mesh_vList.push_back(mesh_3dvector);
 						}
 						readInt(&fmesh, &mesh_listCount);
+						mesh_vtList.reserve(mesh_listCount);
 						for (uint32_t i = 0; i < mesh_listCount; i++) {
 							readFloat(&fmesh, &(mesh_2dvector.x));
 							readFloat(&fmesh, &(mesh_2dvector.y));
 							mesh_vtList.push_back(mesh_2dvector);
 						}
 						readInt(&fmesh, &mesh_listCount);
+						mesh_vnList.reserve(mesh_listCount);
 						for (uint32_t i = 0; i < mesh_listCount; i++) {
 							readFloat(&fmesh, &(mesh_3dvector.x));
 							readFloat(&fmesh, &(mesh_3dvector.y));

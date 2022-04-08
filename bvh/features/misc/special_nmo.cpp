@@ -19,14 +19,14 @@ namespace bvh {
 					auto ctx = pkg->plgif->GetCKContext();
 					CKObjectArray* finalArray = CreateCKObjectArray();
 					XObjectPointerArray tmpArray = ctx->GetObjectListByType(CKCID_OBJECT, TRUE);
-					int count = tmpArray.Size();
-					for (unsigned int i = 0; i < count; i++)
+					uint32_t count = (uint32_t)tmpArray.Size();
+					for (uint32_t i = 0; i < count; i++)
 						finalArray->AddIfNotHere(tmpArray.GetObjectA(i));
 
 					if (ctx->GetCurrentLevel() == NULL) {
 						//no level, add it and add all object into it.
 						CKLevel* levels = (CKLevel*)ctx->CreateObject(CKCID_LEVEL);
-						for (unsigned int i = 0; i < count; i++)
+						for (uint32_t i = 0; i < count; i++)
 							levels->AddObject(tmpArray.GetObjectA(i));
 					} else {
 						//have level, just remove it

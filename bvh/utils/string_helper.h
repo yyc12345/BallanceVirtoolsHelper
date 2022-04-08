@@ -9,13 +9,21 @@ namespace bvh {
 
 			// Inline functions should be implemented in header
 			// Implements references
-			// https://github.com/AshampooSystems/boden/blob/master/framework/foundation/include/bdn/String.h
-			// https://zh.cppreference.com/w/cpp/string/basic_string/find
-			inline bool StdstringStartsWith(const std::string& source, const std::string& needle) {
-				return source.length() >= needle.length() && source.find(needle) == 0;
-			}
+			// https://www.boost.org/doc/libs/1_39_0/boost/algorithm/string/predicate.hpp
 			inline bool StdstringStartsWith(const std::string& source, const char* needle) {
-				return source.length() >= strlen(needle) && source.find(needle) == 0;
+				auto it = source.begin();
+				const char* pit = needle;
+
+				for (;
+					it != source.end() && *pit != '\0';
+					++it, ++pit) {
+					if (*it != *pit) return false;
+				}
+
+				return (*pit == '\0');
+			}
+			inline bool StdstringStartsWith(const std::string& source, const std::string& needle) {
+				return StdstringStartsWith(source, needle.c_str());
 			}
 
 			BOOL Stdstring2Uint(std::string* strl, UINT* number);

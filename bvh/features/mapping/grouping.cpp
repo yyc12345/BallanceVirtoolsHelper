@@ -47,7 +47,7 @@ namespace bvh {
 
 					XObjectPointerArray objArray = ctx->GetObjectListByType(CKCID_3DOBJECT, FALSE);
 					int count = objArray.Size();
-					int strlength = 0;
+					size_t strlength = 0;
 					for (int i = 0; i < count; i++) {
 						obj = (CK3dObject*)objArray[i];
 
