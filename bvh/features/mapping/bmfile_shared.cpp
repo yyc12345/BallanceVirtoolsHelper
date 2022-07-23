@@ -7,7 +7,6 @@ namespace bvh {
 		namespace mapping {
 			namespace bmfile {
 
-				const uint32_t CONST_ExternalTextureList_Length = 81;	//following list's length. not to change this when the list is changed
 				const char* CONST_ExternalTextureList[] = {
 					"atari.avi",
 					"atari.bmp",
@@ -91,8 +90,8 @@ namespace bvh {
 					"Wood_Plain2.bmp",
 					"Wood_Raft.bmp"
 				};
+				const uint32_t CONST_ExternalTextureList_Length = sizeof(CONST_ExternalTextureList) / sizeof(char*);	//following list's length. not to change this when the list is changed
 
-				const uint32_t CONST_ExternalComponent_Length = 27;	//following list's length. not to change this when the list is changed
 				const char* CONST_ExternalComponent[] = {
 					"P_Extra_Life",
 					"P_Extra_Point",
@@ -122,6 +121,7 @@ namespace bvh {
 					"PR_Resetpoint",
 					"PS_FourFlames"
 				};
+				const uint32_t CONST_ExternalComponent_Length = sizeof(CONST_ExternalComponent) / sizeof(char*);	//following list's length. not to change this when the list is changed
 
 			}
 		}

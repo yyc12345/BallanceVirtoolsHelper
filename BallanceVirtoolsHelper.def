@@ -1,5 +1,4 @@
 LIBRARY      "BallanceVirtoolsHelper"
-DESCRIPTION  'Fuck Virtools'
 
 EXPORTS
 	GetVirtoolsPluginInfoCount

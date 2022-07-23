@@ -10,7 +10,6 @@ namespace bvh {
 
 #pragma region const value
 
-				const int CONST_ElementsList_Length = 23;
 				const char* CONST_ElementsList[] = {
 					"P_Extra_Life",
 					"P_Extra_Point",
@@ -36,6 +35,7 @@ namespace bvh {
 					"P_Modul_37",
 					"P_Modul_41"
 				};
+				const int CONST_ElementsList_Length = sizeof(CONST_ElementsList) / sizeof(char*);
 
 #pragma endregion
 

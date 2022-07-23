@@ -82,7 +82,7 @@ namespace bvh {
 					VxColor material_color;
 					float material_value;
 					CKTexture* material_tryGottonTexture;
-					BOOL material_useTexture;
+					BOOL material_useTexture, material_alphaProp;
 					uint32_t material_textureIndex;
 					//used by texture
 					CKTexture* exportTexture;
@@ -316,6 +316,15 @@ namespace bvh {
 #undef writeColor
 						material_value = exportMaterial->GetPower();
 						writeFloat(&fmaterial, &material_value);
+
+						material_alphaProp = exportMaterial->AlphaTestEnabled();
+						writeBool(&fmaterial, &material_alphaProp);
+						material_alphaProp = exportMaterial->AlphaBlendEnabled();
+						writeBool(&fmaterial, &material_alphaProp);
+						material_alphaProp = exportMaterial->ZWriteEnabled();
+						writeBool(&fmaterial, &material_alphaProp);
+						material_alphaProp = exportMaterial->IsTwoSided();
+						writeBool(&fmaterial, &material_alphaProp);
 
 						// try get material
 						material_tryGottonTexture = exportMaterial->GetTexture();

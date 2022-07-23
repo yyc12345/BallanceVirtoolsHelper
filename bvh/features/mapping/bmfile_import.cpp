@@ -9,7 +9,7 @@ namespace bvh {
 	namespace features {
 		namespace mapping {
 			namespace bmfile {
-			
+
 				void ImportBM(utils::ParamPackage* pkg) {
 					// ====================================== 
 					// preparing temp folder
@@ -76,7 +76,7 @@ namespace bvh {
 					CKMaterial* importMaterial = NULL;
 					VxColor material_color;
 					float material_colorPower;
-					BOOL material_useTexture;
+					BOOL material_useTexture, material_alphaProp;
 					uint32_t material_textureIndex;
 					//used in mesh
 					CKMesh* importMesh = NULL;
@@ -191,6 +191,26 @@ namespace bvh {
 						readFloat(&fmaterial, &material_colorPower);
 						importMaterial->SetPower(material_colorPower);
 
+						readBool(&fmaterial, &material_alphaProp);
+						importMaterial->EnableAlphaTest(material_alphaProp);
+						if (material_alphaProp) {
+							importMaterial->SetAlphaFunc(VXCMP_GREATER);
+							importMaterial->SetAlphaRef(1);
+						}
+						readBool(&fmaterial, &material_alphaProp);
+						importMaterial->EnableAlphaBlend(material_alphaProp);
+						if (material_alphaProp) {
+							importMaterial->SetSourceBlend(VXBLEND_SRCALPHA);
+							importMaterial->SetDestBlend(VXBLEND_INVSRCALPHA);
+						}
+						readBool(&fmaterial, &material_alphaProp);
+						importMaterial->EnableZWrite(material_alphaProp);
+						if (material_alphaProp) {
+							importMaterial->SetZFunc(VXCMP_LESSEQUAL);
+						}
+						readBool(&fmaterial, &material_alphaProp);
+						importMaterial->SetTwoSided(material_alphaProp);
+
 						readBool(&fmaterial, &material_useTexture);
 						readInt(&fmaterial, &material_textureIndex);
 						if (material_useTexture) {
@@ -245,7 +265,7 @@ namespace bvh {
 							for (int j = 0; j < 9; j++) {
 								readInt(&fmesh, &(mesh_faceData[j]));
 							}
-							
+
 							// manipulate face data
 							for (int j = 0; j < 9; j += 3) {
 								mesh_3dvector = mesh_vList[mesh_faceData[j]];
