@@ -21,6 +21,11 @@ namespace bvh {
 			std::string window_ConvertEncoding_ManualOldCP;
 			int window_ConvertEncoding_NewCP;
 			std::string window_ConvertEncoding_ManualNewCP;
+			//window_mapping_bm_import
+			int window_mapping_bmImport_renameObj;
+			int window_mapping_bmImport_renameMesh;
+			int window_mapping_bmImport_renameMat;
+			int window_mapping_bmImport_renameTex;
 
 			//todo: add setting in there
 		};

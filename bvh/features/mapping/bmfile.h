@@ -41,6 +41,7 @@ namespace bvh {
 				void loadExternalTexture(std::string* name, CKTexture* texture, utils::ParamPackage* pkg);
 				void loadComponenetMesh(CK3dEntity* obj, CKContext* ctx, uint32_t index);
 				BOOL isComponentInStandard(std::string* name);
+				CKObject* userCreateCKObject(CKContext* ctx, CK_CLASSID cls, const char* name, BOOL use_rename, BOOL* is_existed);
 
 				void ExportBM(utils::ParamPackage* pkg);
 				void writeBool(std::ofstream* fs, BOOL* boolean);

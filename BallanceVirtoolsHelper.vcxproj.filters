@@ -105,6 +105,9 @@
     <ClInclude Include="bvh\utils\zip_helper.h">
       <Filter>Headers\utils</Filter>
     </ClInclude>
+    <ClInclude Include="bvh\mfcwindows\bmfile_import.h">
+      <Filter>Headers\mfcwindows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -166,6 +169,9 @@
     </ClCompile>
     <ClCompile Include="bvh\features\mapping\bmfile_import.cpp">
       <Filter>Sources\features\mapping</Filter>
+    </ClCompile>
+    <ClCompile Include="bvh\mfcwindows\bmfile_import.cpp">
+      <Filter>Sources\mfcwindows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

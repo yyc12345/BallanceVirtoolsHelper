@@ -6,7 +6,7 @@ namespace bvh {
 
 		ConfigManager::ConfigManager() :
 			CurrentConfig(),
-			config_version(14) {
+			config_version(15) {
 			;
 		}
 		ConfigManager::~ConfigManager() {
@@ -33,6 +33,11 @@ namespace bvh {
 			CurrentConfig.window_ConvertEncoding_NewCP = 0;
 			CurrentConfig.window_ConvertEncoding_ManualNewCP = "";
 
+			CurrentConfig.window_mapping_bmImport_renameObj = (int)TRUE;
+			CurrentConfig.window_mapping_bmImport_renameMesh = (int)TRUE;
+			CurrentConfig.window_mapping_bmImport_renameMat = (int)TRUE;
+			CurrentConfig.window_mapping_bmImport_renameTex = (int)FALSE;
+
 			//todo: add setting default value in there
 		}
 		void ConfigManager::SaveConfig() {
@@ -57,6 +62,11 @@ namespace bvh {
 			WriteString(f, &CurrentConfig.window_ConvertEncoding_ManualOldCP);
 			WriteInt(f, &CurrentConfig.window_ConvertEncoding_NewCP);
 			WriteString(f, &CurrentConfig.window_ConvertEncoding_ManualNewCP);
+
+			WriteInt(f, &CurrentConfig.window_mapping_bmImport_renameObj);
+			WriteInt(f, &CurrentConfig.window_mapping_bmImport_renameMesh);
+			WriteInt(f, &CurrentConfig.window_mapping_bmImport_renameMat);
+			WriteInt(f, &CurrentConfig.window_mapping_bmImport_renameTex);
 
 			//todo: add setting write in there
 
@@ -92,6 +102,10 @@ namespace bvh {
 			ReadInt(f, &CurrentConfig.window_ConvertEncoding_NewCP);
 			ReadString(f, &CurrentConfig.window_ConvertEncoding_ManualNewCP);
 
+			ReadInt(f, &CurrentConfig.window_mapping_bmImport_renameObj);
+			ReadInt(f, &CurrentConfig.window_mapping_bmImport_renameMesh);
+			ReadInt(f, &CurrentConfig.window_mapping_bmImport_renameMat);
+			ReadInt(f, &CurrentConfig.window_mapping_bmImport_renameTex);
 			//todo: add setting read in there
 
 			fclose(f);

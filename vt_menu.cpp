@@ -197,7 +197,7 @@ void MenuCallback(int commandID) {
 			ShellExecute(NULL, "open", "https://github.com/yyc12345/BallanceVirtoolsHelper/issues", NULL, NULL, SW_SHOWNORMAL);
 			break;
 		case 31:
-			AfxMessageBox("BallanceVirtoolsHelper - The plugin which can help Ballance mapping and script.\nBM file spec version: 1.4(14)\nConfig file version: 14\nPlugin version: 2.0\nUnder GPL v3 License.\nProject homepage: https://github.com/yyc12345/BallanceVirtoolsHelper", MB_ICONINFORMATION + MB_OK);
+			AfxMessageBox("BallanceVirtoolsHelper - The plugin which can help Ballance mapping and script.\nBM file spec version: 1.4 (14)\nConfig file version: 15\nPlugin version: 2.0\nUnder GPL v3 License.\nProject homepage: https://github.com/yyc12345/BallanceVirtoolsHelper", MB_ICONINFORMATION + MB_OK);
 			break;
 	}
 

@@ -3,6 +3,7 @@
 #include "../../utils/zip_helper.h"
 #include "../../utils/win32_helper.h"
 #include "../../utils/string_helper.h"
+#include "../../mfcwindows/bmfile_import.h"
 #include <cuchar>
 
 namespace bvh {
@@ -21,6 +22,14 @@ namespace bvh {
 						return;
 					}
 					bmx_file_path = gotten_bmx_file.c_str();
+					// get merge setting
+					bvh::mfcwindows::BMFileImport* bm_import_window = new bvh::mfcwindows::BMFileImport(pkg);
+					if (bm_import_window->DoModal() != IDOK) {
+						delete bm_import_window;
+						pkg->error_proc->SetExecutionResult(FALSE, "You must specific name conflict strategies.");
+						return;
+					}
+
 					// get temp folder
 					utils::win32_helper::GetTempFolder(pkg->plgif->GetCKContext(), &temp_folder);
 					temp_folder /= "9d2aa26133b94afaa2edcaf580c71e86";	// 9d2aa26133b94afaa2edcaf580c71e86 is guid
@@ -64,6 +73,8 @@ namespace bvh {
 					std::ifstream findex, fobject, fmesh, fmaterial, ftexture;
 					std::vector<FILE_INDEX_HELPER*> objectList, meshList, materialList, textureList;
 
+					//CK creation var
+					BOOL is_existed_probe = FALSE;
 					//used in index
 					FILE_INDEX_HELPER* index_entryChunk = NULL;
 					uint8_t index_type;
@@ -147,8 +158,9 @@ namespace bvh {
 						ftexture.seekg((*iter)->offset);
 
 						// create new virtools object
-						importTexture = (CKTexture*)ctx->CreateObject(CKCID_TEXTURE, (CKSTRING)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
+						importTexture = (CKTexture*)userCreateCKObject(ctx, CKCID_TEXTURE, (*iter)->name.c_str(), bm_import_window->OUT_rename_tex, &is_existed_probe);
 						(*iter)->id = importTexture->GetID();
+						if (is_existed_probe) continue;
 
 						readString(&ftexture, &texture_filename);
 						readBool(&ftexture, &texture_isExternal);
@@ -163,6 +175,10 @@ namespace bvh {
 							importTexture->SetSaveOptions(CKTEXTURE_RAWDATA);
 						}
 						importTexture->FreeVideoMemory();
+
+
+						// add into scene
+						vtenv_currentScene->AddObjectToScene(importTexture);
 					}
 					ftexture.close();
 
@@ -173,8 +189,9 @@ namespace bvh {
 						fmaterial.seekg((*iter)->offset);
 
 						// create new virtools obj
-						importMaterial = (CKMaterial*)ctx->CreateObject(CKCID_MATERIAL, (char*)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
+						importMaterial = (CKMaterial*)userCreateCKObject(ctx, CKCID_MATERIAL, (*iter)->name.c_str(), bm_import_window->OUT_rename_mat, &is_existed_probe);
 						(*iter)->id = importMaterial->GetID();
+						if (is_existed_probe) continue;
 
 						// pre-set for alpha channel
 						material_color.a = 1;
@@ -216,6 +233,10 @@ namespace bvh {
 						if (material_useTexture) {
 							importMaterial->SetTexture((CKTexture*)ctx->GetObjectA(textureList[material_textureIndex]->id));
 						}
+
+
+						// add into scene
+						vtenv_currentScene->AddObjectToScene(importMaterial);
 					}
 					fmaterial.close();
 
@@ -226,8 +247,10 @@ namespace bvh {
 						fmesh.seekg((*iter)->offset);
 
 						// create new virtools obj
-						importMesh = (CKMesh*)ctx->CreateObject(CKCID_MESH, (CKSTRING)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
+						importMesh = (CKMesh*)userCreateCKObject(ctx, CKCID_MESH, (*iter)->name.c_str(), bm_import_window->OUT_rename_mesh, &is_existed_probe);
 						(*iter)->id = importMesh->GetID();
+						if (is_existed_probe) continue;
+
 
 						// load mesh
 						mesh_vList.clear(); mesh_vnList.clear(); mesh_vtList.clear();
@@ -286,6 +309,9 @@ namespace bvh {
 								importMesh->SetFaceMaterial(i, (CKMaterial*)ctx->GetObjectA(materialList[mesh_materialIndex]->id));
 							}
 						}
+
+						// add into scene
+						vtenv_currentScene->AddObjectToScene(importMesh);
 					}
 					fmesh.close();
 
@@ -296,8 +322,10 @@ namespace bvh {
 						fobject.seekg((*iter)->offset);
 
 						// create new virtools obj
-						importObject = (CK3dObject*)ctx->CreateObject(CKCID_3DOBJECT, (CKSTRING)(*iter)->name.c_str(), CK_OBJECTCREATION_RENAME);
+						importObject = (CK3dObject*)userCreateCKObject(ctx, CKCID_3DOBJECT, (*iter)->name.c_str(), bm_import_window->OUT_rename_obj, &is_existed_probe);
 						(*iter)->id = importObject->GetID();
+						if (is_existed_probe) continue;
+
 
 						// load object
 						// read basic data
@@ -339,7 +367,7 @@ namespace bvh {
 
 						// apply hidden
 						importObject->Show(object_isHidden ? CKHIDE : CKSHOW);
-						// all object should add into current scene with dependency
+						// add into scene
 						vtenv_currentScene->AddObjectToScene(importObject);
 					}
 					fobject.close();
@@ -354,6 +382,8 @@ namespace bvh {
 					for (auto iter = objectList.begin(); iter != objectList.end(); iter++)
 						delete (*iter);
 
+					// delete window and return
+					delete bm_import_window;
 					pkg->error_proc->SetExecutionResult(TRUE);
 				}
 
@@ -491,7 +521,25 @@ namespace bvh {
 					// couldn't find it
 					return FALSE;
 				}
+				CKObject* userCreateCKObject(CKContext* ctx, CK_CLASSID cls, const char* name, BOOL use_rename, BOOL* is_existed) {
+					if (use_rename) {
+						// use rename flag to create object directly
+						// use rename will get a new object definitely.
+						*is_existed = FALSE;
+						return ctx->CreateObject(cls, (CKSTRING)name, CK_OBJECTCREATION_RENAME, NULL);
+					} else {
+						// try get current node
+						CKObject* obj = ctx->GetObjectByNameAndClass((CKSTRING)name, cls, NULL);
+						if (obj != NULL) {
+							*is_existed = TRUE;
+							return obj;
+						}
 
+						// otherwise create it directly
+						*is_existed = FALSE;
+						return ctx->CreateObject(cls, (CKSTRING)name, CK_OBJECTCREATION_NONAMECHECK, NULL);
+					}
+				}
 			}
 		}
 	}

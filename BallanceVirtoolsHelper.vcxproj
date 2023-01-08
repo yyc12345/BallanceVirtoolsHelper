@@ -71,6 +71,7 @@
       <DisableSpecificWarnings>4819;4996</DisableSpecificWarnings>
       <SupportJustMyCode>false</SupportJustMyCode>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -96,6 +97,7 @@
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;VX_MEM_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4819;4996</DisableSpecificWarnings>
       <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -110,6 +112,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="bvh\mfcwindows\bmfile_import.h" />
     <ClInclude Include="bvh\utils\config_manager.h" />
     <ClInclude Include="bvh\utils\error_proc.h" />
     <ClInclude Include="bvh\utils\param_package.h" />
@@ -133,6 +136,7 @@
     <ClCompile Include="bvh\features\mapping\bmfile_export.cpp" />
     <ClCompile Include="bvh\features\mapping\bmfile_fix_texture.cpp" />
     <ClCompile Include="bvh\features\mapping\bmfile_import.cpp" />
+    <ClCompile Include="bvh\mfcwindows\bmfile_import.cpp" />
     <ClCompile Include="bvh\utils\config_manager.cpp" />
     <ClCompile Include="bvh\utils\error_proc.cpp" />
     <ClCompile Include="bvh\utils\param_package.cpp" />
