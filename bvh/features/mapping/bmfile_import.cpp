@@ -14,15 +14,15 @@ namespace bvh {
 					// ====================================== 
 					// preparing temp folder
 					// get bmx file and decompress it into temp folder
-					std::string gotten_bmx_file;
+					std::wstring gotten_bmx_file;
 					std::filesystem::path bmx_file_path, temp_folder, temp_texture_folder;
-					if (!utils::win32_helper::OpenFileDialog(&gotten_bmx_file, "BM file(*.bmx)\0*.bmx\0", "bmx", TRUE)) {
+					if (!utils::win32_helper::OpenFileDialog(&gotten_bmx_file, L"BM file(*.bmx)\0*.bmx\0", L"bmx", TRUE)) {
 						pkg->error_proc->SetExecutionResult(FALSE, "No selected BM file.");
 						return;
 					}
 					bmx_file_path = gotten_bmx_file.c_str();
 					// get temp folder
-					utils::win32_helper::GetTempFolder(&temp_folder);
+					utils::win32_helper::GetTempFolder(pkg->plgif->GetCKContext(), &temp_folder);
 					temp_folder /= "9d2aa26133b94afaa2edcaf580c71e86";	// 9d2aa26133b94afaa2edcaf580c71e86 is guid
 					temp_texture_folder = temp_folder / "Texture";
 					// clean temp folder
@@ -387,7 +387,7 @@ namespace bvh {
 					uint32_t length;
 					readInt(fs, &length);
 					bmstr.resize(length);
-					fs->read((char*)bmstr.data(), length * sizeof(char32_t));
+					fs->read((char*)bmstr.data(), (std::streamsize)length * sizeof(char32_t));
 					utf8str.reserve(length * 2);	// reserve double space for trying avoiding re-alloc
 
 					// decode

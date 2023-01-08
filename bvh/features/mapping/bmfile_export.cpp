@@ -24,9 +24,9 @@ namespace bvh {
 						pkg->error_proc->SetExecutionResult(FALSE, "You cancel this process.");
 						return;
 					}
-					bmx_file = bm_export_window->OUT_File;
+					bmx_file = bm_export_window->OUT_File.c_str();
 					// get temp folder path
-					utils::win32_helper::GetTempFolder(&temp_folder);
+					utils::win32_helper::GetTempFolder(pkg->plgif->GetCKContext(), &temp_folder);
 					temp_folder /= "a6694fa9ca1c46588cf4b6e6d376c3bd";	// a6694fa9ca1c46588cf4b6e6d376c3bd is guid
 					temp_texture_folder = temp_folder / "Texture";
 					// clean temp folder
@@ -207,7 +207,7 @@ namespace bvh {
 						object_chunkPtrHeader = fobject.tellp();
 						writeInt(&fobject, &object_groupListCount);
 						auto grouping_data_range = grouping_data.equal_range(exportObject->GetID());
-						for (auto it = grouping_data_range.first; it != grouping_data_range.second; ++it) {
+						for (auto &it = grouping_data_range.first; it != grouping_data_range.second; ++it) {
 							writeString(&fobject, it->second);
 							++object_groupListCount;
 						}
@@ -431,7 +431,7 @@ namespace bvh {
 					writeInt(fs, &c32Length);
 
 					// write data
-					fs->write((char*)bmstr.data(), c32Length * sizeof(char32_t));
+					fs->write((char*)bmstr.data(), (std::streamsize)c32Length * sizeof(char32_t));
 
 				}
 				BOOL isValidObject(CK3dEntity* obj) {

@@ -42,12 +42,15 @@ namespace bvh {
 
 			int OUT_Mode;
 			CK_ID OUT_Target;
-			std::string OUT_File;
+			std::wstring OUT_File;
 
 		private:
 			utils::ParamPackage* pkg;
 			std::vector<CK_ID> comboboxMirror;
 			int nowMode;
+
+			std::wstring realBMFileStorage;
+
 		};
 	}
 }

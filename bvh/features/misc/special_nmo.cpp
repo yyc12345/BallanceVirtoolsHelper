@@ -8,12 +8,19 @@ namespace bvh {
 			namespace special_nmo {
 				void SaveSpecialNMO(utils::ParamPackage* pkg) {
 					std::filesystem::path file, tempfile;
-					std::string filepath, filename;
-					if (!utils::win32_helper::OpenFileDialog(&filepath, "NMO file(*.nmo)\0*.nmo\0", "nmo", FALSE)) {
+					std::wstring filepath, filename;
+					if (!utils::win32_helper::OpenFileDialog(&filepath, L"NMO file(*.nmo)\0*.nmo\0", L"nmo", FALSE)) {
 						pkg->error_proc->SetExecutionResult(FALSE, "No selected NMO file.");
 						return;
 					}
-					file = filepath;
+					file = filepath.c_str();
+
+					// get temp file
+					// temp file are created in vt temp folder and it must can be parsed
+					// otherwise vt can not work. so we do not check it validation when WString -> String
+					utils::win32_helper::GetTempFolder(pkg->plgif->GetCKContext(), &tempfile);
+					utils::string_helper::StdwstringPrintf(&filename, L"7c20254bdc9a4409b490e46efaf5e128_%d.cmo", GetCurrentProcessId()); //7c20254bdc9a4409b490e46efaf5e128 is guid
+					tempfile /= filename;
 
 					// try re-construct a usable CKObjectArray
 					auto ctx = pkg->plgif->GetCKContext();
@@ -34,14 +41,9 @@ namespace bvh {
 						finalArray->Remove(ctx->GetCurrentScene());
 					}
 
-					//get temp file
-					utils::win32_helper::GetTempFolder(&tempfile);
-					utils::string_helper::StdstringPrintf(&filename, "7c20254bdc9a4409b490e46efaf5e128_%d.cmo", GetCurrentProcessId()); //7c20254bdc9a4409b490e46efaf5e128 is guid
-					tempfile /= filename;
-					DeleteFileA(tempfile.string().c_str());
-					//get real file
-					DeleteFileA(file.string().c_str());
-
+					// delete cache file and real file
+					DeleteFileW(tempfile.wstring().c_str());
+					DeleteFileW(file.wstring().c_str());
 					//save it
 					CKDependencies dep;
 					dep.m_Flags = CK_DEPENDENCIES_FULL;
@@ -53,8 +55,8 @@ namespace bvh {
 					}
 
 					//move temp file
-					auto code2 = MoveFileA(tempfile.string().c_str(), file.string().c_str());
-					if (code != CK_OK) {
+					auto code2 = MoveFileW(tempfile.wstring().c_str(), file.wstring().c_str());
+					if (!code2) {
 						pkg->error_proc->SetExecutionResult(FALSE, "Error when moving extension.");
 						return;
 					}

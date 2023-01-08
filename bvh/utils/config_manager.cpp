@@ -6,7 +6,7 @@ namespace bvh {
 
 		ConfigManager::ConfigManager() :
 			CurrentConfig(),
-			config_version(13) {
+			config_version(14) {
 			;
 		}
 		ConfigManager::~ConfigManager() {
@@ -17,15 +17,15 @@ namespace bvh {
 
 		void ConfigManager::GetConfigFilePath(std::filesystem::path* path) {
 			win32_helper::GetVirtoolsFolder(path);
-			*path /= "BallanceVirtoolsHelper.cfg";
+			*path /= L"BallanceVirtoolsHelper.cfg";
 		}
 		void ConfigManager::InitConfig() {
-			CurrentConfig.func_mapping_bm_ExternalTextureFolder = "";
+			CurrentConfig.func_mapping_bm_ExternalTextureFolder = L"";
 			CurrentConfig.func_mapping_bm_NoComponentGroupName = "";
 			CurrentConfig.func_mapping_bm_OmittedMaterialPrefix = "";
 
 			CurrentConfig.window_mapping_bmExport_mode = 2;
-			CurrentConfig.window_mapping_bmExport_filename = "";
+			CurrentConfig.window_mapping_bmExport_filename = L"";
 
 			CurrentConfig.window_ConvertEncoding_Method = 0;
 			CurrentConfig.window_ConvertEncoding_OldCP = 0;
@@ -39,18 +39,18 @@ namespace bvh {
 			std::filesystem::path filepath;
 			GetConfigFilePath(&filepath);
 
-			FILE* f = fopen(filepath.string().c_str(), "wb");
+			FILE* f = _wfopen(filepath.wstring().c_str(), L"wb");
 
 			//write version first
 			WriteInt(f, &config_version);
 
 			//write data
-			WriteString(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
+			WriteWstring(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
 			WriteString(f, &CurrentConfig.func_mapping_bm_NoComponentGroupName);
 			WriteString(f, &CurrentConfig.func_mapping_bm_OmittedMaterialPrefix);
 
 			WriteInt(f, &CurrentConfig.window_mapping_bmExport_mode);
-			WriteString(f, &CurrentConfig.window_mapping_bmExport_filename);
+			WriteWstring(f, &CurrentConfig.window_mapping_bmExport_filename);
 
 			WriteInt(f, &CurrentConfig.window_ConvertEncoding_Method);
 			WriteInt(f, &CurrentConfig.window_ConvertEncoding_OldCP);
@@ -66,7 +66,7 @@ namespace bvh {
 			std::filesystem::path filepath;
 			GetConfigFilePath(&filepath);
 
-			FILE* f = fopen(filepath.string().c_str(), "rb");
+			FILE* f = _wfopen(filepath.wstring().c_str(), L"rb");
 			if (f == NULL) goto needInitCfg;
 
 			//checker
@@ -79,12 +79,12 @@ namespace bvh {
 			}
 
 			//read data
-			ReadString(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
+			ReadWstring(f, &CurrentConfig.func_mapping_bm_ExternalTextureFolder);
 			ReadString(f, &CurrentConfig.func_mapping_bm_NoComponentGroupName);
 			ReadString(f, &CurrentConfig.func_mapping_bm_OmittedMaterialPrefix);
 
 			ReadInt(f, &CurrentConfig.window_mapping_bmExport_mode);
-			ReadString(f, &CurrentConfig.window_mapping_bmExport_filename);
+			ReadWstring(f, &CurrentConfig.window_mapping_bmExport_filename);
 
 			ReadInt(f, &CurrentConfig.window_ConvertEncoding_Method);
 			ReadInt(f, &CurrentConfig.window_ConvertEncoding_OldCP);
@@ -133,28 +133,39 @@ namespace bvh {
 			str->resize(count);
 			fread(str->data(), sizeof(char), count, fs);
 		}
-		void ConfigManager::ReadString(FILE* fs, std::vector<std::string*>* str) {
+		void ConfigManager::ReadWstring(FILE* fs, std::wstring* str) {
 			int count = 0;
-			std::string* cache;
 			ReadInt(fs, &count);
-			for (int i = 0; i < count; ++i) {
-				cache = new std::string();
-				ReadString(fs, cache);
-				str->push_back(cache);
-			}
+			str->resize(count);
+			fread(str->data(), sizeof(wchar_t), count, fs);
 		}
+		//void ConfigManager::ReadString(FILE* fs, std::vector<std::string*>* str) {
+		//	int count = 0;
+		//	std::string* cache;
+		//	ReadInt(fs, &count);
+		//	for (int i = 0; i < count; ++i) {
+		//		cache = new std::string();
+		//		ReadString(fs, cache);
+		//		str->push_back(cache);
+		//	}
+		//}
 		void ConfigManager::WriteString(FILE* fs, std::string* str) {
 			int count = str->size();
 			WriteInt(fs, &count);
 			fwrite(str->c_str(), sizeof(char), count, fs);
 		}
-		void ConfigManager::WriteString(FILE* fs, std::vector<std::string*>* str) {
+		void ConfigManager::WriteWstring(FILE* fs, std::wstring* str) {
 			int count = str->size();
 			WriteInt(fs, &count);
-			for (auto iter = str->begin(); iter != str->end(); iter++) {
-				WriteString(fs, *iter);
-			}
+			fwrite(str->c_str(), sizeof(wchar_t), count, fs);
 		}
+		//void ConfigManager::WriteString(FILE* fs, std::vector<std::string*>* str) {
+		//	int count = str->size();
+		//	WriteInt(fs, &count);
+		//	for (auto iter = str->begin(); iter != str->end(); iter++) {
+		//		WriteString(fs, *iter);
+		//	}
+		//}
 
 #pragma endregion
 	}

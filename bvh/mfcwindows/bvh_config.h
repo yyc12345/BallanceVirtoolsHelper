@@ -37,6 +37,7 @@ namespace bvh {
 
 		private:
 			utils::ParamPackage* pkg;
+			std::wstring realExtTexFolderStorage;
 		};
 
 	}

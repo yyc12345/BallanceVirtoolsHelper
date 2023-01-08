@@ -13,13 +13,19 @@ namespace bvh {
 						pkg->error_proc->SetExecutionResult(FALSE, "No selected CKDataArray.");
 						return;
 					}
-					std::string file;
-					if (!utils::win32_helper::OpenFileDialog(&file, "Csv file(*.csv)\0*.csv\0", "csv", TRUE)) {
+					std::wstring file;
+					if (!utils::win32_helper::OpenFileDialog(&file, L"Csv file(*.csv)\0*.csv\0", L"csv", TRUE)) {
 						pkg->error_proc->SetExecutionResult(FALSE, "No selected CSV file.");
 						return;
 					}
 
-					BOOL cache = target->LoadElements((CKSTRING)file.c_str(), TRUE, 0);
+					std::string ansi_file;
+					if (!utils::string_helper::Wstring2String(&file, &ansi_file, CP_ACP) || 
+						!utils::win32_helper::CheckANSIPathValidation(&ansi_file)) {
+						pkg->error_proc->SetExecutionResult(FALSE, "Selected CSV file path contain illegal character for current code page.");
+						return;
+					}
+					BOOL cache = target->LoadElements((CKSTRING)ansi_file.c_str(), TRUE, 0);
 					if (!cache) {
 						pkg->error_proc->SetExecutionResult(FALSE, "Error when import file.");
 						return;
@@ -33,13 +39,19 @@ namespace bvh {
 						pkg->error_proc->SetExecutionResult(FALSE, "No selected CKDataArray.");
 						return;
 					}
-					std::string file;
-					if (!utils::win32_helper::OpenFileDialog(&file, "Csv file(*.csv)\0*.csv\0", "csv", FALSE)) {
+					std::wstring file;
+					if (!utils::win32_helper::OpenFileDialog(&file, L"Csv file(*.csv)\0*.csv\0", L"csv", FALSE)) {
 						pkg->error_proc->SetExecutionResult(FALSE, "No selected CSV file.");
 						return;
 					}
 
-					BOOL cache = target->WriteElements((CKSTRING)file.c_str(), 0, target->GetColumnCount(), FALSE);
+					std::string ansi_file;
+					if (!utils::string_helper::Wstring2String(&file, &ansi_file, CP_ACP) ||
+						!utils::win32_helper::CheckANSIPathValidation(&ansi_file)) {
+						pkg->error_proc->SetExecutionResult(FALSE, "Selected CSV file path contain illegal character for current code page.");
+						return;
+					}
+					BOOL cache = target->WriteElements((CKSTRING)ansi_file.c_str(), 0, target->GetColumnCount(), FALSE);
 					if (!cache) {
 						pkg->error_proc->SetExecutionResult(FALSE, "Error when export file.");
 						return;

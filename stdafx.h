@@ -38,3 +38,6 @@
 #include "VEP_ScriptActionMenu.h"
 #include "VEP_KeyboardShortcutManager.h"
 #include "VEP_All.h"
+
+// define a custom MAX_PATH
+#define BVH_MAX_PATH (MAX_PATH + 0x200)

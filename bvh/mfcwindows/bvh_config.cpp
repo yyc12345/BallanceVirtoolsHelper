@@ -13,6 +13,7 @@ namespace bvh {
 
 			BVHConfig::BVHConfig(utils::ParamPackage* _pkg, CWnd* pParent /*=nullptr*/)
 			: CDialogEx(IDD_DIALOG1, pParent),
+			realExtTexFolderStorage(),
 			pkg(_pkg) {
 
 		}
@@ -37,7 +38,9 @@ namespace bvh {
 			CDialogEx::OnInitDialog();
 
 			// load config
-			m_BM_ExternalTextureFolder.SetWindowTextA(pkg->cfg_manager->CurrentConfig.func_mapping_bm_ExternalTextureFolder.c_str());
+			realExtTexFolderStorage = pkg->cfg_manager->CurrentConfig.func_mapping_bm_ExternalTextureFolder.c_str();
+			utils::win32_helper::StdWstring2CwndText(&m_BM_ExternalTextureFolder, &realExtTexFolderStorage);
+
 			m_BM_NoComponentGroup.SetWindowTextA(pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName.c_str());
 			m_BM_OmittedMaterialPrefix.SetWindowTextA(pkg->cfg_manager->CurrentConfig.func_mapping_bm_OmittedMaterialPrefix.c_str());
 			return TRUE;  // return TRUE unless you set the focus to a control
@@ -47,14 +50,16 @@ namespace bvh {
 #pragma region window_Config message processor
 
 		void BVHConfig::On_BM_ExternalTextureFolderBrowse() {
-			std::string cache;
+			std::wstring cache;
 			utils::win32_helper::OpenFolderDialog(&cache, m_hWnd);
-			m_BM_ExternalTextureFolder.SetWindowTextA(cache.c_str());
+
+			realExtTexFolderStorage = cache.c_str();
+			utils::win32_helper::StdWstring2CwndText(&m_BM_ExternalTextureFolder, &realExtTexFolderStorage);
 		}
 
 		void BVHConfig::On_Dialog_OK() {
 			//save config
-			utils::win32_helper::CwndText2Stdstring(&m_BM_ExternalTextureFolder, &(pkg->cfg_manager->CurrentConfig.func_mapping_bm_ExternalTextureFolder));
+			pkg->cfg_manager->CurrentConfig.func_mapping_bm_ExternalTextureFolder = realExtTexFolderStorage.c_str();
 			utils::win32_helper::CwndText2Stdstring(&m_BM_NoComponentGroup, &(pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName));
 			utils::win32_helper::CwndText2Stdstring(&m_BM_OmittedMaterialPrefix, &(pkg->cfg_manager->CurrentConfig.func_mapping_bm_OmittedMaterialPrefix));
 

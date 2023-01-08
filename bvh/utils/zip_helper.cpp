@@ -22,10 +22,10 @@ namespace bvh {
 		namespace zip_helper {
 
 			void Compress(std::filesystem::path* filepath, std::filesystem::path* folder) {
-				zlib_filefunc_def ffunc;
+				zlib_filefunc64_def ffunc;
 				zipFile zip_file = NULL;
-				fill_win32_filefunc(&ffunc);
-				zip_file = zipOpen2(filepath->string().c_str(), APPEND_STATUS_CREATE, NULL, &ffunc);
+				fill_win32_filefunc64W(&ffunc);
+				zip_file = zipOpen2_64(filepath->wstring().c_str(), APPEND_STATUS_CREATE, NULL, &ffunc);
 				if (zip_file == NULL) throw std::logic_error("Fail to opne zip file.");
 
 				char* file_swap = (char*)malloc(BVH_ZIP_BUFFER * sizeof(char));
@@ -47,22 +47,23 @@ namespace bvh {
 				std::filesystem::path processing_folder_absolute, processing_folder_relative;
 				std::ifstream cpoied_file;
 				std::streamsize copied_file_gotten_char;
-				std::string zip_internal_path_utf8, zip_internal_path_acp;
+				std::string zip_internal_path_utf8;
+				std::wstring zip_internal_path_acp;
 
 				// build win32 fs query string
-				std::string win32_query_filepath;
-				utils::string_helper::StdstringPrintf(&win32_query_filepath, "%s\\*", current_folder->string().c_str());
+				std::wstring win32_query_filepath;
+				utils::string_helper::StdwstringPrintf(&win32_query_filepath, L"%ls\\*", current_folder->wstring().c_str());
 				// alloc win32 filesystem query values and query right now
-				WIN32_FIND_DATA filedata;
-				memset(&filedata, 0, sizeof(WIN32_FIND_DATA));
-				HANDLE fhandle = FindFirstFile(win32_query_filepath.c_str(), &filedata);
+				WIN32_FIND_DATAW filedata;
+				memset(&filedata, 0, sizeof(WIN32_FIND_DATAW));
+				HANDLE fhandle = FindFirstFileW(win32_query_filepath.c_str(), &filedata);
 				if (fhandle == INVALID_HANDLE_VALUE)
 					//error throw it
 					return FALSE;
 
 
 				while (TRUE) {
-					if (filedata.cFileName[0] != '.') {	//filter for .. and .
+					if (filedata.cFileName[0] != L'.') {	//filter for .. and .
 						// get relative folder
 						processing_folder_absolute = *current_folder;
 						processing_folder_absolute /= filedata.cFileName;
@@ -72,8 +73,9 @@ namespace bvh {
 						if (filedata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
 							// process folder
 							// generate folder path
-							utils::string_helper::StdstringPrintf(&zip_internal_path_acp, "%s/", processing_folder_relative.string().c_str());
-							utils::string_helper::ConvertEncoding(&zip_internal_path_acp, &zip_internal_path_utf8, CP_ACP, CP_UTF8);
+							utils::string_helper::StdwstringPrintf(&zip_internal_path_acp, L"%ls/", processing_folder_relative.wstring().c_str());
+							if (!utils::string_helper::Wstring2String(&zip_internal_path_acp, &zip_internal_path_utf8, CP_UTF8))
+								throw std::runtime_error("Impossilble encoding convertion fail in zip compression.");
 
 							// create blank folder
 							if (zipOpenNewFileInZip4_64(
@@ -99,8 +101,9 @@ namespace bvh {
 							// process file
 							// file path do not need attach slash
 							// conv encoding is enough
-							zip_internal_path_acp = processing_folder_relative.string().c_str();
-							utils::string_helper::ConvertEncoding(&zip_internal_path_acp, &zip_internal_path_utf8, CP_ACP, CP_UTF8);
+							zip_internal_path_acp = processing_folder_relative.wstring().c_str();
+							if (!utils::string_helper::Wstring2String(&zip_internal_path_acp, &zip_internal_path_utf8, CP_UTF8))
+								throw std::runtime_error("Impossilble encoding convertion fail in zip compression.");
 
 							if (zipOpenNewFileInZip4_64(
 								*zip_file, // zip file
@@ -118,7 +121,7 @@ namespace bvh {
 							}
 
 							// copy file
-							cpoied_file.open(processing_folder_absolute.string().c_str(), std::ios_base::in | std::ios_base::binary);
+							cpoied_file.open(processing_folder_absolute.wstring().c_str(), std::ios_base::in | std::ios_base::binary);
 
 							while (TRUE) {
 								if (cpoied_file.peek(), cpoied_file.eof()) break;
@@ -134,7 +137,7 @@ namespace bvh {
 					}
 
 					// try get next one
-					if (!FindNextFile(fhandle, &filedata))
+					if (!FindNextFileW(fhandle, &filedata))
 						// no more files
 						break;
 
@@ -147,18 +150,18 @@ namespace bvh {
 
 			void Decompress(std::filesystem::path* filepath, std::filesystem::path* base_folder) {
 				// init zip values
-				zlib_filefunc_def ffunc;
+				zlib_filefunc64_def ffunc;
 				unz_global_info gi;
 				unz_file_info file_info;
 				unzFile zip_file = NULL;
-				fill_win32_filefunc(&ffunc);
+				fill_win32_filefunc64W(&ffunc);
 
 				// alloc string for following use
-				std::string zip_internal_path_utf8(MAX_PATH, '\0');
-				std::string zip_internal_path_acp;
+				std::string zip_internal_path_utf8(BVH_MAX_PATH, '\0');
+				std::wstring zip_internal_path_acp;
 
 				// open zip file
-				zip_file = unzOpen2(filepath->string().c_str(), &ffunc);
+				zip_file = unzOpen2_64(filepath->wstring().c_str(), &ffunc);
 				if (zip_file == NULL) throw std::bad_alloc();
 				// read global information
 				if (unzGetGlobalInfo(zip_file, &gi) != UNZ_OK)
@@ -186,8 +189,9 @@ namespace bvh {
 					}
 
 					// convert filename and decompress file
-					utils::string_helper::ConvertEncoding(&zip_internal_path_utf8, &zip_internal_path_acp, CP_UTF8, CP_ACP);
-					if (!doExtractCurrentFile(&zip_file, &zip_internal_path_utf8, base_folder, file_swap))
+					if (!utils::string_helper::String2Wstring(&zip_internal_path_utf8, &zip_internal_path_acp, CP_UTF8))
+						throw std::runtime_error("Impossilble encoding convertion fail in zip compression.");
+					if (!doExtractCurrentFile(&zip_file, &zip_internal_path_acp, base_folder, file_swap))
 						throw std::logic_error("Fail to decompress file");
 
 					// to next file and check it.
@@ -201,7 +205,7 @@ namespace bvh {
 				unzClose(zip_file);
 			}
 
-			BOOL doExtractCurrentFile(unzFile* zip_file, std::string* relative_path, std::filesystem::path* base_folder, char* file_swap) {
+			BOOL doExtractCurrentFile(unzFile* zip_file, std::wstring* relative_path, std::filesystem::path* base_folder, char* file_swap) {
 				// allocate for generate absolute path
 				std::filesystem::path absolute_path;
 
@@ -211,7 +215,7 @@ namespace bvh {
 
 				// distinguish file or folder
 				int count = relative_path->size();
-				if ((*relative_path)[count - 1] == '\\' || (*relative_path)[count - 1] == '/') {
+				if ((*relative_path)[count - 1] == L'\\' || (*relative_path)[count - 1] == L'/') {
 					// process as folder
 					// create new empty folder
 					absolute_path = *base_folder / *relative_path;
@@ -228,7 +232,7 @@ namespace bvh {
 						return FALSE;
 
 					// copy file
-					cpoied_file.open(absolute_path, std::ios_base::out | std::ios_base::binary);
+					cpoied_file.open(absolute_path.wstring().c_str(), std::ios_base::out | std::ios_base::binary);
 					while (TRUE) {
 						copied_file_gotten = unzReadCurrentFile(*zip_file, file_swap, BVH_ZIP_BUFFER);
 						if (copied_file_gotten < 0)

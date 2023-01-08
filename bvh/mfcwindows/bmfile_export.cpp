@@ -15,11 +15,8 @@ namespace bvh {
 
 			BMFileExport::BMFileExport(utils::ParamPackage* _pkg, CWnd* pParent /*=nullptr*/)
 			: CDialogEx(IDD_DIALOG2, pParent),
-			comboboxMirror(),
-			nowMode(-1),
-			OUT_Mode(2),
-			OUT_Target(0),
-			OUT_File(),
+			comboboxMirror(), nowMode(-1), realBMFileStorage(),
+			OUT_Mode(2), OUT_Target(0), OUT_File(),
 			pkg(_pkg) {
 			;
 		}
@@ -42,6 +39,7 @@ namespace bvh {
 		BOOL BMFileExport::OnInitDialog() {
 			CDialogEx::OnInitDialog();
 
+			// set mode
 			switch (pkg->cfg_manager->CurrentConfig.window_mapping_bmExport_mode) {
 				case 0:
 					m_Mode_Object.SetCheck(1);
@@ -57,7 +55,9 @@ namespace bvh {
 			// nowMode = cfg_manager->CurrentConfig.window_mapping_bmExport_mode;
 			On_Mode_Change();
 
-			m_BM_File.SetWindowTextA(pkg->cfg_manager->CurrentConfig.window_mapping_bmExport_filename.c_str());
+			// set filename
+			realBMFileStorage = pkg->cfg_manager->CurrentConfig.window_mapping_bmExport_filename.c_str();
+			utils::win32_helper::StdWstring2CwndText(&m_BM_File, &realBMFileStorage);
 
 			return TRUE;  // return TRUE unless you set the focus to a control
 						  // 异常: OCX 属性页应返回 FALSE
@@ -122,9 +122,12 @@ namespace bvh {
 			m_Target.EnableWindow(m_Mode_All.GetCheck() != 1);
 		}
 		void BMFileExport::On_Browse_BM() {
-			std::string filepath;
-			if (utils::win32_helper::OpenFileDialog(&filepath, "BM file(*.bmx)\0*.bmx\0", "bmx", FALSE))
-				m_BM_File.SetWindowTextA(filepath.c_str());
+			std::wstring filepath;
+			if (utils::win32_helper::OpenFileDialog(&filepath, L"BM file(*.bmx)\0*.bmx\0", L"bmx", FALSE)) {
+				realBMFileStorage = filepath.c_str();
+				utils::win32_helper::StdWstring2CwndText(&m_BM_File, &realBMFileStorage);
+			}
+
 		}
 		void BMFileExport::On_Dialog_OK() {
 			// check data
@@ -142,15 +145,15 @@ namespace bvh {
 				else OUT_Mode = 1;
 			}
 
-			utils::win32_helper::CwndText2Stdstring(&m_BM_File, &OUT_File);
-			if (OUT_File.empty()) {
-				MessageBoxA("Export should not be empty.", "Setting error", MB_OK + MB_ICONERROR);
+			if (realBMFileStorage.empty()) {
+				MessageBoxA("Export file should not be empty.", "Setting error", MB_OK + MB_ICONERROR);
 				return;
 			}
+			OUT_File = realBMFileStorage.c_str();
 
 			// setting save
 			pkg->cfg_manager->CurrentConfig.window_mapping_bmExport_mode = OUT_Mode;
-			pkg->cfg_manager->CurrentConfig.window_mapping_bmExport_filename = OUT_File;
+			pkg->cfg_manager->CurrentConfig.window_mapping_bmExport_filename = OUT_File.c_str();
 			pkg->cfg_manager->SaveConfig();
 
 			CDialogEx::OnOK();

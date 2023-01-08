@@ -74,10 +74,10 @@ namespace bvh {
 				int wcount, write_result;
 
 				// convert to WCHAR
-				wcount = MultiByteToWideChar(cp, 0, orig->c_str(), -1, NULL, 0);
+				wcount = MultiByteToWideChar(cp, 0, orig->c_str(), orig->size(), NULL, 0);
 				if (wcount <= 0) return FALSE;
 				dest->resize(wcount);
-				write_result = MultiByteToWideChar(cp, 0, orig->c_str(), -1, dest->data(), wcount);
+				write_result = MultiByteToWideChar(cp, 0, orig->c_str(), orig->size(), dest->data(), wcount);
 				if (write_result <= 0) return FALSE;
 
 				return TRUE;
@@ -87,10 +87,10 @@ namespace bvh {
 				int count, write_result;
 
 				//converter to CHAR
-				count = WideCharToMultiByte(cp, 0, orig->c_str(), -1, NULL, 0, NULL, NULL);
+				count = WideCharToMultiByte(cp, 0, orig->c_str(), orig->size(), NULL, 0, NULL, NULL);
 				if (count <= 0) return FALSE;
 				dest->resize(count);
-				write_result = WideCharToMultiByte(cp, 0, orig->c_str(), -1, dest->data(), count, NULL, NULL);
+				write_result = WideCharToMultiByte(cp, 0, orig->c_str(), orig->size(), dest->data(), count, NULL, NULL);
 				if (write_result <= 0) return FALSE;
 
 				return TRUE;

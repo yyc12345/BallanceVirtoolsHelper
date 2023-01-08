@@ -21,7 +21,7 @@ namespace bvh {
 			BOOL doCompressCurrentFolder(zipFile* zip_file, std::filesystem::path* basefolder, std::filesystem::path* nowFolder, char* file_swap);
 
 			void Decompress(std::filesystem::path* filepath, std::filesystem::path* folder);
-			BOOL doExtractCurrentFile(unzFile* zip_file, std::string* inner_name, std::filesystem::path* folder, char* file_swap);
+			BOOL doExtractCurrentFile(unzFile* zip_file, std::wstring* inner_name, std::filesystem::path* folder, char* file_swap);
 
 		}
 	}

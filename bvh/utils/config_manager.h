@@ -9,12 +9,12 @@ namespace bvh {
 
 		struct ConfigBody {
 			//func_mapping_bm
-			std::string func_mapping_bm_ExternalTextureFolder;
+			std::wstring func_mapping_bm_ExternalTextureFolder;
 			std::string func_mapping_bm_NoComponentGroupName;
 			std::string func_mapping_bm_OmittedMaterialPrefix;
 			//window_mapping_bm_export
 			int window_mapping_bmExport_mode;	//0 is object, 1 is group, 2 is all
-			std::string window_mapping_bmExport_filename;
+			std::wstring window_mapping_bmExport_filename;
 			//window_convertEncoding
 			int window_ConvertEncoding_Method;
 			int window_ConvertEncoding_OldCP;
@@ -44,9 +44,11 @@ namespace bvh {
 			void WriteInt(FILE* fs, int* num);
 			void WriteInt(FILE* fs, std::vector<int>* num);
 			void ReadString(FILE* fs, std::string* str);
-			void ReadString(FILE* fs, std::vector<std::string*>* str);
+			void ReadWstring(FILE* fs, std::wstring* str);
+			//void ReadString(FILE* fs, std::vector<std::string*>* str);
 			void WriteString(FILE* fs, std::string* str);
-			void WriteString(FILE* fs, std::vector<std::string*>* str);
+			void WriteWstring(FILE* fs, std::wstring* str);
+			//void WriteString(FILE* fs, std::vector<std::string*>* str);
 		};
 	}
 }
