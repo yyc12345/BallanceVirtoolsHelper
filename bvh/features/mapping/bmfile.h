@@ -4,6 +4,7 @@
 #include "../../utils/param_package.h"
 #include <fstream>
 #include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #define BM_FILE_VERSION 14
@@ -25,6 +26,69 @@ namespace bvh {
 					CK_ID id;
 					uint64_t offset;
 				};
+
+#pragma pack(1)
+				struct BM_FACE_PROTOTYPE {
+					union {
+						struct BM_FACE_PROTOTYPE_DATA_V {
+							uint32_t v1, vt1, vn1;
+							uint32_t v2, vt2, vn2;
+							uint32_t v3, vt3, vn3;
+						}data;
+						uint32_t vbin[sizeof(BM_FACE_PROTOTYPE_DATA_V) / sizeof(uint32_t)];
+					}indices;
+
+					uint8_t use_material;
+					uint32_t material_index;
+				};
+#pragma pack()
+
+				namespace mesh_transition {
+
+					struct BmTransitionVertex {
+						BmTransitionVertex();
+						BmTransitionVertex(VxVector &vtx, Vx2DVector& uv, VxVector& norm);
+						VxVector m_Vtx;
+						Vx2DVector m_UV;
+						VxVector m_Norm;
+					};
+					typedef BmTransitionVertex* PBmTransitionVertex;
+
+					struct BmTransitionVertexHash {
+						size_t operator()(const PBmTransitionVertex& cla) const;
+					};
+					struct BmTransitionVertexEqual {
+						bool operator()(const PBmTransitionVertex& c1, const PBmTransitionVertex& c2) const;
+					};
+
+					struct BmTransitionFace {
+						BmTransitionFace();
+						BmTransitionFace(uint32_t _i1, uint32_t _i2, uint32_t _i3, BM_FACE_PROTOTYPE& parent);
+						uint32_t ind1, ind2, ind3;
+
+						uint8_t use_material;
+						uint32_t material_index;
+					};
+
+					class MeshTransition {
+					public:
+						MeshTransition();
+						~MeshTransition();
+
+						void DoParse();
+
+						std::vector<VxVector>* m_In_Vtx, * m_In_Norm;
+						std::vector<Vx2DVector>* m_In_UV;
+						std::vector<BM_FACE_PROTOTYPE>* m_In_Face;
+
+						std::vector<BmTransitionVertex> m_Out_Vertex;
+						std::vector<BmTransitionFace> m_Out_FaceIndices;
+
+					private:
+						std::unordered_map<PBmTransitionVertex, uint32_t, BmTransitionVertexHash, BmTransitionVertexEqual> m_DupRemover;
+					};
+
+				}
 
 				extern const uint32_t CONST_ExternalTextureList_Length;
 				extern const char* CONST_ExternalTextureList[];

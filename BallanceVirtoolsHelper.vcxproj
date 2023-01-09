@@ -136,6 +136,7 @@
     <ClCompile Include="bvh\features\mapping\bmfile_export.cpp" />
     <ClCompile Include="bvh\features\mapping\bmfile_fix_texture.cpp" />
     <ClCompile Include="bvh\features\mapping\bmfile_import.cpp" />
+    <ClCompile Include="bvh\features\mapping\transition_mesh.cpp" />
     <ClCompile Include="bvh\mfcwindows\bmfile_import.cpp" />
     <ClCompile Include="bvh\utils\config_manager.cpp" />
     <ClCompile Include="bvh\utils\error_proc.cpp" />

@@ -173,6 +173,9 @@
     <ClCompile Include="bvh\mfcwindows\bmfile_import.cpp">
       <Filter>Sources\mfcwindows</Filter>
     </ClCompile>
+    <ClCompile Include="bvh\features\mapping\transition_mesh.cpp">
+      <Filter>Sources\features\mapping</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="BallanceVirtoolsHelper.def">
