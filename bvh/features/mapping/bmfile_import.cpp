@@ -96,9 +96,9 @@ namespace bvh {
 					uint32_t mesh_listCount;
 					std::vector<VxVector> mesh_vList, mesh_vnList;
 					std::vector<Vx2DVector> mesh_vtList;
-					uint32_t mesh_faceData[9];
-					BOOL mesh_useMaterial;
-					uint32_t mesh_materialIndex;
+					std::vector<BM_FACE_PROTOTYPE> mesh_faceList;
+					mesh_transition::MeshTransition mesh_converter;
+					int mesh_assignCounter;
 					//used in object
 					CK3dObject* importObject = NULL;
 					VxMatrix object_worldMatrix;
@@ -112,7 +112,7 @@ namespace bvh {
 					findex.open(temp_folder / "index.bm", std::ios_base::in | std::ios_base::binary);
 
 					uint32_t vercmp;
-					readInt(&findex, &vercmp);
+					readData<uint32_t>(&findex, &vercmp);
 					if (vercmp != BM_FILE_VERSION) {
 						findex.close();
 						pkg->error_proc->SetExecutionResult(FALSE, "Not supported BM version. Expect: %d, Gotten: %d", BM_FILE_VERSION, vercmp);
@@ -130,7 +130,7 @@ namespace bvh {
 						// reading entry and distinguish them
 						// then put them into different bucket via its type
 						readString(&findex, &(index_entryChunk->name));
-						readInt(&findex, &index_type);
+						readData<uint8_t>(&findex, &index_type);
 						switch ((FILE_INDEX_TYPE)index_type) {
 							case FILE_INDEX_TYPE__OBJECT:
 								objectList.push_back(index_entryChunk);
@@ -147,7 +147,7 @@ namespace bvh {
 							default:
 								break;
 						}
-						readInt(&findex, &(index_entryChunk->offset));
+						readData<uint64_t>(&findex, &(index_entryChunk->offset));
 					}
 					findex.close();
 
@@ -195,7 +195,7 @@ namespace bvh {
 
 						// pre-set for alpha channel
 						material_color.a = 1;
-#define readColor readFloat(&fmaterial, &(material_color.r)); readFloat(&fmaterial, &(material_color.g)); readFloat(&fmaterial, &(material_color.b));
+#define readColor readArrayData<float>(&fmaterial, &(material_color.r), UINT32_C(3));
 						readColor;
 						importMaterial->SetAmbient(material_color);
 						readColor;
@@ -205,7 +205,7 @@ namespace bvh {
 						readColor;
 						importMaterial->SetEmissive(material_color);
 #undef readColor
-						readFloat(&fmaterial, &material_colorPower);
+						readData<float>(&fmaterial, &material_colorPower);
 						importMaterial->SetPower(material_colorPower);
 
 						readBool(&fmaterial, &material_alphaProp);
@@ -229,7 +229,7 @@ namespace bvh {
 						importMaterial->SetTwoSided(material_alphaProp);
 
 						readBool(&fmaterial, &material_useTexture);
-						readInt(&fmaterial, &material_textureIndex);
+						readData<uint32_t>(&fmaterial, &material_textureIndex);
 						if (material_useTexture) {
 							importMaterial->SetTexture((CKTexture*)ctx->GetObjectA(textureList[material_textureIndex]->id));
 						}
@@ -253,62 +253,80 @@ namespace bvh {
 
 
 						// load mesh
-						mesh_vList.clear(); mesh_vnList.clear(); mesh_vtList.clear();
-						readInt(&fmesh, &mesh_listCount);
-						mesh_vList.reserve(mesh_listCount);
-						// lazy load v, vn, vt
-						for (uint32_t i = 0; i < mesh_listCount; i++) {
-							readFloat(&fmesh, &(mesh_3dvector.x));
-							readFloat(&fmesh, &(mesh_3dvector.y));
-							readFloat(&fmesh, &(mesh_3dvector.z));
-							mesh_vList.push_back(mesh_3dvector);
-						}
-						readInt(&fmesh, &mesh_listCount);
-						mesh_vtList.reserve(mesh_listCount);
-						for (uint32_t i = 0; i < mesh_listCount; i++) {
-							readFloat(&fmesh, &(mesh_2dvector.x));
-							readFloat(&fmesh, &(mesh_2dvector.y));
-							mesh_vtList.push_back(mesh_2dvector);
-						}
-						readInt(&fmesh, &mesh_listCount);
-						mesh_vnList.reserve(mesh_listCount);
-						for (uint32_t i = 0; i < mesh_listCount; i++) {
-							readFloat(&fmesh, &(mesh_3dvector.x));
-							readFloat(&fmesh, &(mesh_3dvector.y));
-							readFloat(&fmesh, &(mesh_3dvector.z));
-							mesh_vnList.push_back(mesh_3dvector);
-						}
+						// load v, vn, vt
+						readData<uint32_t>(&fmesh, &mesh_listCount);
+						readVectorData<VxVector>(&fmesh, &mesh_vList, mesh_listCount);
+						readData<uint32_t>(&fmesh, &mesh_listCount);
+						readVectorData<Vx2DVector>(&fmesh, &mesh_vtList, mesh_listCount);
+						readData<uint32_t>(&fmesh, &mesh_listCount);
+						readVectorData<VxVector>(&fmesh, &mesh_vnList, mesh_listCount);
+
 						// read face
-						readInt(&fmesh, &mesh_listCount);
-						// init vector and face count
-						importMesh->SetVertexCount(mesh_listCount * 3);
-						importMesh->SetFaceCount(mesh_listCount);
-						for (uint32_t i = 0; i < mesh_listCount; i++) {
-							// read one face data
-							for (int j = 0; j < 9; j++) {
-								readInt(&fmesh, &(mesh_faceData[j]));
-							}
+						readData<uint32_t>(&fmesh, &mesh_listCount);
+						readVectorData<BM_FACE_PROTOTYPE>(&fmesh, &mesh_faceList, mesh_listCount);
 
-							// manipulate face data
-							for (int j = 0; j < 9; j += 3) {
-								mesh_3dvector = mesh_vList[mesh_faceData[j]];
-								importMesh->SetVertexPosition(i * 3 + j / 3, &mesh_3dvector);
-								mesh_2dvector = mesh_vtList[mesh_faceData[j + 1]];
-								importMesh->SetVertexTextureCoordinates(i * 3 + j / 3, mesh_2dvector.x, mesh_2dvector.y);
-								mesh_3dvector = mesh_vnList[mesh_faceData[j + 2]];
-								importMesh->SetVertexNormal(i * 3 + j / 3, &mesh_3dvector);
-							}
+						// send to converter
+						mesh_converter.DoMeshParse(
+							&mesh_vList,
+							&mesh_vtList,
+							&mesh_vnList,
+							&mesh_faceList
+						);
 
+						// process converter data
+						importMesh->SetVertexCount(mesh_converter.m_Out_Vertex.size());
+						mesh_assignCounter = 0;
+						for (auto it = mesh_converter.m_Out_Vertex.begin(); it != mesh_converter.m_Out_Vertex.end(); (++it), (++mesh_assignCounter)) {
+							// set v vt vn
+							importMesh->SetVertexPosition(mesh_assignCounter, &((*it).m_Vtx));
+							importMesh->SetVertexTextureCoordinates(mesh_assignCounter, (*it).m_UV.x, (*it).m_UV.y);
+							importMesh->SetVertexNormal(mesh_assignCounter, &((*it).m_Norm));
+						}
+
+						importMesh->SetFaceCount(mesh_converter.m_Out_FaceIndices.size());
+						mesh_assignCounter = 0;
+						for (auto it = mesh_converter.m_Out_FaceIndices.begin(); it != mesh_converter.m_Out_FaceIndices.end(); (++it), (++mesh_assignCounter)) {
 							// set indices
-							importMesh->SetFaceVertexIndex(i, i * 3, i * 3 + 1, i * 3 + 2);
+							importMesh->SetFaceVertexIndex(mesh_assignCounter, (*it).ind1, (*it).ind2, (*it).ind3);
 
 							// set material
-							readBool(&fmesh, &mesh_useMaterial);
-							readInt(&fmesh, &mesh_materialIndex);
-							if (mesh_useMaterial) {
-								importMesh->SetFaceMaterial(i, (CKMaterial*)ctx->GetObjectA(materialList[mesh_materialIndex]->id));
+							if ((*it).use_material) {
+								importMesh->SetFaceMaterial(
+									mesh_assignCounter, 
+									(CKMaterial*)ctx->GetObjectA(materialList[(*it).material_index]->id)
+								);
 							}
 						}
+
+						//// init vector and face count
+						//importMesh->SetVertexCount(mesh_listCount * 3);
+						//importMesh->SetFaceCount(mesh_listCount);
+						//for (uint32_t i = 0; i < mesh_listCount; i++) {
+						//	// read one face data
+						//	for (int j = 0; j < 9; j++) {
+						//		readInt(&fmesh, &(mesh_faceData[j]));
+						//	}
+
+						//	// manipulate face data
+						//	for (int j = 0; j < 9; j += 3) {
+						//		mesh_3dvector = mesh_vList[mesh_faceData[j]];
+						//		importMesh->SetVertexPosition(i * 3 + j / 3, &mesh_3dvector);
+						//		mesh_2dvector = mesh_vtList[mesh_faceData[j + 1]];
+						//		importMesh->SetVertexTextureCoordinates(i * 3 + j / 3, mesh_2dvector.x, mesh_2dvector.y);
+						//		mesh_3dvector = mesh_vnList[mesh_faceData[j + 2]];
+						//		importMesh->SetVertexNormal(i * 3 + j / 3, &mesh_3dvector);
+						//	}
+
+						//	// set indices
+						//	importMesh->SetFaceVertexIndex(i, i * 3, i * 3 + 1, i * 3 + 2);
+
+						//	// set material
+						//	readBool(&fmesh, &mesh_useMaterial);
+						//	readInt(&fmesh, &mesh_materialIndex);
+						//	if (mesh_useMaterial) {
+						//		importMesh->SetFaceMaterial(i, (CKMaterial*)ctx->GetObjectA(materialList[mesh_materialIndex]->id));
+						//	}
+						//}
 
 						// add into scene
 						vtenv_currentScene->AddObjectToScene(importMesh);
@@ -331,15 +349,16 @@ namespace bvh {
 						// read basic data
 						readBool(&fobject, &object_isComponent);
 						readBool(&fobject, &object_isHidden);
-						for (int i = 0; i < 4; i++) {
-							for (int j = 0; j < 4; j++) {
-								readFloat(&fobject, &(object_worldMatrix[i][j]));
-							}
-						}
+						readData<VxMatrix>(&fobject, &object_worldMatrix);
+						//for (int i = 0; i < 4; i++) {
+						//	for (int j = 0; j < 4; j++) {
+						//		readData<float>(&fobject, &(object_worldMatrix[i][j]));
+						//	}
+						//}
 						importObject->SetWorldMatrix(object_worldMatrix);
 
 						// read grouping message
-						readInt(&fobject, &object_groupListCount);
+						readData<uint32_t>(&fobject, &object_groupListCount);
 						for (uint32_t i = 0; i < object_groupListCount; i++) {
 							readString(&fobject, &object_groupNameCache);
 							features::mapping::grouping::groupIntoWithCreation(
@@ -351,8 +370,8 @@ namespace bvh {
 
 						// read mesh index
 						// process it differently by isComponent
-						readInt(&fobject, &object_meshIndex);
-						if (object_isComponent) loadComponenetMesh(importObject, ctx, object_meshIndex);
+						readData<uint32_t>(&fobject, &object_meshIndex);
+						if (object_isComponent) loadComponenetMesh(ctx, vtenv_currentScene, importObject, mesh_converter, object_meshIndex);
 						else {
 							// simplely point to mesh
 							importObject->SetCurrentMesh((CKMesh*)ctx->GetObjectA(meshList[object_meshIndex]->id));
@@ -390,20 +409,8 @@ namespace bvh {
 				// WARNING: all following `Read` func are based on current OS is little-endian.
 				void readBool(std::ifstream* fs, BOOL* boolean) {
 					uint8_t num;
-					readInt(fs, &num);
+					readData<uint8_t>(fs, &num);
 					*boolean = num ? TRUE : FALSE;
-				}
-				void readInt(std::ifstream* fs, uint8_t* num) {
-					fs->read((char*)num, sizeof(uint8_t));
-				}
-				void readInt(std::ifstream* fs, uint32_t* num) {
-					fs->read((char*)num, sizeof(uint32_t));
-				}
-				void readInt(std::ifstream* fs, uint64_t* num) {
-					fs->read((char*)num, sizeof(uint64_t));
-				}
-				void readFloat(std::ifstream* fs, float* num) {
-					fs->read((char*)num, sizeof(float));
 				}
 				// References
 				// https://zh.cppreference.com/w/cpp/string/multibyte/c32rtomb
@@ -415,7 +422,7 @@ namespace bvh {
 
 					// find length and read
 					uint32_t length;
-					readInt(fs, &length);
+					readData<uint32_t>(fs, &length);
 					bmstr.resize(length);
 					fs->read((char*)bmstr.data(), (std::streamsize)length * sizeof(char32_t));
 					utf8str.reserve(length * 2);	// reserve double space for trying avoiding re-alloc
@@ -444,67 +451,92 @@ namespace bvh {
 					texture->LoadImageA((char*)external_folder.string().c_str());
 					texture->SetSaveOptions(CKTEXTURE_EXTERNAL);
 				}
-				void loadComponenetMesh(CK3dEntity* obj, CKContext* ctx, uint32_t index) {
+				void loadComponenetMesh(CKContext* ctx, CKScene* scene, CK3dEntity* obj, mesh_transition::MeshTransition converter, uint32_t model_index) {
 					// NOTE: this code is sync with bm_import mesh creaion. if something changed, please sync them.
 
 					// declare value
 					std::filesystem::path meshfile;
 					CKMesh* currentMesh;
 					std::vector<VxVector> vList, vnList;
-					VxVector vector;
+					std::vector<COMPONENT_FACE_PROTOTYPE> faceList;
 					uint32_t vecCount;
-					uint32_t face_data[6];
 					std::ifstream fmesh;
-					std::string filename, meshname;
+					std::wstring filename;
+					std::string meshname;
 
-					// first, get file
-					utils::string_helper::StdstringPrintf(&filename, "%s.bin", CONST_ExternalComponent[index]);
+					// first, create mesh
+					utils::string_helper::StdstringPrintf(&meshname, "COMP_MESH_%s", CONST_ExternalComponent[model_index]);
+					BOOL existed_probe;
+					currentMesh = (CKMesh*)userCreateCKObject(ctx, CKCID_MESH, meshname.c_str(), FALSE, &existed_probe);
+					if (existed_probe) {
+						// mesh is existed, link it and directly return.
+						obj->SetCurrentMesh(currentMesh);
+						return;
+					}
+
+					// then, get file
+					utils::string_helper::StdwstringPrintf(&filename, L"%s.bin", CONST_ExternalComponent[model_index]);
 					utils::win32_helper::GetVirtoolsFolder(&meshfile);
-					meshfile /= "BMMeshes";
+					meshfile /= L"BMMeshes";
 					meshfile /= filename.c_str();
-					fmesh.open(meshfile, std::ios_base::in | std::ios_base::binary);
-
-					// then, create mesh
-					utils::string_helper::StdstringPrintf(&meshname, "%s_MESH", CONST_ExternalComponent[index]);
-					currentMesh = (CKMesh*)ctx->CreateObject(CKCID_MESH, (CKSTRING)meshname.c_str(), CK_OBJECTCREATION_RENAME);
+					fmesh.open(meshfile.wstring().c_str(), std::ios_base::in | std::ios_base::binary);
 
 					// read data
-					readInt(&fmesh, &vecCount);
-					// lazy load v
-					for (uint32_t i = 0; i < vecCount; i++) {
-						readFloat(&fmesh, &(vector.x));
-						readFloat(&fmesh, &(vector.y));
-						readFloat(&fmesh, &(vector.z));
-						vList.push_back(vector);
-					}
-					readInt(&fmesh, &vecCount);
-					for (uint32_t i = 0; i < vecCount; i++) {
-						readFloat(&fmesh, &(vector.x));
-						readFloat(&fmesh, &(vector.y));
-						readFloat(&fmesh, &(vector.z));
-						vnList.push_back(vector);
-					}
+					// load v and vn
+					readData<uint32_t>(&fmesh, &vecCount);
+					readVectorData<VxVector>(&fmesh, &vList, vecCount);
+					readData<uint32_t>(&fmesh, &vecCount);
+					readVectorData<VxVector>(&fmesh, &vnList, vecCount);
+
 					// read face
-					readInt(&fmesh, &vecCount);
-					// init vector and face count
-					currentMesh->SetVertexCount(vecCount * 3);
-					currentMesh->SetFaceCount(vecCount);
-					for (uint32_t i = 0; i < vecCount; i++) {
-						for (int j = 0; j < 6; j++)
-							readInt(&fmesh, &(face_data[j]));
+					readData<uint32_t>(&fmesh, &vecCount);
+					readVectorData<COMPONENT_FACE_PROTOTYPE>(&fmesh, &faceList, vecCount);
 
-						for (int j = 0; j < 6; j += 2) {
-							vector = vList[face_data[j]];
-							currentMesh->SetVertexPosition(i * 3 + j / 2, &vector);
-							vector = vnList[face_data[j + 1]];
-							currentMesh->SetVertexNormal(i * 3 + j / 2, &vector);
-						}
-
-						currentMesh->SetFaceVertexIndex(i, i * 3, i * 3 + 1, i * 3 + 2);
-					}
-
+					// end of reading data
 					fmesh.close();
 
+					// push into converter
+					converter.DoComponentParse(
+						&vList,
+						&vnList,
+						&faceList
+					);
+
+					// process converter data
+					currentMesh->SetVertexCount(converter.m_Out_Vertex.size());
+					int mesh_assignCounter = 0;
+					for (auto it = converter.m_Out_Vertex.begin(); it != converter.m_Out_Vertex.end(); (++it), (++mesh_assignCounter)) {
+						// set v vt vn
+						currentMesh->SetVertexPosition(mesh_assignCounter, &((*it).m_Vtx));
+						currentMesh->SetVertexNormal(mesh_assignCounter, &((*it).m_Norm));
+					}
+
+					currentMesh->SetFaceCount(converter.m_Out_FaceIndices.size());
+					mesh_assignCounter = 0;
+					for (auto it = converter.m_Out_FaceIndices.begin(); it != converter.m_Out_FaceIndices.end(); (++it), (++mesh_assignCounter)) {
+						// set indices
+						currentMesh->SetFaceVertexIndex(mesh_assignCounter, (*it).ind1, (*it).ind2, (*it).ind3);
+					}
+
+					//// init vector and face count
+					//currentMesh->SetVertexCount(vecCount * 3);
+					//currentMesh->SetFaceCount(vecCount);
+					//for (uint32_t i = 0; i < vecCount; i++) {
+					//	for (int j = 0; j < 6; j++)
+					//		readData<uint32_t>(&fmesh, &(face_data[j]));
+
+					//	for (int j = 0; j < 6; j += 2) {
+					//		vector = vList[face_data[j]];
+					//		currentMesh->SetVertexPosition(i * 3 + j / 2, &vector);
+					//		vector = vnList[face_data[j + 1]];
+					//		currentMesh->SetVertexNormal(i * 3 + j / 2, &vector);
+					//	}
+
+					//	currentMesh->SetFaceVertexIndex(i, i * 3, i * 3 + 1, i * 3 + 2);
+					//}
+
+					// add this new one into scene
+					scene->AddObjectToScene(currentMesh);
 					// apply current mesh into object
 					obj->SetCurrentMesh(currentMesh);
 				}
