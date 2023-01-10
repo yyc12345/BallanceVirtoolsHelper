@@ -1,4 +1,5 @@
 #include "bmfile.h"
+#include "Ge2Virtools.h"
 
 namespace bvh {
 	namespace features {
@@ -24,6 +25,9 @@ namespace bvh {
 						ind1(_i1), ind2(_i2), ind3(_i3),
 						use_material(use_mtl), material_index(mtl_id) {
 						;
+					}
+					bool BmTransitionVertexCompare::operator()(const BmTransitionVertex& lhs, const BmTransitionVertex& rhs) const {
+						return memcmp(&lhs, &rhs, sizeof(BmTransitionVertex)) < 0;
 					}
 
 					// Generate from Visual Studio with stuppid adaption.
@@ -106,12 +110,12 @@ namespace bvh {
 					}
 
 					void MeshTransition::DoRealParse() {
-						// clear inermidated val
+						// clear intermidated val
 						m_DupRemover.clear();
 						// clear result
 						m_Out_Vertex.clear();
 						m_Out_FaceIndices.clear();
-
+						
 						// reserve vector to prevent extra mem alloc
 						// use the most bad situation to reserve
 						uint32_t face_size = m_IsComponent ? m_In_FaceAlt->size() : m_In_Face->size();
@@ -124,32 +128,20 @@ namespace bvh {
 							for (int j = 0; j < 3; ++j) {
 								// create one first
 								PushVertex(faceid, j);
-								//m_Out_Vertex.emplace_back(
-								//	(*m_In_Vtx)[(*it).indices.vbin[j]],
-								//	(*m_In_UV)[(*it).indices.vbin[j + 1]],
-								//	(*m_In_Norm)[(*it).indices.vbin[j + 2]]
-								//);
 
-								// try find it
-								auto find_probe = m_DupRemover.find(m_Out_Vertex.back());
-								if (find_probe != m_DupRemover.end()) {
-									// got
-									idx[j] = find_probe->second;
+								// try insert it
+								auto insert_result = m_DupRemover.try_emplace(m_Out_Vertex.back(), m_Out_Vertex.size() - 1);
+								idx[j] = (*(insert_result.first)).second;
+								if (!insert_result.second) {
+									// have existed key
 									// remove prev added
 									m_Out_Vertex.pop_back();
-								} else {
-									// can not find. add it
-									idx[j] = m_Out_Vertex.size() - 1;
-									m_DupRemover.insert({ m_Out_Vertex.back(), m_Out_Vertex.size() - 1 });
 								}
 							}
 
 							// create face
 							PushFace(faceid, idx);
-							//m_Out_FaceIndices.emplace_back(idx[0], idx[1], idx[2], (*it));
 						}
-
-
 					}
 
 					void MeshTransition::PushVertex(size_t face_index, int indices_index) {
@@ -187,6 +179,110 @@ namespace bvh {
 							);
 						}
 					}
+
+
+					//MeshTransitionDassault::MeshTransitionDassault(CKContext* ctx) :
+					//	m_In_Vtx(NULL), m_In_UV(NULL), m_In_Norm(NULL), m_In_Face(NULL), m_In_FaceAlt(NULL),
+					//	m_Out_Vertex(), m_Out_FaceIndices(),
+					//	m_IsComponent(FALSE),
+					//	mExporter(ctx), mTranMesh(mExporter, FALSE) {
+					//	;
+					//}
+					//MeshTransitionDassault::~MeshTransitionDassault() {
+					//	;
+					//}
+
+					//void MeshTransitionDassault::DoMeshParse(
+					//	std::vector<VxVector>* vtx,
+					//	std::vector<Vx2DVector>* uv,
+					//	std::vector<VxVector>* norm,
+					//	std::vector<BM_FACE_PROTOTYPE>* face
+					//) {
+					//	m_IsComponent = FALSE;
+
+					//	m_In_Vtx = vtx;
+					//	m_In_UV = uv;
+					//	m_In_Norm = norm;
+					//	m_In_Face = face;
+					//	m_In_FaceAlt = NULL;
+
+					//	DoRealParse();
+					//}
+
+					//void MeshTransitionDassault::DoComponentParse(
+					//	std::vector<VxVector>* vtx,
+					//	std::vector<VxVector>* norm,
+					//	std::vector<COMPONENT_FACE_PROTOTYPE>* face
+					//) {
+					//	m_IsComponent = TRUE;
+
+					//	m_In_Vtx = vtx;
+					//	m_In_UV = NULL;
+					//	m_In_Norm = norm;
+					//	m_In_Face = NULL;
+					//	m_In_FaceAlt = face;
+
+					//	DoRealParse();
+					//}
+
+					//void MeshTransitionDassault::DoRealParse() {
+					//	// clear converter
+					//	mTranMesh.Reset();
+					//	// clear result
+					//	m_Out_Vertex.clear();
+					//	m_Out_FaceIndices.clear();
+
+					//	// reserve vector to prevent extra mem alloc
+					//	// use the most bad situation to reserve
+					//	uint32_t face_size = m_IsComponent ? m_In_FaceAlt->size() : m_In_Face->size();
+					//	m_Out_Vertex.reserve(face_size * 3);
+					//	m_Out_FaceIndices.reserve(face_size);
+
+					//	// iterate face
+					//	for (size_t faceid = 0; faceid < face_size; ++faceid) {
+					//		if (m_IsComponent) {
+
+					//		} else {
+
+					//		}
+					//	}
+					//}
+
+					//void MeshTransitionDassault::PushVertex(size_t face_index, int indices_index) {
+					//	//static Vx2DVector empty_uv(0.0f, 0.0f);
+					//	//uint32_t* face_indices_decl;
+
+					//	//if (m_IsComponent) {
+					//	//	face_indices_decl = &((*m_In_FaceAlt)[face_index].vbin[indices_index * 2]);
+					//	//	m_Out_Vertex.emplace_back(
+					//	//		(*m_In_Vtx)[face_indices_decl[0]],
+					//	//		empty_uv,	// use blank uv to fill it
+					//	//		(*m_In_Norm)[face_indices_decl[1]]
+					//	//	);
+					//	//} else {
+					//	//	face_indices_decl = &((*m_In_Face)[face_index].indices.vbin[indices_index * 3]);
+					//	//	m_Out_Vertex.emplace_back(
+					//	//		(*m_In_Vtx)[face_indices_decl[0]],
+					//	//		(*m_In_UV)[face_indices_decl[1]],
+					//	//		(*m_In_Norm)[face_indices_decl[2]]
+					//	//	);
+					//	//}
+					//}
+
+					//void MeshTransitionDassault::PushFace(size_t face_index, uint32_t idx[3]) {
+					//	//if (m_IsComponent) {
+					//	//	m_Out_FaceIndices.emplace_back(
+					//	//		idx[0], idx[1], idx[2],
+					//	//		UINT8_C(0), UINT32_C(0)
+					//	//	);
+					//	//} else {
+					//	//	BM_FACE_PROTOTYPE* proto = &((*m_In_Face)[face_index]);
+					//	//	m_Out_FaceIndices.emplace_back(
+					//	//		idx[0], idx[1], idx[2],
+					//	//		proto->use_material, proto->material_index
+					//	//	);
+					//	//}
+					//}
 
 				}
 			}

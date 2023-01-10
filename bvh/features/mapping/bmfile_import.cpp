@@ -461,8 +461,7 @@ namespace bvh {
 					std::vector<COMPONENT_FACE_PROTOTYPE> faceList;
 					uint32_t vecCount;
 					std::ifstream fmesh;
-					std::wstring filename;
-					std::string meshname;
+					std::string filename, meshname;
 
 					// first, create mesh
 					utils::string_helper::StdstringPrintf(&meshname, "COMP_MESH_%s", CONST_ExternalComponent[model_index]);
@@ -475,7 +474,7 @@ namespace bvh {
 					}
 
 					// then, get file
-					utils::string_helper::StdwstringPrintf(&filename, L"%s.bin", CONST_ExternalComponent[model_index]);
+					utils::string_helper::StdstringPrintf(&filename, "%s.bin", CONST_ExternalComponent[model_index]);
 					utils::win32_helper::GetVirtoolsFolder(&meshfile);
 					meshfile /= L"BMMeshes";
 					meshfile /= filename.c_str();
