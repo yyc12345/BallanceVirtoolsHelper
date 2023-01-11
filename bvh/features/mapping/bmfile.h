@@ -85,34 +85,39 @@ namespace bvh {
 
 					class MeshTransition {
 					public:
-						MeshTransition();
+						MeshTransition(CKContext* ctx);
 						~MeshTransition();
 
 						void DoMeshParse(
-							std::vector<VxVector>* vtx, 
-							std::vector<Vx2DVector>* uv, 
-							std::vector<VxVector>* norm,
-							std::vector<BM_FACE_PROTOTYPE>* face
+							CKMesh* mesh,
+							std::vector<VxVector>* vtx, std::vector<Vx2DVector>* uv, std::vector<VxVector>* norm,
+							std::vector<BM_FACE_PROTOTYPE>* face,
+							std::vector<FILE_INDEX_HELPER*>* mtl_list
 						);
 						void DoComponentParse(
-							std::vector<VxVector>* vtx,
-							std::vector<VxVector>* norm,
+							CKMesh* mesh,
+							std::vector<VxVector>* vtx, std::vector<VxVector>* norm,
 							std::vector<COMPONENT_FACE_PROTOTYPE>* face
 						);
 						
-						std::vector<BmTransitionVertex> m_Out_Vertex;
-						std::vector<BmTransitionFace> m_Out_FaceIndices;
-
 					private:
 						void DoRealParse();
+						void ApplyToMaterial();
 						void PushVertex(size_t face_index, int indices_index);
 						void PushFace(size_t face_index, uint32_t idx[3]);
 
+						CKContext* m_In_Ctx;
+
 						BOOL m_IsComponent;
+						CKMesh* m_In_Mesh;
 						std::vector<VxVector>* m_In_Vtx, * m_In_Norm;
 						std::vector<Vx2DVector>* m_In_UV;
 						std::vector<BM_FACE_PROTOTYPE>* m_In_Face;
 						std::vector<COMPONENT_FACE_PROTOTYPE>* m_In_FaceAlt;
+						std::vector<FILE_INDEX_HELPER*>* m_In_MaterialList;
+
+						std::vector<BmTransitionVertex> m_Out_Vertex;
+						std::vector<BmTransitionFace> m_Out_FaceIndices;
 
 						//std::unordered_map<BmTransitionVertex, uint32_t, BmTransitionVertexHash, BmTransitionVertexEqual> m_DupRemover;
 						std::map<BmTransitionVertex, uint32_t, BmTransitionVertexCompare> m_DupRemover;

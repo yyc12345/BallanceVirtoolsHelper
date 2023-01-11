@@ -56,6 +56,17 @@ namespace bvh {
 							}
 						}
 
+						// first, we need store its as opaque mode
+						material->EnableAlphaTest(FALSE);
+						material->EnableAlphaBlend(FALSE);
+						material->SetTwoSided(FALSE);
+						// IMPORTANT: z write is enable in default.
+						material->EnableZWrite(TRUE);
+						material->SetZFunc(VXCMP_LESSEQUAL);
+
+						// then, we change material some properties
+						// according to its referring texture
+						// 
 						// get texture index
 						texture = material->GetTexture(0);
 						if (texture == NULL) continue;
@@ -63,7 +74,7 @@ namespace bvh {
 						if (target == textureList.end())
 							continue;	// no found
 
-						// judge its type
+						// switch by textures
 						switch (target->second) {
 							//case 0:    //atari.avi
 							//case 1:    //atari.bmp

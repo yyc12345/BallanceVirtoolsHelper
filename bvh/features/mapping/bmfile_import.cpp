@@ -97,8 +97,7 @@ namespace bvh {
 					std::vector<VxVector> mesh_vList, mesh_vnList;
 					std::vector<Vx2DVector> mesh_vtList;
 					std::vector<BM_FACE_PROTOTYPE> mesh_faceList;
-					mesh_transition::MeshTransition mesh_converter;
-					int mesh_assignCounter;
+					mesh_transition::MeshTransition mesh_converter(ctx);
 					//used in object
 					CK3dObject* importObject = NULL;
 					VxMatrix object_worldMatrix;
@@ -265,68 +264,13 @@ namespace bvh {
 						readData<uint32_t>(&fmesh, &mesh_listCount);
 						readVectorData<BM_FACE_PROTOTYPE>(&fmesh, &mesh_faceList, mesh_listCount);
 
-						// send to converter
+						// send to converter and fet converted mesh
 						mesh_converter.DoMeshParse(
-							&mesh_vList,
-							&mesh_vtList,
-							&mesh_vnList,
-							&mesh_faceList
+							importMesh,
+							&mesh_vList, &mesh_vtList, &mesh_vnList,
+							&mesh_faceList,
+							&materialList
 						);
-
-						// process converter data
-						importMesh->SetVertexCount(mesh_converter.m_Out_Vertex.size());
-						mesh_assignCounter = 0;
-						for (auto it = mesh_converter.m_Out_Vertex.begin(); it != mesh_converter.m_Out_Vertex.end(); (++it), (++mesh_assignCounter)) {
-							// set v vt vn
-							importMesh->SetVertexPosition(mesh_assignCounter, &((*it).m_Vtx));
-							importMesh->SetVertexTextureCoordinates(mesh_assignCounter, (*it).m_UV.x, (*it).m_UV.y);
-							importMesh->SetVertexNormal(mesh_assignCounter, &((*it).m_Norm));
-						}
-
-						importMesh->SetFaceCount(mesh_converter.m_Out_FaceIndices.size());
-						mesh_assignCounter = 0;
-						for (auto it = mesh_converter.m_Out_FaceIndices.begin(); it != mesh_converter.m_Out_FaceIndices.end(); (++it), (++mesh_assignCounter)) {
-							// set indices
-							importMesh->SetFaceVertexIndex(mesh_assignCounter, (*it).ind1, (*it).ind2, (*it).ind3);
-
-							// set material
-							if ((*it).use_material) {
-								importMesh->SetFaceMaterial(
-									mesh_assignCounter, 
-									(CKMaterial*)ctx->GetObjectA(materialList[(*it).material_index]->id)
-								);
-							}
-						}
-
-						//// init vector and face count
-						//importMesh->SetVertexCount(mesh_listCount * 3);
-						//importMesh->SetFaceCount(mesh_listCount);
-						//for (uint32_t i = 0; i < mesh_listCount; i++) {
-						//	// read one face data
-						//	for (int j = 0; j < 9; j++) {
-						//		readInt(&fmesh, &(mesh_faceData[j]));
-						//	}
-
-						//	// manipulate face data
-						//	for (int j = 0; j < 9; j += 3) {
-						//		mesh_3dvector = mesh_vList[mesh_faceData[j]];
-						//		importMesh->SetVertexPosition(i * 3 + j / 3, &mesh_3dvector);
-						//		mesh_2dvector = mesh_vtList[mesh_faceData[j + 1]];
-						//		importMesh->SetVertexTextureCoordinates(i * 3 + j / 3, mesh_2dvector.x, mesh_2dvector.y);
-						//		mesh_3dvector = mesh_vnList[mesh_faceData[j + 2]];
-						//		importMesh->SetVertexNormal(i * 3 + j / 3, &mesh_3dvector);
-						//	}
-
-						//	// set indices
-						//	importMesh->SetFaceVertexIndex(i, i * 3, i * 3 + 1, i * 3 + 2);
-
-						//	// set material
-						//	readBool(&fmesh, &mesh_useMaterial);
-						//	readInt(&fmesh, &mesh_materialIndex);
-						//	if (mesh_useMaterial) {
-						//		importMesh->SetFaceMaterial(i, (CKMaterial*)ctx->GetObjectA(materialList[mesh_materialIndex]->id));
-						//	}
-						//}
 
 						// add into scene
 						vtenv_currentScene->AddObjectToScene(importMesh);
@@ -350,11 +294,6 @@ namespace bvh {
 						readBool(&fobject, &object_isComponent);
 						readBool(&fobject, &object_isHidden);
 						readData<VxMatrix>(&fobject, &object_worldMatrix);
-						//for (int i = 0; i < 4; i++) {
-						//	for (int j = 0; j < 4; j++) {
-						//		readData<float>(&fobject, &(object_worldMatrix[i][j]));
-						//	}
-						//}
 						importObject->SetWorldMatrix(object_worldMatrix);
 
 						// read grouping message
@@ -494,45 +433,13 @@ namespace bvh {
 					// end of reading data
 					fmesh.close();
 
-					// push into converter
+					// push into converter and get converted mesh
 					converter.DoComponentParse(
-						&vList,
-						&vnList,
+						currentMesh,
+						&vList, &vnList,
 						&faceList
 					);
 
-					// process converter data
-					currentMesh->SetVertexCount(converter.m_Out_Vertex.size());
-					int mesh_assignCounter = 0;
-					for (auto it = converter.m_Out_Vertex.begin(); it != converter.m_Out_Vertex.end(); (++it), (++mesh_assignCounter)) {
-						// set v vt vn
-						currentMesh->SetVertexPosition(mesh_assignCounter, &((*it).m_Vtx));
-						currentMesh->SetVertexNormal(mesh_assignCounter, &((*it).m_Norm));
-					}
-
-					currentMesh->SetFaceCount(converter.m_Out_FaceIndices.size());
-					mesh_assignCounter = 0;
-					for (auto it = converter.m_Out_FaceIndices.begin(); it != converter.m_Out_FaceIndices.end(); (++it), (++mesh_assignCounter)) {
-						// set indices
-						currentMesh->SetFaceVertexIndex(mesh_assignCounter, (*it).ind1, (*it).ind2, (*it).ind3);
-					}
-
-					//// init vector and face count
-					//currentMesh->SetVertexCount(vecCount * 3);
-					//currentMesh->SetFaceCount(vecCount);
-					//for (uint32_t i = 0; i < vecCount; i++) {
-					//	for (int j = 0; j < 6; j++)
-					//		readData<uint32_t>(&fmesh, &(face_data[j]));
-
-					//	for (int j = 0; j < 6; j += 2) {
-					//		vector = vList[face_data[j]];
-					//		currentMesh->SetVertexPosition(i * 3 + j / 2, &vector);
-					//		vector = vnList[face_data[j + 1]];
-					//		currentMesh->SetVertexNormal(i * 3 + j / 2, &vector);
-					//	}
-
-					//	currentMesh->SetFaceVertexIndex(i, i * 3, i * 3 + 1, i * 3 + 2);
-					//}
 
 					// add this new one into scene
 					scene->AddObjectToScene(currentMesh);
