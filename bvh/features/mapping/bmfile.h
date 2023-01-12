@@ -64,12 +64,6 @@ namespace bvh {
 					};
 #pragma pack()
 
-					struct BmTransitionVertexHash {
-						size_t operator()(const BmTransitionVertex& cla) const;
-					};
-					struct BmTransitionVertexEqual {
-						bool operator()(const BmTransitionVertex& c1, const BmTransitionVertex& c2) const;
-					};
 					struct BmTransitionVertexCompare {
 						bool operator()(const BmTransitionVertex& lhs, const BmTransitionVertex& rhs) const;
 					};
@@ -119,43 +113,10 @@ namespace bvh {
 						std::vector<BmTransitionVertex> m_Out_Vertex;
 						std::vector<BmTransitionFace> m_Out_FaceIndices;
 
-						//std::unordered_map<BmTransitionVertex, uint32_t, BmTransitionVertexHash, BmTransitionVertexEqual> m_DupRemover;
+						// unordered_map have performance problem when dealing with massive data (in this case, big mesh)
+						// so we use map to get stable time cost.
 						std::map<BmTransitionVertex, uint32_t, BmTransitionVertexCompare> m_DupRemover;
 					};
-
-					//class MeshTransitionDassault {
-					//	MeshTransitionDassault(CKContext* ctx);
-					//	~MeshTransitionDassault();
-
-					//	void DoMeshParse(
-					//		std::vector<VxVector>* vtx,
-					//		std::vector<Vx2DVector>* uv,
-					//		std::vector<VxVector>* norm,
-					//		std::vector<BM_FACE_PROTOTYPE>* face
-					//	);
-					//	void DoComponentParse(
-					//		std::vector<VxVector>* vtx,
-					//		std::vector<VxVector>* norm,
-					//		std::vector<COMPONENT_FACE_PROTOTYPE>* face
-					//	);
-
-					//	std::vector<BmTransitionVertex> m_Out_Vertex;
-					//	std::vector<BmTransitionFace> m_Out_FaceIndices;
-
-					//private:
-					//	void DoRealParse();
-					//	void PushVertex(size_t face_index, int indices_index);
-					//	void PushFace(size_t face_index, uint32_t idx[3]);
-
-					//	BOOL m_IsComponent;
-					//	std::vector<VxVector>* m_In_Vtx, * m_In_Norm;
-					//	std::vector<Vx2DVector>* m_In_UV;
-					//	std::vector<BM_FACE_PROTOTYPE>* m_In_Face;
-					//	std::vector<COMPONENT_FACE_PROTOTYPE>* m_In_FaceAlt;
-
-					//	Export2Virtools mExporter;
-					//	VirtoolsTransitionMesh mTranMesh;
-					//};
 
 				}
 
