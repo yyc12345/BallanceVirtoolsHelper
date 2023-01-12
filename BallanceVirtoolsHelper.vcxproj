@@ -77,7 +77,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(VIRTOOLS35_PATH)\InterfacePlugins\$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>$(ZLIB_PATH)\contrib\vstudio\vc14\x86\ZlibDllReleaseWithoutAsm;$(VIRTOOLS35_PATH)\Sdk\Lib\Win32\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vxmath.lib;DllEditor.lib;ck2.lib;InterfaceControls.lib;CKControls.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vxmath.lib;DllEditor.lib;ck2.lib;Ge2Virtools.lib;InterfaceControls.lib;CKControls.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>BallanceVirtoolsHelper.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(VIRTOOLS35_PATH)\InterfacePlugins\$(ProjectName).pdb</ProgramDatabaseFile>
@@ -108,7 +108,7 @@
       <ProgramDatabaseFile>$(VIRTOOLS35_PATH)\InterfacePlugins\$(ProjectName).pdb</ProgramDatabaseFile>
       <OutputFile>$(VIRTOOLS35_PATH)\InterfacePlugins\$(ProjectName).dll</OutputFile>
       <AdditionalLibraryDirectories>$(ZLIB_PATH)\contrib\vstudio\vc14\x86\ZlibDllReleaseWithoutAsm;$(VIRTOOLS35_PATH)\Sdk\Lib\Win32\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vxmath.lib;DllEditor.lib;ck2.lib;InterfaceControls.lib;CKControls.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vxmath.lib;DllEditor.lib;ck2.lib;Ge2Virtools.lib;InterfaceControls.lib;CKControls.lib;zlibwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -136,7 +136,6 @@
     <ClCompile Include="bvh\features\mapping\bmfile_export.cpp" />
     <ClCompile Include="bvh\features\mapping\bmfile_fix_texture.cpp" />
     <ClCompile Include="bvh\features\mapping\bmfile_import.cpp" />
-    <ClCompile Include="bvh\features\mapping\transition_mesh.cpp" />
     <ClCompile Include="bvh\mfcwindows\bmfile_import.cpp" />
     <ClCompile Include="bvh\utils\config_manager.cpp" />
     <ClCompile Include="bvh\utils\error_proc.cpp" />

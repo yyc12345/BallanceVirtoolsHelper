@@ -24,7 +24,7 @@ namespace bvh {
 
 				struct FILE_INDEX_HELPER {
 					std::string name;
-					CK_ID id;
+					CKObject* obj;
 					uint64_t offset;
 				};
 
@@ -52,113 +52,6 @@ namespace bvh {
 				};
 #pragma pack()
 
-				namespace mesh_transition {
-
-#pragma pack(1)
-					struct BmTransitionVertex {
-						BmTransitionVertex();
-						BmTransitionVertex(VxVector& vtx, Vx2DVector& uv, VxVector& norm);
-						VxVector m_Vtx;
-						Vx2DVector m_UV;
-						VxVector m_Norm;
-					};
-#pragma pack()
-
-					struct BmTransitionVertexHash {
-						size_t operator()(const BmTransitionVertex& cla) const;
-					};
-					struct BmTransitionVertexEqual {
-						bool operator()(const BmTransitionVertex& c1, const BmTransitionVertex& c2) const;
-					};
-					struct BmTransitionVertexCompare {
-						bool operator()(const BmTransitionVertex& lhs, const BmTransitionVertex& rhs) const;
-					};
-
-					struct BmTransitionFace {
-						BmTransitionFace();
-						BmTransitionFace(uint32_t _i1, uint32_t _i2, uint32_t _i3, uint8_t use_mtl, uint32_t mtl_id);
-						uint32_t ind1, ind2, ind3;
-
-						uint8_t use_material;
-						uint32_t material_index;
-					};
-
-					class MeshTransition {
-					public:
-						MeshTransition(CKContext* ctx);
-						~MeshTransition();
-
-						void DoMeshParse(
-							CKMesh* mesh,
-							std::vector<VxVector>* vtx, std::vector<Vx2DVector>* uv, std::vector<VxVector>* norm,
-							std::vector<BM_FACE_PROTOTYPE>* face,
-							std::vector<FILE_INDEX_HELPER*>* mtl_list
-						);
-						void DoComponentParse(
-							CKMesh* mesh,
-							std::vector<VxVector>* vtx, std::vector<VxVector>* norm,
-							std::vector<COMPONENT_FACE_PROTOTYPE>* face
-						);
-						
-					private:
-						void DoRealParse();
-						void ApplyToMaterial();
-						void PushVertex(size_t face_index, int indices_index);
-						void PushFace(size_t face_index, uint32_t idx[3]);
-
-						CKContext* m_In_Ctx;
-
-						BOOL m_IsComponent;
-						CKMesh* m_In_Mesh;
-						std::vector<VxVector>* m_In_Vtx, * m_In_Norm;
-						std::vector<Vx2DVector>* m_In_UV;
-						std::vector<BM_FACE_PROTOTYPE>* m_In_Face;
-						std::vector<COMPONENT_FACE_PROTOTYPE>* m_In_FaceAlt;
-						std::vector<FILE_INDEX_HELPER*>* m_In_MaterialList;
-
-						std::vector<BmTransitionVertex> m_Out_Vertex;
-						std::vector<BmTransitionFace> m_Out_FaceIndices;
-
-						//std::unordered_map<BmTransitionVertex, uint32_t, BmTransitionVertexHash, BmTransitionVertexEqual> m_DupRemover;
-						std::map<BmTransitionVertex, uint32_t, BmTransitionVertexCompare> m_DupRemover;
-					};
-
-					//class MeshTransitionDassault {
-					//	MeshTransitionDassault(CKContext* ctx);
-					//	~MeshTransitionDassault();
-
-					//	void DoMeshParse(
-					//		std::vector<VxVector>* vtx,
-					//		std::vector<Vx2DVector>* uv,
-					//		std::vector<VxVector>* norm,
-					//		std::vector<BM_FACE_PROTOTYPE>* face
-					//	);
-					//	void DoComponentParse(
-					//		std::vector<VxVector>* vtx,
-					//		std::vector<VxVector>* norm,
-					//		std::vector<COMPONENT_FACE_PROTOTYPE>* face
-					//	);
-
-					//	std::vector<BmTransitionVertex> m_Out_Vertex;
-					//	std::vector<BmTransitionFace> m_Out_FaceIndices;
-
-					//private:
-					//	void DoRealParse();
-					//	void PushVertex(size_t face_index, int indices_index);
-					//	void PushFace(size_t face_index, uint32_t idx[3]);
-
-					//	BOOL m_IsComponent;
-					//	std::vector<VxVector>* m_In_Vtx, * m_In_Norm;
-					//	std::vector<Vx2DVector>* m_In_UV;
-					//	std::vector<BM_FACE_PROTOTYPE>* m_In_Face;
-					//	std::vector<COMPONENT_FACE_PROTOTYPE>* m_In_FaceAlt;
-
-					//	Export2Virtools mExporter;
-					//	VirtoolsTransitionMesh mTranMesh;
-					//};
-
-				}
-
 				extern const uint32_t CONST_ExternalTextureList_Length;
 				extern const char* CONST_ExternalTextureList[];
 				extern const uint32_t CONST_ExternalComponent_Length;
@@ -181,9 +74,9 @@ namespace bvh {
 				void readBool(std::ifstream* fs, BOOL* boolean);
 				void readString(std::ifstream* fs, std::string* str);
 				void loadExternalTexture(std::string* name, CKTexture* texture, utils::ParamPackage* pkg);
-				void loadComponenetMesh(CKContext* ctx, CKScene* scene, CK3dEntity* obj, mesh_transition::MeshTransition converter, uint32_t model_index);
+				CKMesh* loadComponenetMesh(CKContext* ctx, Export2Virtools* exporter, VirtoolsTransitionMesh* converter, uint32_t model_index);
 				BOOL isComponentInStandard(std::string* name);
-				CKObject* userCreateCKObject(CKContext* ctx, CK_CLASSID cls, const char* name, BOOL use_rename, BOOL* is_existed);
+				CKObject* userCreateCKObject(CKContext* ctx, Export2Virtools* exporter, FILE_INDEX_TYPE cls, const char* name, void* pkey, void* extraData, BOOL use_rename, BOOL* is_existed);
 
 				void ExportBM(utils::ParamPackage* pkg);
 				void writeBool(std::ofstream* fs, BOOL* boolean);
