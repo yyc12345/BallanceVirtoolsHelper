@@ -345,12 +345,6 @@ namespace bvh {
 					pkg->error_proc->SetExecutionResult(TRUE);
 				}
 
-				// WARNING: all following `Read` func are based on current OS is little-endian.
-				void readBool(std::ifstream* fs, BOOL* boolean) {
-					uint8_t num;
-					readData<uint8_t>(fs, &num);
-					*boolean = num ? TRUE : FALSE;
-				}
 				// References
 				// https://zh.cppreference.com/w/cpp/string/multibyte/c32rtomb
 				void readString(std::ifstream* fs, std::string* str) {

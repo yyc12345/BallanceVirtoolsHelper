@@ -126,6 +126,7 @@ namespace bvh {
 				extern const char* CONST_ExternalComponent[];
 
 				void ImportBM(utils::ParamPackage* pkg);
+				// WARNING: all following `Read` func are based on current OS is little-endian.
 				template<typename T>
 				inline void readData(std::ifstream* fs, T* data) {
 					fs->read((char*)data, (std::streamsize)sizeof(T));
@@ -139,7 +140,11 @@ namespace bvh {
 					vec->resize(count);
 					fs->read((char*)vec->data(), ((std::streamsize)sizeof(T)) * ((std::streamsize)count));
 				}
-				void readBool(std::ifstream* fs, BOOL* boolean);
+				inline void readBool(std::ifstream* fs, BOOL* boolean) {
+					uint8_t num;
+					readData<uint8_t>(fs, &num);
+					*boolean = num ? TRUE : FALSE;
+				}
 				void readString(std::ifstream* fs, std::string* str);
 				void loadExternalTexture(std::string* name, CKTexture* texture, utils::ParamPackage* pkg);
 				void loadComponenetMesh(CKContext* ctx, CKScene* scene, CK3dEntity* obj, mesh_transition::MeshTransition converter, uint32_t model_index);
@@ -147,17 +152,31 @@ namespace bvh {
 				CKObject* userCreateCKObject(CKContext* ctx, CK_CLASSID cls, const char* name, BOOL use_rename, BOOL* is_existed);
 
 				void ExportBM(utils::ParamPackage* pkg);
-				void writeBool(std::ofstream* fs, BOOL* boolean);
-				void writeInt(std::ofstream* fs, uint8_t* num);
-				void writeInt(std::ofstream* fs, uint32_t* num);
-				void writeInt(std::ofstream* fs, uint64_t* num);
-				void writeFloat(std::ofstream* fs, float* num);
+				// WARNING: all following `Write` func are based on current OS is little-endian.
+				template<typename T>
+				inline void writeData(std::ofstream* fs, T* data) {
+					fs->write((char*)data, sizeof(T));
+				}
+				template<typename T>
+				inline void writeArrayData(std::ofstream* fs, T* arr, uint32_t count) {
+					fs->write((char*)arr, ((std::streamsize)sizeof(T)) * ((std::streamsize)count));
+				}
+				template<typename T>
+				inline void writeVectorData(std::ofstream* fs, std::vector<T>* vec) {
+					fs->write((char*)vec->data(), ((std::streamsize)sizeof(T)) * ((std::streamsize)vec->size()));
+				}
+				inline void writeBool(std::ofstream* fs, BOOL* boolean) {
+					uint8_t num = *boolean ? 1 : 0;
+					writeData<uint8_t>(fs, &num);
+				}
 				void writeString(std::ofstream* fs, std::string* str);
 				BOOL isValidObject(CK3dEntity* obj);
-				void getComponent(std::unordered_set<CK_ID>* grp, CK_ID objId, std::string* name, BOOL* is_component, uint32_t* gottten_id);
+				void getComponent(std::unordered_set<CK_ID>* fncgSet, CK3dEntity* obj, BOOL* is_component, uint32_t* gottten_id);
 				BOOL isExternalTexture(CKContext* ctx, CKTexture* texture, std::string* name);
 				void safelyGetName(CKObject* obj, std::string* name);
-				uint32_t tryAddWithIndex(std::vector<CK_ID>* list, CK_ID newValue);
+				void putIndexHeader(std::ofstream* findex, CKObject* data, FILE_INDEX_TYPE t, uint64_t offset);
+				template<typename T>
+				uint32_t tryAddWithPtr(std::vector<T*>* list, T* newValue);
 
 				void FixTexture(utils::ParamPackage* pkg);
 

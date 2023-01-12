@@ -37,7 +37,10 @@ namespace bvh {
 					// ============================================
 					// allocate some variables and preparing exporting work
 					CKContext* ctx = pkg->plgif->GetCKContext();
-					std::vector<CK_ID> objectList, meshList, materialList, textureList;
+					std::vector<CK3dEntity*> objectList;
+					std::vector<CKMesh*> meshList;
+					std::vector<CKMaterial*> materialList;
+					std::vector<CKTexture*> textureList;
 					std::ofstream findex, fobject, fmesh, fmaterial, ftexture;
 
 					// used by forced non-component group
@@ -58,9 +61,6 @@ namespace bvh {
 					int filter_groupCount;
 					//used by index
 					uint32_t index_bmVersion;
-					uint64_t index_offset;
-					FILE_INDEX_TYPE index_type;
-					std::string index_name;
 					//used by object
 					CK3dEntity* exportObject;
 					BOOL object_isComponent, object_isHidden;
@@ -70,12 +70,14 @@ namespace bvh {
 					uint32_t object_groupListCount;
 					//used by mesh
 					CKMesh* exportMesh;
-					VxVector mesh_vector;
-					uint32_t mesh_count;
-					uint32_t mesh_indexValue;
-					float mesh_uvU, mesh_uvV;
+					CKDWORD mesh_scanStride;
+					VxVector* mesh_p3dVector;
+					Vx2DVector* mesh_p2dVector;
+					std::vector<VxVector> mesh_3dVectorList;
+					std::vector<Vx2DVector> mesh_2dVectorList;
+					std::vector<BM_FACE_PROTOTYPE> mesh_faceList;
 					WORD* mesh_faceIndices;
-					BOOL mesh_useMaterial;
+					uint32_t mesh_count;
 					CKMaterial* mesh_faceMaterial;
 					//used by material
 					CKMaterial* exportMaterial;
@@ -114,7 +116,7 @@ namespace bvh {
 							pkg->cfg_manager->CurrentConfig.func_mapping_bm_NoComponentGroupName == grouping_ckGroupPtr->GetName()) {
 							continue; // we don't need NoComponentGroup data
 						}
-						
+
 						// allocate new string from heap to store group name
 						grouping_ckGroupNamePtr = new std::string();
 						*grouping_ckGroupNamePtr = grouping_ckGroupPtr->GetName();
@@ -127,7 +129,7 @@ namespace bvh {
 						for (int i = 0; i < grouping_ckGroupLength; ++i) {
 							grouping_data.insert({ grouping_ckGroupPtr->GetObject(i)->GetID(), grouping_ckGroupNamePtr });
 						}
-						
+
 					}
 
 					// collecting exported objects data
@@ -136,7 +138,7 @@ namespace bvh {
 					switch (bm_export_window->OUT_Mode) {
 						case 0:
 							// obj
-							objectList.push_back(bm_export_window->OUT_Target);
+							objectList.push_back((CK3dObject*)ctx->GetObjectA(bm_export_window->OUT_Target));
 							break;
 						case 1:
 							// group
@@ -148,7 +150,7 @@ namespace bvh {
 									case CKCID_3DENTITY:
 									case CKCID_3DOBJECT:
 										if (isValidObject((CK3dEntity*)filter_groupItem))
-											objectList.push_back(filter_groupItem->GetID());
+											objectList.push_back((CK3dEntity*)filter_groupItem);
 										break;
 									default:
 										break;	// do nothing
@@ -161,60 +163,51 @@ namespace bvh {
 							for (auto item = objArray.Begin(); item != objArray.End(); ++item) {
 								filter_3dentity = (CK3dEntity*)(*item);
 								if (isValidObject(filter_3dentity))
-									objectList.push_back(filter_3dentity->GetID());
+									objectList.push_back(filter_3dentity);
 							}
 							break;
 					}
 
 					// ============================================
 					// write bmx internal file in temp folder
-					
+
 					// now we open `index.bm` first
 					// this file should be opened in the whole of exporting
 					// because it store all index infomations
 					findex.open(temp_folder / "index.bm", std::ios_base::out | std::ios_base::binary);
 					//write version header
 					index_bmVersion = BM_FILE_VERSION;
-					writeInt(&findex, &index_bmVersion);
+					writeData<uint32_t>(&findex, &index_bmVersion);
 
 					//write object
 					fobject.open(temp_folder / "object.bm", std::ios_base::out | std::ios_base::binary);
 					for (auto iter = objectList.begin(); iter != objectList.end(); iter++) {
-						exportObject = (CK3dEntity*)ctx->GetObjectA(*iter);
+						exportObject = *iter;
 						//write index first
-						safelyGetName(exportObject, &index_name);
-						writeString(&findex, &index_name);
-						index_type = FILE_INDEX_TYPE__OBJECT;
-						writeInt(&findex, (uint8_t*)&index_type);
-						index_offset = fobject.tellp();
-						writeInt(&findex, &index_offset);
+						putIndexHeader(&findex, exportObject, FILE_INDEX_TYPE__OBJECT, fobject.tellp());
 
 						//write object
-						getComponent(&utils_fncgSet, exportObject->GetID(), &index_name, &object_isComponent, &object_meshIndex);
+						getComponent(&utils_fncgSet, exportObject, &object_isComponent, &object_meshIndex);
 						writeBool(&fobject, &object_isComponent);
 						object_isHidden = exportObject->IsVisible() == CKHIDE;
 						writeBool(&fobject, &object_isHidden);
 						object_worldMatrix = exportObject->GetWorldMatrix();
-						for (int i = 0; i < 4; i++) {
-							for (int j = 0; j < 4; j++) {
-								writeFloat(&fobject, &object_worldMatrix[i][j]);
-							}
-						}
+						writeData<VxMatrix>(&fobject, &object_worldMatrix);
 
 						// write group list
 						// record length position and ready back to there to write count
 						object_groupListCount = 0;
 						object_chunkPtrHeader = fobject.tellp();
-						writeInt(&fobject, &object_groupListCount);
+						writeData<uint32_t>(&fobject, &object_groupListCount);
 						auto grouping_data_range = grouping_data.equal_range(exportObject->GetID());
-						for (auto &it = grouping_data_range.first; it != grouping_data_range.second; ++it) {
+						for (auto& it = grouping_data_range.first; it != grouping_data_range.second; ++it) {
 							writeString(&fobject, it->second);
 							++object_groupListCount;
 						}
 						// backups current position, back to count position, write it and back to current position
 						object_chunkPtrTail = fobject.tellp();
 						fobject.seekp(object_chunkPtrHeader);
-						writeInt(&fobject, &object_groupListCount);
+						writeData<uint32_t>(&fobject, &object_groupListCount);
 						fobject.seekp(object_chunkPtrTail);
 
 						// if this object is normal object, we need to register it in mesh list
@@ -222,89 +215,87 @@ namespace bvh {
 						// otherwise, write corresponding component id gotten from
 						// previous function calling
 						if (!object_isComponent) {
-							object_meshIndex = tryAddWithIndex(&meshList, exportObject->GetMesh(0)->GetID());
+							object_meshIndex = tryAddWithPtr<CKMesh>(&meshList, exportObject->GetMesh(0));
 						}
-						writeInt(&fobject, &object_meshIndex);
+						writeData<uint32_t>(&fobject, &object_meshIndex);
 					}
 					fobject.close();
 
 					// write mesh
 					fmesh.open(temp_folder / "mesh.bm", std::ios_base::out | std::ios_base::binary);
 					for (auto iter = meshList.begin(); iter != meshList.end(); iter++) {
-						exportMesh = (CKMesh*)ctx->GetObjectA(*iter);
+						exportMesh = *iter;
 						//write index first
-						safelyGetName(exportMesh, &index_name);
-						writeString(&findex, &index_name);
-						index_type = FILE_INDEX_TYPE__MESH;
-						writeInt(&findex, (uint8_t*)&index_type);
-						index_offset = fmesh.tellp();
-						writeInt(&findex, &index_offset);
+						putIndexHeader(&findex, exportMesh, FILE_INDEX_TYPE__MESH, fmesh.tellp());
 
 						//write mesh
 						mesh_count = exportMesh->GetVertexCount();
-						writeInt(&fmesh, &mesh_count);
-						for (uint32_t i = 0; i < mesh_count; i++) {
-							exportMesh->GetVertexPosition(i, &mesh_vector);
-							writeFloat(&fmesh, &mesh_vector.x);
-							writeFloat(&fmesh, &mesh_vector.y);
-							writeFloat(&fmesh, &mesh_vector.z);
+						mesh_3dVectorList.resize(mesh_count);
+						mesh_2dVectorList.resize(mesh_count);
+
+						writeData<uint32_t>(&fmesh, &mesh_count);
+						mesh_p3dVector = (VxVector*)exportMesh->GetPositionsPtr(&mesh_scanStride);
+						for (uint32_t i = 0; i < mesh_count; ++i) {
+							memcpy(mesh_3dVectorList.data() + i, mesh_p3dVector, sizeof(VxVector));
+							mesh_p3dVector = (VxVector*)((char*)mesh_p3dVector + mesh_scanStride);
 						}
-						writeInt(&fmesh, &mesh_count);
-						for (uint32_t i = 0; i < mesh_count; i++) {
-							exportMesh->GetVertexTextureCoordinates(i, &mesh_uvU, &mesh_uvV);
-							writeFloat(&fmesh, &mesh_uvU);
-							writeFloat(&fmesh, &mesh_uvV);
+						writeVectorData<VxVector>(&fmesh, &mesh_3dVectorList);
+
+						writeData<uint32_t>(&fmesh, &mesh_count);
+						mesh_p2dVector = (Vx2DVector*)exportMesh->GetTextureCoordinatesPtr(&mesh_scanStride);
+						for (uint32_t i = 0; i < mesh_count; ++i) {
+							memcpy(mesh_2dVectorList.data() + i, mesh_p2dVector, sizeof(Vx2DVector));
+							mesh_p2dVector = (Vx2DVector*)((char*)mesh_p2dVector + mesh_scanStride);
 						}
-						writeInt(&fmesh, &mesh_count);
-						for (uint32_t i = 0; i < mesh_count; i++) {
-							exportMesh->GetVertexNormal(i, &mesh_vector);
-							writeFloat(&fmesh, &mesh_vector.x);
-							writeFloat(&fmesh, &mesh_vector.y);
-							writeFloat(&fmesh, &mesh_vector.z);
+						writeVectorData<Vx2DVector>(&fmesh, &mesh_2dVectorList);
+
+						writeData<uint32_t>(&fmesh, &mesh_count);
+						mesh_p3dVector = (VxVector*)exportMesh->GetNormalsPtr(&mesh_scanStride);
+						for (uint32_t i = 0; i < mesh_count; ++i) {
+							memcpy(mesh_3dVectorList.data() + i, mesh_p3dVector, sizeof(VxVector));
+							mesh_p3dVector = (VxVector*)((char*)mesh_p3dVector + mesh_scanStride);
 						}
+						writeVectorData<VxVector>(&fmesh, &mesh_3dVectorList);
 
 						mesh_count = exportMesh->GetFaceCount();
-						mesh_faceIndices = exportMesh->GetFacesIndices();
-						writeInt(&fmesh, &mesh_count);
-						for (uint32_t i = 0; i < mesh_count; i++) {
-							mesh_indexValue = mesh_faceIndices[i * 3];
-							writeInt(&fmesh, &mesh_indexValue);
-							writeInt(&fmesh, &mesh_indexValue);
-							writeInt(&fmesh, &mesh_indexValue);
-							mesh_indexValue = mesh_faceIndices[i * 3 + 1];
-							writeInt(&fmesh, &mesh_indexValue);
-							writeInt(&fmesh, &mesh_indexValue);
-							writeInt(&fmesh, &mesh_indexValue);
-							mesh_indexValue = mesh_faceIndices[i * 3 + 2];
-							writeInt(&fmesh, &mesh_indexValue);
-							writeInt(&fmesh, &mesh_indexValue);
-							writeInt(&fmesh, &mesh_indexValue);
+						mesh_faceList.resize(mesh_count);
+						writeData<uint32_t>(&fmesh, &mesh_count);
 
+						mesh_faceIndices = exportMesh->GetFacesIndices();
+						for (uint32_t i = 0; i < mesh_count; i++) {
+							BM_FACE_PROTOTYPE* pFace = mesh_faceList.data() + i;
+
+							// indices
+							pFace->indices.data.v1 = pFace->indices.data.vt1 = pFace->indices.data.vn1 = mesh_faceIndices[0];
+							pFace->indices.data.v2 = pFace->indices.data.vt2 = pFace->indices.data.vn2 = mesh_faceIndices[1];
+							pFace->indices.data.v3 = pFace->indices.data.vt3 = pFace->indices.data.vn3 = mesh_faceIndices[2];
+							
+							// mtl data
 							mesh_faceMaterial = exportMesh->GetFaceMaterial(i);
-							mesh_useMaterial = mesh_faceMaterial != NULL;
-							writeBool(&fmesh, &mesh_useMaterial);
-							if (mesh_useMaterial) {
-								mesh_indexValue = tryAddWithIndex(&materialList, mesh_faceMaterial->GetID());
-							} else mesh_indexValue = 0;
-							writeInt(&fmesh, &mesh_indexValue);
+							pFace->use_material = mesh_faceMaterial != NULL;
+							
+							if (pFace->use_material) {
+								pFace->material_index = tryAddWithPtr<CKMaterial>(&materialList, mesh_faceMaterial);
+							} else pFace->material_index = UINT32_C(0);
+							
+
+							// inc self
+							mesh_faceIndices = mesh_faceIndices + 3;
 						}
+						writeVectorData<BM_FACE_PROTOTYPE>(&fmesh, &mesh_faceList);
+
 					}
 					fmesh.close();
 
 					// write material
 					fmaterial.open(temp_folder / "material.bm", std::ios_base::out | std::ios_base::binary);
 					for (auto iter = materialList.begin(); iter != materialList.end(); iter++) {
-						exportMaterial = (CKMaterial*)ctx->GetObjectA(*iter);
+						exportMaterial = *iter;
 						//write index first
-						safelyGetName(exportMaterial, &index_name);
-						writeString(&findex, &index_name);
-						index_type = FILE_INDEX_TYPE__MATERIAL;
-						writeInt(&findex, (uint8_t*)&index_type);
-						index_offset = fmaterial.tellp();
-						writeInt(&findex, &index_offset);
+						putIndexHeader(&findex, exportMaterial, FILE_INDEX_TYPE__MATERIAL, fmaterial.tellp());
 
 						//write material
-#define writeColor writeFloat(&fmaterial, &material_color.r);writeFloat(&fmaterial, &material_color.g);writeFloat(&fmaterial, &material_color.b);
+#define writeColor writeArrayData<float>(&fmaterial, &(material_color.r), UINT32_C(3));
 						material_color = exportMaterial->GetAmbient();
 						writeColor;
 						material_color = exportMaterial->GetDiffuse();
@@ -315,7 +306,7 @@ namespace bvh {
 						writeColor;
 #undef writeColor
 						material_value = exportMaterial->GetPower();
-						writeFloat(&fmaterial, &material_value);
+						writeData<float>(&fmaterial, &material_value);
 
 						material_alphaProp = exportMaterial->AlphaTestEnabled();
 						writeBool(&fmaterial, &material_alphaProp);
@@ -326,28 +317,24 @@ namespace bvh {
 						material_alphaProp = exportMaterial->IsTwoSided();
 						writeBool(&fmaterial, &material_alphaProp);
 
-						// try get material
+						// try get texture
 						material_tryGottonTexture = exportMaterial->GetTexture();
 						material_useTexture = material_tryGottonTexture != NULL && material_tryGottonTexture->GetSlotFileName(0) != NULL;
 						writeBool(&fmaterial, &material_useTexture);
+
 						if (material_useTexture) {
-							material_textureIndex = tryAddWithIndex(&textureList, material_tryGottonTexture->GetID());
+							material_textureIndex = tryAddWithPtr<CKTexture>(&textureList, material_tryGottonTexture);
 						} else material_textureIndex = 0;
-						writeInt(&fmaterial, &material_textureIndex);
+						writeData<uint32_t>(&fmaterial, &material_textureIndex);
 					}
 					fmaterial.close();
 
 					// write texture
 					ftexture.open(temp_folder / "texture.bm", std::ios_base::out | std::ios_base::binary);
 					for (auto iter = textureList.begin(); iter != textureList.end(); iter++) {
-						exportTexture = (CKTexture*)ctx->GetObjectA(*iter);
+						exportTexture = *iter;
 						//write index first
-						safelyGetName(exportTexture, &index_name);
-						writeString(&findex, &index_name);
-						index_type = FILE_INDEX_TYPE__TEXTURE;
-						writeInt(&findex, (uint8_t*)&index_type);
-						index_offset = ftexture.tellp();
-						writeInt(&findex, &index_offset);
+						putIndexHeader(&findex, exportTexture, FILE_INDEX_TYPE__TEXTURE, ftexture.tellp());
 
 						//write texture
 						texture_absoluteTexturePath = exportTexture->GetSlotFileName(0);
@@ -383,23 +370,6 @@ namespace bvh {
 					pkg->error_proc->SetExecutionResult(TRUE);
 				}
 
-				// WARNING: all following `Write` func are based on current OS is little-endian.
-				void writeBool(std::ofstream* fs, BOOL* boolean) {
-					uint8_t num = *boolean ? 1 : 0;
-					writeInt(fs, &num);
-				}
-				void writeInt(std::ofstream* fs, uint8_t* num) {
-					fs->write((char*)num, sizeof(uint8_t));
-				}
-				void writeInt(std::ofstream* fs, uint32_t* num) {
-					fs->write((char*)num, sizeof(uint32_t));
-				}
-				void writeInt(std::ofstream* fs, uint64_t* num) {
-					fs->write((char*)num, sizeof(uint64_t));
-				}
-				void writeFloat(std::ofstream* fs, float* num) {
-					fs->write((char*)num, sizeof(float));
-				}
 				// References
 				// https://zh.cppreference.com/w/cpp/string/multibyte/mbrtoc32
 				void writeString(std::ofstream* fs, std::string* str) {
@@ -419,16 +389,16 @@ namespace bvh {
 						if (rc == (std::size_t)-3) {
 							throw std::logic_error("writeString(): no surrogates in UTF-32.");
 						}
-						
+
 						if (rc <= ((std::size_t)-1) / 2) {
 							bmstr.append(1, c32);
 							ptr += rc;
 							c32Length++;
 						} else break;
 					}
-					
+
 					// write length
-					writeInt(fs, &c32Length);
+					writeData<uint32_t>(fs, &c32Length);
 
 					// write data
 					fs->write((char*)bmstr.data(), (std::streamsize)c32Length * sizeof(char32_t));
@@ -440,7 +410,12 @@ namespace bvh {
 					if (mesh->GetFaceCount() == 0) return FALSE;	//no face
 					return TRUE;
 				}
-				void getComponent(std::unordered_set<CK_ID>* fncgSet, CK_ID objId, std::string* name, BOOL* is_component, uint32_t* gottten_id) {
+				void getComponent(std::unordered_set<CK_ID>* fncgSet, CK3dEntity* obj, BOOL* is_component, uint32_t* gottten_id) {
+					// get id and name first
+					CK_ID objId = obj->GetID();
+					std::string name;
+					safelyGetName(obj, &name);
+
 					// we check it whether in FNCG first
 					if (fncgSet->find(objId) != fncgSet->end()) {
 						// got, return it as normal object immediately
@@ -451,7 +426,7 @@ namespace bvh {
 
 					// if it is not in FNCG, we should check it by tools chain standard prefix
 					for (uint32_t i = 0; i < CONST_ExternalComponent_Length; i++) {
-						if (utils::string_helper::StdstringStartsWith(*name, CONST_ExternalComponent[i])) {
+						if (utils::string_helper::StdstringStartsWith(name, CONST_ExternalComponent[i])) {
 							// obj is matched with tools chain's standard prefix
 							// process obj as a component
 							*is_component = TRUE;
@@ -486,7 +461,19 @@ namespace bvh {
 
 					utils::string_helper::StdstringPrintf(name, "noname_%d", obj->GetID());
 				}
-				uint32_t tryAddWithIndex(std::vector<CK_ID>* list, CK_ID newValue) {
+				void putIndexHeader(std::ofstream* findex, CKObject* data, FILE_INDEX_TYPE t, uint64_t offset) {
+					// name
+					std::string obj_name;
+					safelyGetName(data, &obj_name);
+					writeString(findex, &obj_name);
+					// type
+					uint8_t index_type = (uint8_t)t;
+					writeData<uint8_t>(findex, (uint8_t*)&index_type);
+					// offset
+					writeData<uint64_t>(findex, &offset);
+				}
+				template<typename T>
+				uint32_t tryAddWithPtr(std::vector<T*>* list, T* newValue) {
 					auto gotten = std::find(list->begin(), list->end(), newValue);
 					uint32_t res = 0;
 					if (gotten == list->end()) {
