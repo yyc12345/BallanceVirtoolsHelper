@@ -67,16 +67,13 @@ void UpdateMenu() { //current max id: 32
 
 	CMenu* sub_bm = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 0, "BM", FALSE, TRUE);
 	//CMenu* sub_3dentity = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 0, "3DEntity", FALSE, TRUE);
-	CMenu* sub_group = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 1, "Group", FALSE, TRUE);
-	s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 8, "Add Shadow");
+	//CMenu* sub_group = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 1, "Group", FALSE, TRUE);
 	//CMenu* sub_light = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 2, "Light", FALSE, TRUE);
 	//CMenu* sub_mesh = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 3, "Mesh", FALSE, TRUE);
 	//CMenu* sub_name = s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 4, "Name", FALSE, TRUE);
 
 	s_Plugininterface->AddPluginMenuItem(sub_bm, 2, "Import BM file");
 	s_Plugininterface->AddPluginMenuItem(sub_bm, 3, "Export BM file");
-	s_Plugininterface->AddPluginMenuItem(sub_bm, -1, NULL, TRUE);
-	s_Plugininterface->AddPluginMenuItem(sub_bm, 7, "Fix texture");
 
 	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 5, "Align");
 	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 6, "Center distribute");
@@ -86,8 +83,10 @@ void UpdateMenu() { //current max id: 32
 	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 10, "Splice");
 	//s_Plugininterface->AddPluginMenuItem(sub_3dentity, 11, "Accurately move");
 
-	s_Plugininterface->AddPluginMenuItem(sub_group, 5, "Auto grouping");
-	s_Plugininterface->AddPluginMenuItem(sub_group, 6, "Grouping checker");
+	s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 7, "Fix texture");
+	s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 5, "Auto grouping");
+	s_Plugininterface->AddPluginMenuItem(s_MappingMenu, 8, "Add Shadow");
+	//s_Plugininterface->AddPluginMenuItem(sub_group, 6, "Grouping checker");
 
 	//s_Plugininterface->AddPluginMenuItem(sub_light, 16, "Add test light");
 	//s_Plugininterface->AddPluginMenuItem(sub_light, 17, "Remove test light");
