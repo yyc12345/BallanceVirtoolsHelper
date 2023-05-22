@@ -51,10 +51,12 @@ namespace bvh {
 
 		void BVHConfig::On_BM_ExternalTextureFolderBrowse() {
 			std::wstring cache;
-			utils::win32_helper::OpenFolderDialog(&cache, m_hWnd);
 
-			realExtTexFolderStorage = cache.c_str();
-			utils::win32_helper::StdWstring2CwndText(&m_BM_ExternalTextureFolder, &realExtTexFolderStorage);
+			if (utils::win32_helper::OpenFolderDialog(&cache, m_hWnd)) {
+				realExtTexFolderStorage = cache.c_str();
+				utils::win32_helper::StdWstring2CwndText(&m_BM_ExternalTextureFolder, &realExtTexFolderStorage);
+			}
+
 		}
 
 		void BVHConfig::On_Dialog_OK() {

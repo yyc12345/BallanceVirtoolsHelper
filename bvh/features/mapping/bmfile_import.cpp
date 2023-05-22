@@ -340,9 +340,6 @@ namespace bvh {
 					for (auto iter = objectList.begin(); iter != objectList.end(); iter++)
 						delete (*iter);
 
-					int jjj = 0;
-					int ppp = 3 / jjj;
-
 					// delete window and return
 					delete bm_import_window;
 					pkg->error_proc->SetExecutionResult(TRUE);

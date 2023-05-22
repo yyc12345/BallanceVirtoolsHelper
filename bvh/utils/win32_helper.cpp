@@ -260,7 +260,10 @@ namespace bvh::utils::win32_helper {
 
 	static LONG WINAPI UExceptionImpl(LPEXCEPTION_POINTERS info) {
 		// create stream first
-		FILE* fs = fopen("BallanceVirtoolsHelper.log", "w");
+		std::filesystem::path logpath;
+		GetVirtoolsFolder(&logpath);
+		logpath /= "BallanceVirtoolsHelper.log";
+		FILE* fs = _wfopen(logpath.wstring().c_str(), L"w");
 		if (fs != nullptr) {
 
 			// record exception type first
