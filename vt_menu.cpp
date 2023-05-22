@@ -131,10 +131,14 @@ void MenuCallback(int commandID) {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	BOOL runResult = TRUE;
 
-	// define error_proc
+	// define error_proc, exception recorder
 	// and param package
+	bvh::utils::win32_helper::UnhandledExceptionGuard except_guard;
 	bvh::utils::ErrorProc error_proc;
 	bvh::utils::ParamPackage pkg(s_Plugininterface, &error_proc, cfg_manager);
+
+	// active exception capture
+	except_guard.BacktraceRegister();
 
 	switch (commandID) {
 		case 2:
@@ -199,6 +203,9 @@ void MenuCallback(int commandID) {
 			AfxMessageBox("BallanceVirtoolsHelper - The plugin which can help Ballance mapping and script.\nBM file spec version: 1.4 (14)\nConfig file version: 15\nPlugin version: 2.0\nUnder GPL v3 License.\nProject homepage: https://github.com/yyc12345/BallanceVirtoolsHelper", MB_ICONINFORMATION + MB_OK);
 			break;
 	}
+
+	// deactive exception capture
+	except_guard.BacktraceUnregister();
 
 	error_proc.DisplayMessage(s_Plugininterface->GetCKContext());
 }
