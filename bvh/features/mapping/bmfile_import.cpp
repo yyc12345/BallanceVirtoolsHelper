@@ -413,27 +413,31 @@ namespace bvh {
 					meshfile /= filename.c_str();
 					fmesh.open(meshfile.wstring().c_str(), std::ios_base::in | std::ios_base::binary);
 
-					// read data
-					// load v and vn
-					readData<uint32_t>(&fmesh, &vecCount);
-					readVectorData<VxVector>(&fmesh, &vList, vecCount);
-					readData<uint32_t>(&fmesh, &vecCount);
-					readVectorData<VxVector>(&fmesh, &vnList, vecCount);
+					// check whether file is opened
+					// only loaded file can read data. if fail to load file, keep empty mesh.
+					if (fmesh.is_open()) {
+						// read data
+						// load v and vn
+						readData<uint32_t>(&fmesh, &vecCount);
+						readVectorData<VxVector>(&fmesh, &vList, vecCount);
+						readData<uint32_t>(&fmesh, &vecCount);
+						readVectorData<VxVector>(&fmesh, &vnList, vecCount);
 
-					// read face
-					readData<uint32_t>(&fmesh, &vecCount);
-					readVectorData<COMPONENT_FACE_PROTOTYPE>(&fmesh, &faceList, vecCount);
+						// read face
+						readData<uint32_t>(&fmesh, &vecCount);
+						readVectorData<COMPONENT_FACE_PROTOTYPE>(&fmesh, &faceList, vecCount);
 
-					// end of reading data
-					fmesh.close();
+						// end of reading data
+						fmesh.close();
 
-					// push into converter and get converted mesh
-					converter.DoComponentParse(
-						currentMesh,
-						&vList, &vnList,
-						&faceList
-					);
+						// push into converter and get converted mesh
+						converter.DoComponentParse(
+							currentMesh,
+							&vList, &vnList,
+							&faceList
+						);
 
+					}
 
 					// add this new one into scene
 					scene->AddObjectToScene(currentMesh);

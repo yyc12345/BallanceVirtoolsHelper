@@ -245,8 +245,8 @@ namespace bvh::utils::win32_helper {
 			}
 
 			// write to file
-			fprintf(fs, "0x%08llx[%s]\t%s#%llu\n",
-				frame.AddrPC.Offset, module_name,
+			fprintf(fs, "0x%08llx(rel: 0x%08llx)[%s]\t%s#%llu\n",
+				frame.AddrPC.Offset, frame.AddrPC.Offset - module_base, module_name,
 				source_file, source_file_line
 			);
 
@@ -268,9 +268,10 @@ namespace bvh::utils::win32_helper {
 
 			// record exception type first
 			PEXCEPTION_RECORD rec = info->ExceptionRecord;
-			fprintf(fs, "Unhandled exception occured at 0x%08p: %s.\n",
+			fprintf(fs, "Unhandled exception occured at 0x%08p: %s (%lu).\n",
 				rec->ExceptionAddress,
-				UExceptionGetCodeName(rec->ExceptionCode)
+				UExceptionGetCodeName(rec->ExceptionCode),
+				rec->ExceptionCode
 			);
 
 			// special proc for 2 exceptions

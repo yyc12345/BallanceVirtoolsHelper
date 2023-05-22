@@ -10,7 +10,7 @@ Currently only contains the basic functions, the rest more useful functions will
 ## Technical information
 
 The BM file standard used can be found in [here](https://github.com/yyc12345/gist/blob/master/BMFileSpec/BMSpec_ZH.md)(Chinese only).  
-The tools chain standard used and the format of the files in the `meshes` folder can be found in [here](https://github.com/yyc12345/gist/blob/master/BMFileSpec/YYCToolsChainSpec_ZH.md)(Chinese only).  
+The tools chain standard used and the format of the files in the `BMMeshes` folder can be found in [here](https://github.com/yyc12345/gist/blob/master/BMFileSpec/YYCToolsChainSpec_ZH.md)(Chinese only).  
 Only supports Virtools 3.5
 
 ## Functions introduction

@@ -27,3 +27,16 @@ This version needs to be changed when the structure of configuration file change
 * `bvh/utils/config_manager.cpp`: Method `ConfigManager::LoadConfig()`. Add or remove read method for the config entry added or removed.
 * `bvh/utils/config_manager.cpp`: Contructor `ConfigManager::ConfigManager()`. Change `config_version`'s value in initialize list.
 * `vt_menu.cpp`: About dialog.
+
+## Pack Release
+
+The release package should include these files.
+
+* InterfacePlugins
+  - BallanceVirtoolsHelper.dll
+  - BallanceVirtoolsHelper.pdb
+* BMMeshes
+  - P_Ball_Paper.bin
+  - P_Ball_Stone.bin
+  - other bin files...
+* zlibwapi.dll

@@ -137,8 +137,10 @@ void MenuCallback(int commandID) {
 	bvh::utils::ErrorProc error_proc;
 	bvh::utils::ParamPackage pkg(s_Plugininterface, &error_proc, cfg_manager);
 
+#if defined(NDEBUG)
 	// active exception capture
 	except_guard.BacktraceRegister();
+#endif
 
 	switch (commandID) {
 		case 2:
@@ -204,8 +206,10 @@ void MenuCallback(int commandID) {
 			break;
 	}
 
+#if defined(NDEBUG)
 	// deactive exception capture
 	except_guard.BacktraceUnregister();
+#endif
 
 	error_proc.DisplayMessage(s_Plugininterface->GetCKContext());
 }
